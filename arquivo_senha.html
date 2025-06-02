@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecurePass - Gerenciador de Senhas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #8b5cf6;
+            --dark: #1e293b;
+            --light: #f8fafc;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f0f4f8 0%, #e5e9f0 100%);
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .password-item {
+            transition: all 0.3s ease;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .password-item:hover {
+            background-color: #f1f5f9;
+        }
+        
+        .password-text {
+            letter-spacing: 2px;
+            font-family: monospace;
+            font-size: 1.2rem;
+        }
+        
+        .copy-btn {
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+        
+        .password-field:hover .copy-btn {
+            opacity: 1;
+        }
+        
+        .toggle-password {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .toggle-password:hover {
+            color: var(--primary);
+        }
+        
+        .search-input:focus {
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        
+        .password-strength-bar {
+            height: 8px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .strength-weak { background-color: #ef4444; width: 25%; }
+        .strength-medium { background-color: #f59e0b; width: 50%; }
+        .strength-strong { background-color: #10b981; width: 75%; }
+        .strength-very-strong { background-color: #3b82f6; width: 100%; }
+        
+        .chip {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .chip-weak { background-color: #fee2e2; color: #b91c1c; }
+        .chip-medium { background-color: #fef3c7; color: #b45309; }
+        .chip-strong { background-color: #dcfce7; color: #047857; }
+        .chip-very-strong { background-color: #dbeafe; color: #1d4ed8; }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c7d2fe;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a5b4fc;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4f46e5',
+                        secondary: '#8b5cf6',
+                        dark: '#1e293b',
+                        light: '#f8fafc'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <div class="flex justify-center mb-4">
+                <div class="bg-gradient-to-r from-primary to-secondary p-4 rounded-xl shadow-lg inline-flex">
+                    <i class="fas fa-lock text-white text-4xl"></i>
+                </div>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-bold text-dark font-poppins">SecurePass</h1>
+            <p class="text-gray-600 mt-2 max-w-2xl mx-auto">
+                Gerencie e proteja suas senhas com segurança. Todos os dados armazenados localmente.
+            </p>
+        </header>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Formulário de cadastro e exportação -->
+            <div class="lg:col-span-1">
+                <div class="card p-6 mb-8">
+                    <h2 class="text-xl font-bold mb-6 text-dark flex items-center">
+                        <i class="fas fa-plus-circle mr-2 text-primary"></i> Nova Credencial
+                    </h2>
+                    
+                    <form id="password-form">
+                        <div class="mb-5">
+                            <label class="block text-sm font-medium mb-2 text-gray-700">Descrição*</label>
+                            <input type="text" id="descricao" placeholder="Ex: Banco do Brasil" class="w-full border border-gray-300 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                        
+                        <div class="mb-5">
+                            <label class="block text-sm font-medium mb-2 text-gray-700">URL</label>
+                            <input type="url" id="url" placeholder="https://www.exemplo.com/login" class="w-full border border-gray-300 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        
+                        <div class="mb-5">
+                            <label class="block text-sm font-medium mb-2 text-gray-700">Login/E-mail*</label>
+                            <input type="text" id="login" placeholder="Seu nome de usuário ou e-mail" class="w-full border border-gray-300 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                        
+                        <div class="mb-5">
+                            <label class="block text-sm font-medium mb-2 text-gray-700">Senha*</label>
+                            <div class="relative">
+                                <input type="password" id="senha" placeholder="Crie uma senha segura" class="w-full border border-gray-300 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary pr-10" required>
+                                <button type="button" id="toggle-password" class="absolute right-3 top-3.5 text-gray-500">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div id="strength-indicator" class="mt-2">
+                                <div class="flex justify-between text-xs text-gray-600 mb-1">
+                                    <span>Força da senha:</span>
+                                    <span id="strength-text">Muito fraca</span>
+                                </div>
+                                <div class="password-strength-bar strength-weak"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-5">
+                            <label class="block text-sm font-medium mb-2 text-gray-700">Gerador de Senhas</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="generated-password" readonly class="w-full border border-gray-300 px-4 py-3 rounded-lg bg-gray-50">
+                                <button type="button" id="generate-password" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg transition">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                            </div>
+                            <div class="mt-2 flex items-center">
+                                <input type="range" id="password-length" min="8" max="32" value="16" class="w-full">
+                                <span id="length-value" class="ml-3 text-sm font-medium w-8">16</span>
+                            </div>
+                            <div class="mt-2 flex flex-wrap gap-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="uppercase" checked class="mr-2"> A-Z
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="lowercase" checked class="mr-2"> a-z
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="numbers" checked class="mr-2"> 0-9
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="symbols" checked class="mr-2"> !@#
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium mb-2 text-gray-700">Observações</label>
+                            <textarea id="observacoes" rows="2" placeholder="Detalhes adicionais ou dicas..." class="w-full border border-gray-300 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-3">
+                            <button type="submit" class="bg-gradient-to-r from-primary to-secondary hover:from-primary hover:to-primary-dark px-6 py-3 rounded-lg font-medium text-white min-w-[140px] transition-all duration-300">
+                                <i class="fas fa-save mr-2"></i> Salvar
+                            </button>
+                            <button type="reset" class="bg-gray-500 hover:bg-gray-600 px-6 py-3 rounded-lg font-medium text-white min-w-[140px] transition-all duration-300">
+                                <i class="fas fa-eraser mr-2"></i> Limpar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Importar/Exportar -->
+                <div class="card p-6">
+                    <h2 class="text-xl font-bold mb-6 text-dark flex items-center">
+                        <i class="fas fa-file-export mr-2 text-primary"></i> Backup e Restauração
+                    </h2>
+                    
+                    <div class="mb-5">
+                        <label class="block text-sm font-medium mb-2 text-gray-700">Exportar dados</label>
+                        <div class="flex flex-wrap gap-3">
+                            <button id="exportar" class="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 px-6 py-3 rounded-lg font-medium text-white transition-all duration-300">
+                                <i class="fas fa-file-export mr-2"></i> Exportar para JSON
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium mb-2 text-gray-700">Importar dados</label>
+                        <div class="mb-3">
+                            <input type="file" id="importFile" accept=".json" class="w-full text-sm text-gray-600
+                                  file:mr-4 file:py-2 file:px-4
+                                  file:rounded-lg file:border-0
+                                  file:text-sm file:font-medium
+                                  file:bg-primary-100 file:text-primary-700
+                                  hover:file:bg-primary-200">
+                        </div>
+                    </div>
+                    
+                    <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded">
+                        <p class="text-sm text-amber-700">
+                            <i class="fas fa-exclamation-circle mr-2"></i> Seus dados nunca saem do seu dispositivo. O backup é criptografado e armazenado localmente.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Área de listagem -->
+            <div class="lg:col-span-2">
+                <!-- Pesquisa e filtros -->
+                <div class="card p-6 mb-8">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div class="w-full md:w-2/3">
+                            <div class="relative">
+                                <input type="text" id="search" placeholder="Pesquisar credenciais..." class="w-full border border-gray-300 px-4 py-3 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary search-input">
+                                <div class="absolute left-3 top-3.5 text-gray-500">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w-full md:w-1/3">
+                            <div class="flex items-center justify-end">
+                                <span id="contador" class="text-sm font-medium bg-gray-200 px-3 py-1 rounded-lg">0 credenciais</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Lista de credenciais -->
+                <div class="card p-6">
+                    <h2 class="text-xl font-bold mb-6 text-dark flex items-center">
+                        <i class="fas fa-key mr-2 text-primary"></i> Credenciais Salvas
+                    </h2>
+                    
+                    <div id="lista-vazia" class="py-12 text-center">
+                        <i class="fas fa-lock-open text-5xl text-gray-300 mb-4"></i>
+                        <h3 class="text-xl font-medium text-gray-600">Nenhuma credencial salva</h3>
+                        <p class="text-gray-500 mt-2">Adicione suas primeiras credenciais usando o formulário ao lado</p>
+                    </div>
+                    
+                    <div id="password-list" class="max-h-[600px] overflow-y-auto">
+                        <!-- As credenciais serão inseridas aqui via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="mt-12 pt-8 border-t border-gray-200 text-center">
+            <p class="text-gray-600 text-sm">
+                SecurePass &copy; 2023 - Todos os dados são armazenados localmente no seu dispositivo
+            </p>
+        </footer>
+    </div>
+    
+    <!-- Modal de Edição -->
+    <div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative">
+            <button id="close-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <h2 class="text-xl font-bold mb-4 text-dark">Editar Credencial</h2>
+            <form id="edit-form">
+                <input type="hidden" id="edit-id">
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2 text-gray-700">Descrição</label>
+                    <input type="text" id="edit-descricao" class="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" required>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2 text-gray-700">URL</label>
+                    <input type="url" id="edit-url" class="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2 text-gray-700">Login/E-mail</label>
+                    <input type="text" id="edit-login" class="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" required>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2 text-gray-700">Senha</label>
+                    <div class="flex gap-2">
+                        <div class="password-field flex-1 relative">
+                            <input type="password" id="edit-senha" class="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary pr-10" required>
+                            <button type="button" class="toggle-password absolute right-3 top-2.5 text-gray-500">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <button type="button" id="refresh-password" class="bg-gray-200 hover:bg-gray-300 px-3 rounded-lg transition">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2 text-gray-700">Observações</label>
+                    <textarea id="edit-observacoes" rows="2" class="w-full border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
+                </div>
+                
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" id="cancel-edit" class="bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded-lg text-white">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="bg-primary hover:bg-primary-dark px-4 py-2 rounded-lg text-white">
+                        Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Referências dos elementos
+            const passwordForm = document.getElementById('password-form');
+            const editForm = document.getElementById('edit-form');
+            const passwordList = document.getElementById('password-list');
+            const listaVazia = document.getElementById('lista-vazia');
+            const contador = document.getElementById('contador');
+            const searchInput = document.getElementById('search');
+            const exportBtn = document.getElementById('exportar');
+            const importFile = document.getElementById('importFile');
+            const togglePassword = document.getElementById('toggle-password');
+            const passwordField = document.getElementById('senha');
+            const generateBtn = document.getElementById('generate-password');
+            const generatedPassword = document.getElementById('generated-password');
+            const passwordLength = document.getElementById('password-length');
+            const lengthValue = document.getElementById('length-value');
+            const uppercase = document.getElementById('uppercase');
+            const lowercase = document.getElementById('lowercase');
+            const numbers = document.getElementById('numbers');
+            const symbols = document.getElementById('symbols');
+            const editModal = document.getElementById('edit-modal');
+            const closeModal = document.getElementById('close-modal');
+            const cancelEdit = document.getElementById('cancel-edit');
+            const refreshPassword = document.getElementById('refresh-password');
+            
+            // Variáveis de estado
+            let credentials = [];
+            let editingId = null;
+            
+            // Inicialização
+            loadCredentials();
+            
+            // Carregar credenciais do localStorage
+            function loadCredentials() {
+                const saved = localStorage.getItem('securePassCredentials');
+                if (saved) {
+                    credentials = JSON.parse(saved);
+                    renderPasswordList();
+                }
+            }
+            
+            // Salvar credenciais no localStorage
+            function saveCredentials() {
+                localStorage.setItem('securePassCredentials', JSON.stringify(credentials));
+                renderPasswordList();
+            }
+            
+            // Renderizar lista de credenciais
+            function renderPasswordList(filter = '') {
+                // Filtrar credenciais
+                const filtered = filter ? 
+                    credentials.filter(cred => 
+                        cred.descricao.toLowerCase().includes(filter) || 
+                        (cred.login && cred.login.toLowerCase().includes(filter)) ||
+                        (cred.url && cred.url.toLowerCase().includes(filter)) ||
+                        (cred.observacoes && cred.observacoes.toLowerCase().includes(filter))
+                    ) : 
+                    credentials;
+                
+                // Atualizar contador
+                contador.textContent = `${filtered.length} ${filtered.length === 1 ? 'credencial' : 'credenciais'}`;
+                
+                // Verificar se há dados para exibir
+                if (filtered.length === 0) {
+                    listaVazia.classList.remove('hidden');
+                    passwordList.innerHTML = '';
+                    return;
+                }
+                
+                // Exibir lista
+                listaVazia.classList.add('hidden');
+                
+                // Gerar HTML das credenciais
+                passwordList.innerHTML = filtered.map((cred, index) => {
+                    const strength = evaluatePasswordStrength(cred.senha);
+                    return `
+                    <div class="password-item bg-white p-4 fade-in ${index > 0 ? 'mt-2' : ''}">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-1">
+                                    <div class="bg-primary-100 p-2 rounded-full mr-3">
+                                        <i class="fas ${cred.url ? 'fa-globe' : 'fa-key'} text-primary"></i>
+                                    </div>
+                                    <h3 class="font-bold text-lg text-dark">${cred.descricao}</h3>
+                                    <span class="${strength.chipClass} ml-3">${strength.text}</span>
+                                </div>
+                                
+                                ${cred.url ? `<div class="text-sm text-gray-600 mb-1 flex items-center">
+                                    <i class="fas fa-link mr-2 text-xs"></i>
+                                    <a href="${cred.url}" target="_blank" class="text-blue-500 hover:underline truncate max-w-[250px]">${cred.url}</a>
+                                </div>` : ''}
+                                
+                                <div class="flex flex-wrap gap-4 mt-3">
+                                    <div class="password-field relative group">
+                                        <label class="text-xs font-medium text-gray-500 block">Login/E-mail</label>
+                                        <div class="flex items-center">
+                                            <span class="text-gray-800 truncate max-w-[200px]">${cred.login}</span>
+                                            <button type="button" class="copy-btn ml-2 text-gray-500 hover:text-primary" data-value="${cred.login}">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="password-field relative group">
+                                        <label class="text-xs font-medium text-gray-500 block">Senha</label>
+                                        <div class="flex items-center">
+                                            <span class="password-text text-gray-800">••••••••</span>
+                                            <button type="button" class="copy-btn ml-2 text-gray-500 hover:text-primary" data-value="${cred.senha}">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                            <button type="button" class="toggle-password ml-2 text-gray-500 hover:text-primary" data-value="${cred.senha}">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                ${cred.observacoes ? `<div class="mt-3">
+                                    <label class="text-xs font-medium text-gray-500 block">Observações</label>
+                                    <p class="text-sm text-gray-700">${cred.observacoes}</p>
+                                </div>` : ''}
+                            </div>
+                            
+                            <div class="flex flex-col items-center ml-4">
+                                <button class="edit-btn text-primary hover:text-primary-dark p-2" data-id="${cred.id}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="delete-btn text-red-500 hover:text-red-700 p-2 mt-1" data-id="${cred.id}">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+                
+                // Adicionar eventos
+                document.querySelectorAll('.edit-btn').forEach(btn => {
+                    btn.addEventListener('click', () => openEditModal(btn.dataset.id));
+                });
+                
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', () => deleteCredential(btn.dataset.id));
+                });
+                
+                document.querySelectorAll('.copy-btn').forEach(btn => {
+                    btn.addEventListener('click', () => copyToClipboard(btn.dataset.value));
+                });
+                
+                document.querySelectorAll('.toggle-password').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const parent = this.parentElement;
+                        const password = this.dataset.value;
+                        const display = parent.querySelector('.password-text');
+                        
+                        if (display.textContent === '••••••••') {
+                            display.textContent = password;
+                            this.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                        } else {
+                            display.textContent = '••••••••';
+                            this.innerHTML = '<i class="fas fa-eye"></i>';
+                        }
+                    });
+                });
+            }
+            
+            // Avaliar força da senha
+            function evaluatePasswordStrength(password) {
+                let strength = 0;
+                
+                // Verificar comprimento
+                if (password.length >= 12) strength += 2;
+                else if (password.length >= 8) strength += 1;
+                
+                // Verificar caracteres diversos
+                if (/[A-Z]/.test(password)) strength += 1;
+                if (/[a-z]/.test(password)) strength += 1;
+                if (/[0-9]/.test(password)) strength += 1;
+                if (/[^A-Za-z0-9]/.test(password)) strength += 2;
+                
+                // Determinar categoria
+                if (strength < 3) {
+                    return {
+                        text: "Fraca",
+                        class: "chip-weak",
+                        strength: "weak"
+                    };
+                } else if (strength < 5) {
+                    return {
+                        text: "Média",
+                        class: "chip-medium",
+                        strength: "medium"
+                    };
+                } else if (strength < 7) {
+                    return {
+                        text: "Forte",
+                        class: "chip-strong",
+                        strength: "strong"
+                    };
+                } else {
+                    return {
+                        text: "Muito Forte",
+                        class: "chip-very-strong",
+                        strength: "very-strong"
+                    };
+                }
+            }
+            
+            // Formatar URL
+            function formatUrl(url) {
+                if (!url) return '';
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    return 'https://' + url;
+                }
+                return url;
+            }
+            
+            // Copiar para área de transferência
+            function copyToClipboard(text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Copiado para a área de transferência!');
+                }).catch(err => {
+                    console.error('Erro ao copiar:', err);
+                    alert('Erro ao copiar texto. Verifique as permissões do navegador.');
+                });
+            }
+            
+            // Gerar senha aleatória
+            function generateRandomPassword() {
+                const length = parseInt(passwordLength.value);
+                const includeUppercase = uppercase.checked;
+                const includeLowercase = lowercase.checked;
+                const includeNumbers = numbers.checked;
+                const includeSymbols = symbols.checked;
+                
+                let charset = '';
+                if (includeUppercase) charset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                if (includeLowercase) charset += 'abcdefghijklmnopqrstuvwxyz';
+                if (includeNumbers) charset += '0123456789';
+                if (includeSymbols) charset += '!@#$%^&*()_+~`|}{[]\:;?><,./-=';
+                
+                // Se nenhum conjunto for selecionado, usar todos
+                if (!charset) charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~`|}{[]\:;?><,./-=';
+                
+                let password = '';
+                for (let i = 0; i < length; i++) {
+                    const randomIndex = Math.floor(Math.random() * charset.length);
+                    password += charset.charAt(randomIndex);
+                }
+                
+                generatedPassword.value = password;
+                
+                // Atualizar a avaliação de força
+                const strength = evaluatePasswordStrength(password);
+                document.getElementById('strength-text').textContent = strength.text;
+                document.querySelector('.password-strength-bar').className = `password-strength-bar strength-${strength.strength}`;
+            }
+            
+            // Adicionar nova credencial
+            passwordForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const descricao = document.getElementById('descricao').value.trim();
+                const url = formatUrl(document.getElementById('url').value.trim());
+                const login = document.getElementById('login').value.trim();
+                const senha = document.getElementById('senha').value;
+                const observacoes = document.getElementById('observacoes').value.trim();
+                
+                if (!descricao || !login || !senha) {
+                    alert('Preencha pelo menos a descrição, login e senha!');
+                    return;
+                }
+                
+                const newCredential = {
+                    id: Date.now().toString(),
+                    descricao,
+                    url,
+                    login,
+                    senha,
+                    observacoes,
+                    createdAt: new Date().toISOString()
+                };
+                
+                credentials.push(newCredential);
+                saveCredentials();
+                passwordForm.reset();
+                
+                // Resetar força da senha
+                document.getElementById('strength-text').textContent = 'Muito fraca';
+                document.querySelector('.password-strength-bar').className = 'password-strength-bar strength-weak';
+                
+                alert('Credencial salva com sucesso!');
+            });
+            
+            // Abrir modal de edição
+            function openEditModal(id) {
+                const credential = credentials.find(c => c.id === id);
+                if (!credential) return;
+                
+                document.getElementById('edit-id').value = credential.id;
+                document.getElementById('edit-descricao').value = credential.descricao;
+                document.getElementById('edit-url').value = credential.url || '';
+                document.getElementById('edit-login').value = credential.login;
+                document.getElementById('edit-senha').value = credential.senha;
+                document.getElementById('edit-observacoes').value = credential.observacoes || '';
+                
+                editingId = id;
+                editModal.classList.remove('hidden');
+            }
+            
+            // Fechar modal de edição
+            function closeEditModal() {
+                editModal.classList.add('hidden');
+                editingId = null;
+            }
+            
+            // Salvar alterações
+            editForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const id = document.getElementById('edit-id').value;
+                const descricao = document.getElementById('edit-descricao').value.trim();
+                const url = formatUrl(document.getElementById('edit-url').value.trim());
+                const login = document.getElementById('edit-login').value.trim();
+                const senha = document.getElementById('edit-senha').value;
+                const observacoes = document.getElementById('edit-observacoes').value.trim();
+                
+                if (!descricao || !login || !senha) {
+                    alert('Preencha pelo menos a descrição, login e senha!');
+                    return;
+                }
+                
+                const index = credentials.findIndex(c => c.id === id);
+                if (index !== -1) {
+                    credentials[index] = {
+                        ...credentials[index],
+                        descricao,
+                        url,
+                        login,
+                        senha,
+                        observacoes
+                    };
+                    
+                    saveCredentials();
+                    closeEditModal();
+                    alert('Credencial atualizada com sucesso!');
+                }
+            });
+            
+            // Excluir credencial
+            function deleteCredential(id) {
+                if (confirm('Tem certeza que deseja excluir esta credencial?')) {
+                    credentials = credentials.filter(c => c.id !== id);
+                    saveCredentials();
+                }
+            }
+            
+            // Exportar dados
+            exportBtn.addEventListener('click', function() {
+                if (credentials.length === 0) {
+                    alert('Não há credenciais para exportar!');
+                    return;
+                }
+                
+                const dataStr = JSON.stringify(credentials, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                
+                const exportFileDefaultName = `securepass_credenciais_${new Date().toISOString().slice(0,10)}.json`;
+                
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+            });
+            
+            // Importar dados
+            importFile.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const imported = JSON.parse(event.target.result);
+                        
+                        // Verificar formato básico
+                        if (!Array.isArray(imported) || imported.some(item => !item.descricao || !item.login || !item.senha)) {
+                            throw new Error('Formato de arquivo inválido');
+                        }
+                        
+                        credentials = imported;
+                        saveCredentials();
+                        alert(`${imported.length} credenciais importadas com sucesso!`);
+                        
+                        // Limpar input
+                        importFile.value = '';
+                    } catch (error) {
+                        console.error(error);
+                        alert('Erro ao importar arquivo: ' + error.message);
+                    }
+                };
+                
+                reader.readAsText(file);
+            });
+            
+            // Eventos adicionais
+            togglePassword.addEventListener('click', function() {
+                const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordField.setAttribute('type', type);
+                this.querySelector('i').className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+            });
+            
+            generateBtn.addEventListener('click', generateRandomPassword);
+            
+            passwordLength.addEventListener('input', function() {
+                lengthValue.textContent = this.value;
+                generateRandomPassword();
+            });
+            
+            passwordField.addEventListener('input', function() {
+                if (this.value) {
+                    const strength = evaluatePasswordStrength(this.value);
+                    document.getElementById('strength-text').textContent = strength.text;
+                    document.querySelector('.password-strength-bar').className = `password-strength-bar strength-${strength.strength}`;
+                }
+            });
+            
+            uppercase.addEventListener('change', generateRandomPassword);
+            lowercase.addEventListener('change', generateRandomPassword);
+            numbers.addEventListener('change', generateRandomPassword);
+            symbols.addEventListener('change', generateRandomPassword);
+            
+            closeModal.addEventListener('click', closeEditModal);
+            cancelEdit.addEventListener('click', closeEditModal);
+            
+            refreshPassword.addEventListener('click', function() {
+                generateRandomPassword();
+                document.getElementById('edit-senha').value = generatedPassword.value;
+            });
+            
+            searchInput.addEventListener('input', function() {
+                renderPasswordList(this.value.toLowerCase());
+            });
+            
+            // Gerar uma senha inicial
+            generateRandomPassword();
+        });
+    </script>
+</body>
+</html>
