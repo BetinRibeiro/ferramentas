@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Ração - Suinocultura</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        accent: '#8B5CF6',
+                        light: '#F9FAFB'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F1F5F9;
+        }
+        
+        .pig-icon {
+            width: 60px;
+            height: 60px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .phase-card {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            border-left: 4px solid;
+        }
+        
+        .phase-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+        
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .composition-item {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen py-6">
+    <div class="max-w-6xl mx-auto px-4">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <div class="flex justify-center mb-4">
+                <svg class="pig-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 13C21 14.1 20.1 15 19 15H18C18 16.1 17.1 17 16 17H15" stroke="#8B5CF6" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M3 13C3 14.1 3.9 15 5 15H6C6 16.1 6.9 17 8 17H9" stroke="#8B5CF6" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M12 6V3" stroke="#8B5CF6" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M16.56 7.56L18.7 5.42" stroke="#8B5CF6" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M7.44 7.56L5.3 5.42" stroke="#8B5CF6" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M12 15V14" stroke="#8B5CF6" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M10.25 21H13.75C17.5 21 18 19.7 18 17V15.89C18 13.56 17.41 13 15.11 13H8.89C6.59 13 6 13.56 6 15.89V17C6 19.7 6.5 21 10.25 21Z" stroke="#8B5CF6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M18 14C18 11.08 15.87 8.72 13 8.18V8C13 6.34 11.66 5 10 5H8C6.34 5 5 6.34 5 8C5 9.66 6.34 11 8 11H14.89C16 11 17.11 11.55 17.55 12.57" stroke="#8B5CF6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Calculadora de Ração para Suinocultura</h1>
+            <p class="text-gray-600">Calcule o consumo de ração mensal para seus porcos por fase de produção</p>
+        </header>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Entrada de dados -->
+            <div class="lg:col-span-1 bg-white rounded-2xl shadow-lg p-6">
+                <div class="flex items-center mb-6">
+                    <div class="bg-primary/10 p-2 rounded-lg mr-3">
+                        <i class="fas fa-calculator text-primary text-xl"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-800">Informações para Cálculo</h2>
+                </div>
+                
+                <div class="space-y-5">
+                    <div>
+                        <label for="porcos-count" class="block text-sm font-medium text-gray-700 mb-2">Quantidade de Porcos</label>
+                        <div class="relative">
+                            <input type="number" min="1" id="porcos-count" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-lg focus:ring-2 focus:ring-primary focus:border-primary" value="150">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                <i class="fas fa-piggy-bank text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="dias-fase" class="block text-sm font-medium text-gray-700 mb-2">Dias na Fase Atual</label>
+                        <div class="relative">
+                            <input type="number" min="1" id="dias-fase" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-lg focus:ring-2 focus:ring-primary focus:border-primary" value="30">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                <i class="fas fa-calendar-day text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="fase-producao" class="block text-sm font-medium text-gray-700 mb-2">Fase de Produção</label>
+                        <div class="relative">
+                            <select id="fase-producao" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-lg focus:ring-2 focus:ring-primary focus:border-primary appearance-none">
+                                <option value="1">Leitões (0-30 dias)</option>
+                                <option value="2" selected>Creche (31-70 dias)</option>
+                                <option value="3">Crescimento (71-150 dias)</option>
+                                <option value="4">Terminação (acima de 150 dias)</option>
+                                <option value="0">Matriz Gestante</option>
+                                <option value="5">Matriz Lactante</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button id="calcular-racao" class="w-full bg-primary hover:bg-blue-700 transition-all text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-calculator mr-2"></i>
+                        Calcular Consumo de Ração
+                    </button>
+                </div>
+                
+                <!-- Fases de produção com recomendações -->
+                <div class="mt-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Fases da Produção Suína</h3>
+                    <div class="space-y-3">
+                        <div class="phase-card bg-white border-l-blue-500 border p-4">
+                            <div class="flex justify-between">
+                                <h4 class="font-semibold">Leitões</h4>
+                                <span class="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded-full">0-30 dias</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-2">300-400g/dia por leitão | Rico em proteínas</p>
+                        </div>
+                        
+                        <div class="phase-card bg-white border-l-green-500 border p-4">
+                            <div class="flex justify-between">
+                                <h4 class="font-semibold">Creche</h4>
+                                <span class="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">31-70 dias</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-2">700-900g/dia por leitão | Alta energia</p>
+                        </div>
+                        
+                        <div class="phase-card bg-white border-l-yellow-500 border p-4">
+                            <div class="flex justify-between">
+                                <h4 class="font-semibold">Crescimento</h4>
+                                <span class="text-sm bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">71-150 dias</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-2">1.5-2.3kg/dia por suíno | Balanceado nutrientes</p>
+                        </div>
+                        
+                        <div class="phase-card bg-white border-l-purple-500 border p-4">
+                            <div class="flex justify-between">
+                                <h4 class="font-semibold">Terminação</h4>
+                                <span class="text-sm bg-purple-100 text-purple-800 px-2 py-1 rounded-full">Acima de 150 dias</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-2">2.5-3.0kg/dia por suíno | Preparo para abate</p>
+                        </div>
+                        
+                        <div class="phase-card bg-white border-l-pink-500 border p-4">
+                            <div class="flex justify-between">
+                                <h4 class="font-semibold">Matriz Gestante</h4>
+                                <span class="text-sm bg-pink-100 text-pink-800 px-2 py-1 rounded-full">Gestação</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-2">2.0-2.5kg/dia | Ração especial para gestação</p>
+                        </div>
+                        
+                        <div class="phase-card bg-white border-l-red-500 border p-4">
+                            <div class="flex justify-between">
+                                <h4 class="font-semibold">Matriz Lactante</h4>
+                                <span class="text-sm bg-red-100 text-red-800 px-2 py-1 rounded-full">Lactação</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-2">3.0-4.0kg/dia | Alta densidade nutritiva</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Resultados -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-secondary/10 p-2 rounded-lg mr-3">
+                            <i class="fas fa-chart-pie text-secondary text-xl"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-gray-800">Resultados do Cálculo</h2>
+                    </div>
+                    
+                    <div id="resultados-container">
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-8 text-center" id="empty-result">
+                            <i class="fas fa-calculator text-5xl text-blue-400 mb-4"></i>
+                            <h3 class="text-xl font-medium text-blue-800 mb-2">Aguardando dados para cálculo</h3>
+                            <p class="text-blue-600">Preencha os dados à esquerda e clique em "Calcular Consumo de Ração"</p>
+                        </div>
+                        
+                        <div class="hidden" id="racao-resumo">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+                                <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-5 border border-blue-100">
+                                    <div class="flex items-center">
+                                        <div class="bg-white p-3 rounded-lg mr-4">
+                                            <i class="fas fa-utensils text-primary text-xl"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm text-gray-600">Consumo Diário Total</p>
+                                            <p id="consumo-diario-total" class="text-2xl font-bold text-gray-800">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5 border border-green-100">
+                                    <div class="flex items-center">
+                                        <div class="bg-white p-3 rounded-lg mr-4">
+                                            <i class="fas fa-calendar-alt text-secondary text-xl"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm text-gray-600">Consumo Mensal Total</p>
+                                            <p id="consumo-mensal-total" class="text-2xl font-bold text-gray-800">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-5 border border-yellow-100">
+                                    <div class="flex items-center">
+                                        <div class="bg-white p-3 rounded-lg mr-4">
+                                            <i class="fas fa-piggy-bank text-yellow-500 text-xl"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm text-gray-600">Consumo Diário por Porco</p>
+                                            <p id="consumo-diario-porco" class="text-2xl font-bold text-gray-800">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-gradient-to-r from-purple-50 to-violet-50 rounded-xl p-5 border border-purple-100">
+                                    <div class="flex items-center">
+                                        <div class="bg-white p-3 rounded-lg mr-4">
+                                            <i class="fas fa-warehouse text-purple-500 text-xl"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm text-gray-600">Estoque Recomendado</p>
+                                            <p id="estoque-recomendado" class="text-2xl font-bold text-gray-800">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-8">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                    <i class="fas fa-vial mr-2 text-accent"></i> Composição da Ração
+                                </h3>
+                                <div id="composicao-racao" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <!-- Composição será preenchida por JS -->
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gray-50 border border-gray-200 rounded-xl p-5">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                    <i class="fas fa-lightbulb mr-2 text-yellow-500"></i> Recomendações
+                                </h3>
+                                <ul class="list-disc pl-5 space-y-2 text-gray-700">
+                                    <li id="recomendacao-fase">Fase atual: Creche (31-70 dias)</li>
+                                    <li id="recomendacao-consumo">Consumo estimado por porco: 0.8kg/dia</li>
+                                    <li id="recomendacao-estoque">Estoque recomendado: <span class="font-medium">+20%</span> do consumo mensal</li>
+                                    <li id="recomendacao-entrega">Sugerimos pedir ração a cada 15 dias para manter sempre fresca</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Histórico de cálculos -->
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-accent/10 p-2 rounded-lg mr-3">
+                            <i class="fas fa-history text-accent text-xl"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-gray-800">Histórico de Cálculos</h2>
+                    </div>
+                    
+                    <div id="empty-history" class="text-center py-8">
+                        <i class="fas fa-history text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500">Nenhum cálculo realizado ainda</p>
+                    </div>
+                    
+                    <div id="history-content" class="hidden">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Porcos</th>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fase</th>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Consumo Mensal</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200" id="history-table-body">
+                                    <!-- Histórico será preenchido por JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="mt-4 flex justify-end">
+                            <button id="clear-history" class="text-red-500 hover:text-red-700 flex items-center">
+                                <i class="fas fa-trash-alt mr-2"></i> Limpar Histórico
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Formata números com separadores de milhar e decimais
+        function formatNumber(number, decimals = 2) {
+            return new Intl.NumberFormat('pt-BR', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            }).format(number);
+        }
+        
+        // Definir recomendações de ração por fase
+        const recomedacoesRacao = {
+            // Leitões (0-30 dias)
+            1: {
+                descricao: "Leitões (0-30 dias)",
+                consumoDiarioPorPorco: 0.35, // kg por dia por porco (média)
+                color: "blue",
+                composicao: [
+                    { nome: "Milho", porcentagem: 55, cor: "blue-500" },
+                    { nome: "Farelo de Soja", porcentagem: 32, cor: "green-500" },
+                    { nome: "Suplemento Pré-inicial", porcentagem: 10, cor: "yellow-500" },
+                    { nome: "Óleo Vegetal", porcentagem: 3, cor: "purple-500" }
+                ]
+            },
+            // Creche (31-70 dias)
+            2: {
+                descricao: "Creche (31-70 dias)",
+                consumoDiarioPorPorco: 0.80, // kg por dia por porco (média)
+                color: "green",
+                composicao: [
+                    { nome: "Milho", porcentagem: 65, cor: "blue-500" },
+                    { nome: "Farelo de Soja", porcentagem: 25, cor: "green-500" },
+                    { nome: "Suplemento Inicial", porcentagem: 7, cor: "yellow-500" },
+                    { nome: "Farelo de Trigo", porcentagem: 3, cor: "purple-500" }
+                ]
+            },
+            // Crescimento (71-150 dias)
+            3: {
+                descricao: "Crescimento (71-150 dias)",
+                consumoDiarioPorPorco: 1.90, // kg por dia por porco (média)
+                color: "yellow",
+                composicao: [
+                    { nome: "Milho", porcentagem: 70, cor: "blue-500" },
+                    { nome: "Farelo de Soja", porcentagem: 22, cor: "green-500" },
+                    { nome: "Suplemento Crescimento", porcentagem: 6, cor: "yellow-500" },
+                    { nome: "Farelo de Arroz", porcentagem: 2, cor: "purple-500" }
+                ]
+            },
+            // Terminação (>150 dias)
+            4: {
+                descricao: "Terminação (>150 dias)",
+                consumoDiarioPorPorco: 2.80, // kg por dia por porco (média)
+                color: "purple",
+                composicao: [
+                    { nome: "Milho", porcentagem: 75, cor: "blue-500" },
+                    { nome: "Farelo de Soja", porcentagem: 18, cor: "green-500" },
+                    { nome: "Suplemento Terminação", porcentagem: 5, cor: "yellow-500" },
+                    { nome: "DDG", porcentagem: 2, cor: "purple-500" }
+                ]
+            },
+            // Matriz Gestante
+            0: {
+                descricao: "Matriz Gestante",
+                consumoDiarioPorPorco: 2.20, // kg por dia por porco (média)
+                color: "pink",
+                composicao: [
+                    { nome: "Milho", porcentagem: 70, cor: "blue-500" },
+                    { nome: "Farelo de Soja", porcentagem: 20, cor: "green-500" },
+                    { nome: "Suplemento Gestação", porcentagem: 8, cor: "yellow-500" },
+                    { nome: "Cálcio e Fósforo", porcentagem: 2, cor: "purple-500" }
+                ]
+            },
+            // Matriz Lactante
+            5: {
+                descricao: "Matriz Lactante",
+                consumoDiarioPorPorco: 3.50, // kg por dia por porco (média)
+                color: "red",
+                composicao: [
+                    { nome: "Milho", porcentagem: 63, cor: "blue-500" },
+                    { nome: "Farelo de Soja", porcentagem: 27, cor: "green-500" },
+                    { nome: "Suplemento Lactação", porcentagem: 8, cor: "yellow-500" },
+                    { nome: "Leite em Pó", porcentagem: 2, cor: "purple-500" }
+                ]
+            }
+        };
+        
+        // Carregar histórico do localStorage
+        function loadHistory() {
+            const historyData = JSON.parse(localStorage.getItem('suinoculturaHistory')) || [];
+            const historyBody = document.getElementById('history-table-body');
+            const historyContent = document.getElementById('history-content');
+            const emptyHistory = document.getElementById('empty-history');
+            
+            if (historyData.length === 0) {
+                historyContent.classList.add('hidden');
+                emptyHistory.classList.remove('hidden');
+                return;
+            }
+            
+            emptyHistory.classList.add('hidden');
+            historyContent.classList.remove('hidden');
+            
+            // Limpar o corpo da tabela
+            historyBody.innerHTML = '';
+            
+            // Adicionar itens ao histórico (ordenados do mais recente)
+            historyData.slice().reverse().forEach(item => {
+                const row = document.createElement('tr');
+                row.classList.add('hover:bg-gray-50');
+                row.innerHTML = `
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">${item.date}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">${item.porcos}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">${item.fase}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-800">${item.consumoMensal}</td>
+                `;
+                historyBody.appendChild(row);
+            });
+        }
+        
+        // Salvar item no histórico
+        function saveToHistory(porcos, dias, faseId, faseDesc, consumoDiarioTotal, consumoMensalTotal) {
+            const historyData = JSON.parse(localStorage.getItem('suinoculturaHistory')) || [];
+            
+            const now = new Date();
+            const dateString = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth()+1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            
+            const historyItem = {
+                date: dateString,
+                porcos,
+                dias,
+                faseId,
+                fase: faseDesc,
+                consumoMensal: formatNumber(consumoMensalTotal, 1) + " kg"
+            };
+            
+            // Limitar histórico aos últimos 10 itens
+            historyData.push(historyItem);
+            if (historyData.length > 10) {
+                historyData.shift();
+            }
+            
+            localStorage.setItem('suinoculturaHistory', JSON.stringify(historyData));
+            
+            // Recarregar histórico
+            loadHistory();
+        }
+        
+        // Limpar histórico
+        function clearHistory() {
+            if (confirm("Tem certeza que deseja limpar todo o histórico de cálculos?")) {
+                localStorage.removeItem('suinoculturaHistory');
+                loadHistory();
+            }
+        }
+        
+        // Calcular e mostrar os resultados
+        function calculateResults() {
+            const porcos = parseInt(document.getElementById('porcos-count').value);
+            const dias = parseInt(document.getElementById('dias-fase').value);
+            const faseId = parseInt(document.getElementById('fase-producao').value);
+            
+            // Validar dados
+            if (!porcos || porcos < 1) {
+                alert("Informe uma quantidade válida de porcos");
+                return;
+            }
+            
+            if (!dias || dias < 1) {
+                alert("Informe uma quantidade válida de dias");
+                return;
+            }
+            
+            if (!recomedacoesRacao[faseId]) {
+                alert("Selecione uma fase válida");
+                return;
+            }
+            
+            const recomendacao = recomedacoesRacao[faseId];
+            
+            // Calcular valores
+            const consumoDiarioPorPorco = recomendacao.consumoDiarioPorPorco;
+            const consumoDiarioTotal = consumoDiarioPorPorco * porcos;
+            const consumoMensalTotal = consumoDiarioTotal * 30;
+            const estoqueRecomendado = consumoMensalTotal * 1.2; // +20% estoque
+            
+            // Atualizar valores no resumo
+            document.getElementById('consumo-diario-porco').textContent = formatNumber(consumoDiarioPorPorco, 2) + " kg";
+            document.getElementById('consumo-diario-total').textContent = formatNumber(consumoDiarioTotal, 1) + " kg";
+            document.getElementById('consumo-mensal-total').textContent = formatNumber(consumoMensalTotal, 1) + " kg";
+            document.getElementById('estoque-recomendado').textContent = formatNumber(estoqueRecomendado, 1) + " kg";
+            
+            // Atualizar recomendações
+            document.getElementById('recomendacao-fase').textContent = `Fase atual: ${recomendacao.descricao}`;
+            document.getElementById('recomendacao-consumo').textContent = `Consumo estimado por porco: ${formatNumber(consumoDiarioPorPorco, 2)}kg/dia`;
+            document.getElementById('recomendacao-entrega').textContent = dias > 30 
+                ? "Sugerimos pedir ração a cada 20 dias para manter sempre fresca" 
+                : "Sugerimos pedir ração a cada 15 dias para manter sempre fresca";
+            
+            // Montar composição da ração
+            const composicaoHtml = recomendacao.composicao.map(componente => {
+                const quantidadeMensal = (componente.porcentagem / 100) * consumoMensalTotal;
+                return `
+                    <div class="composition-item bg-${recomendacao.color}-50 border border-${recomendacao.color}-200 rounded-xl p-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h4 class="font-semibold text-gray-800">${componente.nome}</h4>
+                            <span class="font-bold text-lg text-${recomendacao.color}-700">${componente.porcentagem}%</span>
+                        </div>
+                        <div class="progress-bar bg-gray-200 mb-2">
+                            <div class="h-full bg-${componente.cor}" style="width: ${componente.porcentagem}%"></div>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-600">
+                            <span>Componente nutricional</span>
+                            <span class="font-medium">${formatNumber(quantidadeMensal, 1)} kg/mês</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('composicao-racao').innerHTML = composicaoHtml;
+            
+            // Esconder mensagem de resultados vazios e mostrar resumo
+            document.getElementById('empty-result').classList.add('hidden');
+            document.getElementById('racao-resumo').classList.remove('hidden');
+            
+            // Salvar no histórico
+            saveToHistory(
+                porcos, 
+                dias, 
+                faseId, 
+                recomendacao.descricao, 
+                consumoDiarioTotal, 
+                consumoMensalTotal
+            );
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Carregar histórico
+            loadHistory();
+            
+            // Calcular ração
+            document.getElementById('calcular-racao').addEventListener('click', calculateResults);
+            
+            // Limpar histórico
+            document.getElementById('clear-history').addEventListener('click', clearHistory);
+            
+            // Permitir pressionar Enter para calcular
+            document.getElementById('porcos-count').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') calculateResults();
+            });
+            
+            document.getElementById('dias-fase').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') calculateResults();
+            });
+        });
+    </script>
+</body>
+</html>
