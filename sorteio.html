@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Sorteio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700&display=swap');
+        
+        body {
+            background: linear-gradient(135deg, #f0f4f8 0%, #e5e9f0 100%);
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .winner-card {
+            background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .winner-card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        .participant-item:nth-child(odd) {
+            background-color: #f8fafc;
+        }
+        
+        .roulette-container {
+            perspective: 1000px;
+        }
+        
+        .roulette {
+            transform-style: preserve-3d;
+            transition: transform 5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #fde68a;
+            opacity: 0.8;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotateY(0) translateZ(300px); opacity: 0; }
+            100% { transform: rotateY(360deg) translateZ(300px); opacity: 1; }
+        }
+        
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        
+        .participant-animation {
+            animation: spin 0.5s linear infinite;
+        }
+        
+        .action-button {
+            transition: all 0.3s ease;
+        }
+        
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <div class="flex justify-center mb-4">
+                <div class="bg-gradient-to-r from-yellow-500 to-red-500 p-4 rounded-xl shadow-lg inline-flex">
+                    <i class="fas fa-gift text-white text-4xl"></i>
+                </div>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Sistema de Sorteio</h1>
+            <p class="text-gray-600 mt-2 max-w-2xl mx-auto">
+                Cadastre participantes, importe/exporte listas e realize sorteios com animação!
+            </p>
+        </header>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Formulário de cadastro e exportação -->
+            <div>
+                <div class="card p-6 mb-8">
+                    <h2 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                        <i class="fas fa-user-plus mr-2"></i> Cadastrar Participante
+                    </h2>
+                    
+                    <div class="mb-5">
+                        <label class="block text-sm font-medium mb-2 text-gray-700">Nome Completo</label>
+                        <input type="text" id="nome" placeholder="Ex: João da Silva" class="w-full border border-gray-300 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                    </div>
+                    
+                    <div class="mb-5">
+                        <label class="block text-sm font-medium mb-2 text-gray-700">Telefone</label>
+                        <input type="text" id="telefone" placeholder="Ex: (11) 99999-9999" class="w-full border border-gray-300 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-3">
+                        <button id="adicionar" class="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 px-6 py-3 rounded-lg font-medium text-white min-w-[140px] transition-all duration-300 action-button">
+                            <i class="fas fa-plus mr-2"></i> Adicionar
+                        </button>
+                        <button id="limpar-form" class="bg-gray-500 hover:bg-gray-600 px-6 py-3 rounded-lg font-medium text-white min-w-[140px] transition-all duration-300 action-button">
+                            <i class="fas fa-eraser mr-2"></i> Limpar
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Importar/Exportar -->
+                <div class="card p-6">
+                    <h2 class="text-xl font-bold mb-6 text-gray-800 flex items-center">
+                        <i class="fas fa-file-import mr-2"></i> Importar/Exportar Dados
+                    </h2>
+                    
+                    <div class="mb-5">
+                        <label class="block text-sm font-medium mb-2 text-gray-700">Importar Lista (JSON)</label>
+                        <input type="file" id="importFile" accept=".json" class="w-full text-sm text-gray-600
+                              file:mr-4 file:py-2 file:px-4
+                              file:rounded-lg file:border-0
+                              file:text-sm file:font-medium
+                              file:bg-yellow-100 file:text-yellow-700
+                              hover:file:bg-yellow-200">
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium mb-2 text-gray-700">Exportar Lista</label>
+                        <div class="flex flex-wrap gap-3">
+                            <button id="exportar" class="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 px-6 py-3 rounded-lg font-medium text-white min-w-[140px] transition-all duration-300 action-button">
+                                <i class="fas fa-file-export mr-2"></i> Exportar JSON
+                            </button>
+                            <button id="copiar" class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 px-6 py-3 rounded-lg font-medium text-white min-w-[140px] transition-all duration-300 action-button">
+                                <i class="fas fa-copy mr-2"></i> Copiar Lista
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded mb-4">
+                        <p class="text-sm text-amber-700">
+                            <i class="fas fa-info-circle mr-2"></i> Formato JSON necessário para importar: 
+                            <code class="bg-amber-100 px-2 py-1 rounded text-xs">[{"nome":"Nome","telefone":"(00)00000-0000"}]</code>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Área de sorteio e participantes -->
+            <div>
+                <!-- Área de sorteio -->
+                <div class="card p-6 mb-8 winner-card relative overflow-hidden">
+                    <h2 class="text-xl font-bold mb-6 text-gray-800 flex items-center relative z-10">
+                        <i class="fas fa-star mr-2"></i> Realizar Sorteio
+                    </h2>
+                    
+                    <div class="roulette-container h-56 flex items-center justify-center relative z-10">
+                        <div id="roulette" class="roulette text-center w-full">
+                            <div id="roulette-text" class="text-2xl font-bold text-gray-800">
+                                Clique em Sortear para iniciar!
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex flex-wrap gap-3 justify-center relative z-10">
+                        <button id="sortear" class="bg-gradient-to-r from-red-500 to-yellow-500 hover:from-red-600 hover:to-yellow-600 px-6 py-3 rounded-lg font-medium text-white min-w-[140px] transition-all duration-300 action-button">
+                            <i class="fas fa-play mr-2"></i> Sortear
+                        </button>
+                        <button id="reiniciar" class="bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 px-6 py-3 rounded-lg font-medium text-white min-w-[140px] transition-all duration-300 action-button">
+                            <i class="fas fa-redo mr-2"></i> Reiniciar
+                        </button>
+                    </div>
+                    
+                    <div id="resultado" class="mt-6 bg-white bg-opacity-70 p-4 rounded-lg hidden">
+                        <h3 class="text-lg font-bold text-gray-800 mb-2">Parabéns ao ganhador!</h3>
+                        <div class="flex flex-col sm:flex-row items-center justify-between">
+                            <div>
+                                <p id="ganhador-nome" class="text-xl font-bold text-yellow-700"></p>
+                                <p id="ganhador-telefone" class="text-gray-600"></p>
+                            </div>
+                            <button id="compartilhar" class="mt-3 sm:mt-0 bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg text-white">
+                                <i class="fas fa-share-alt mr-1"></i> Compartilhar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Lista de participantes -->
+                <div class="card p-6">
+                    <div class="flex flex-wrap justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                            <i class="fas fa-users mr-2"></i> Participantes Cadastrados
+                        </h2>
+                        <div class="flex items-center">
+                            <span id="contagem" class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">0 participantes</span>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Nome</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Telefone</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lista-participantes" class="bg-white divide-y divide-gray-200">
+                                <tr id="empty-row">
+                                    <td colspan="3" class="px-4 py-8 text-center text-gray-500">
+                                        <i class="fas fa-user-friends text-4xl text-gray-300 mb-3"></i>
+                                        <p>Nenhum participante cadastrado</p>
+                                        <p class="text-sm mt-2">Adicione participantes usando o formulário ao lado</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-4 flex justify-end">
+                        <button id="limpar-tudo" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-white transition-all">
+                            <i class="fas fa-trash mr-1"></i> Limpar Tudo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="mt-12 pt-8 border-t border-gray-200 text-center">
+            <p class="text-gray-600 text-sm">
+                Sistema de Sorteio &copy; 2023 - Todos os direitos reservados
+            </p>
+        </footer>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos do DOM
+            const btnAdicionar = document.getElementById('adicionar');
+            const btnLimparForm = document.getElementById('limpar-form');
+            const btnLimparTudo = document.getElementById('limpar-tudo');
+            const btnSortear = document.getElementById('sortear');
+            const btnReiniciar = document.getElementById('reiniciar');
+            const btnExportar = document.getElementById('exportar');
+            const btnCopiar = document.getElementById('copiar');
+            const btnCompartilhar = document.getElementById('compartilhar');
+            const importFile = document.getElementById('importFile');
+            const listaParticipantes = document.getElementById('lista-participantes');
+            const emptyRow = document.getElementById('empty-row');
+            const contagem = document.getElementById('contagem');
+            const roulette = document.getElementById('roulette');
+            const rouletteText = document.getElementById('roulette-text');
+            const resultado = document.getElementById('resultado');
+            const ganhadorNome = document.getElementById('ganhador-nome');
+            const ganhadorTelefone = document.getElementById('ganhador-telefone');
+            
+            // Variáveis de estado
+            let participantes = [];
+            let sorteioEmAndamento = false;
+            let sorteioInterval;
+            let resultadoAnterior = null;
+            
+            // Inicialização
+            carregarDados();
+            
+            // Carregar dados do localStorage
+            function carregarDados() {
+                const dados = localStorage.getItem('participantes');
+                if (dados) {
+                    participantes = JSON.parse(dados);
+                    atualizarLista();
+                }
+            }
+            
+            // Salvar dados no localStorage
+            function salvarDados() {
+                localStorage.setItem('participantes', JSON.stringify(participantes));
+            }
+            
+            // Atualizar lista de participantes
+            function atualizarLista() {
+                // Limpar lista
+                listaParticipantes.innerHTML = '';
+                
+                if (participantes.length === 0) {
+                    listaParticipantes.appendChild(emptyRow);
+                    contagem.textContent = '0 participantes';
+                    return;
+                }
+                
+                // Adicionar participantes
+                participantes.forEach((participante, index) => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'participant-item';
+                    tr.innerHTML = `
+                        <td class="px-4 py-3 text-sm text-gray-900">
+                            <div class="flex items-center">
+                                <span class="inline-block w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mr-3">
+                                    <i class="fas fa-user text-yellow-600"></i>
+                                </span>
+                                ${participante.nome}
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-700">${participante.telefone}</td>
+                        <td class="px-4 py-3 text-sm">
+                            <button class="editar-btn text-blue-500 hover:text-blue-700 mr-3" data-id="${index}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="remover-btn text-red-500 hover:text-red-700" data-id="${index}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    `;
+                    
+                    listaParticipantes.appendChild(tr);
+                    
+                    // Adicionar eventos aos botões
+                    tr.querySelector('.editar-btn').addEventListener('click', function() {
+                        editarParticipante(index);
+                    });
+                    
+                    tr.querySelector('.remover-btn').addEventListener('click', function() {
+                        removerParticipante(index);
+                    });
+                });
+                
+                // Atualizar contagem
+                contagem.textContent = `${participantes.length} ${participantes.length === 1 ? 'participante' : 'participantes'}`;
+                emptyRow.style.display = 'none';
+            }
+            
+            // Adicionar participante
+            function adicionarParticipante() {
+                const nome = document.getElementById('nome').value.trim();
+                const telefone = document.getElementById('telefone').value.trim();
+                
+                // Validar campos
+                if (!nome || !telefone) {
+                    alert('Por favor, preencha todos os campos!');
+                    return;
+                }
+                
+                // Adicionar participante
+                participantes.push({
+                    nome: nome,
+                    telefone: telefone
+                });
+                
+                // Limpar formulário e salvar
+                limparFormulario();
+                salvarDados();
+                atualizarLista();
+            }
+            
+            // Editar participante
+            function editarParticipante(index) {
+                const participante = participantes[index];
+                
+                // Preencher formulário com dados do participante
+                document.getElementById('nome').value = participante.nome;
+                document.getElementById('telefone').value = participante.telefone;
+                
+                // Remover participante da lista (será readicionado ao salvar)
+                participantes.splice(index, 1);
+                
+                // Atualizar lista
+                salvarDados();
+                atualizarLista();
+            }
+            
+            // Remover participante
+            function removerParticipante(index) {
+                if (confirm('Tem certeza que deseja remover este participante?')) {
+                    participantes.splice(index, 1);
+                    salvarDados();
+                    atualizarLista();
+                }
+            }
+            
+            // Limpar formulário
+            function limparFormulario() {
+                document.getElementById('nome').value = '';
+                document.getElementById('telefone').value = '';
+                document.getElementById('nome').focus();
+            }
+            
+            // Limpar todos os participantes
+            function limparTodos() {
+                if (participantes.length === 0) return;
+                
+                if (confirm('Tem certeza que deseja remover TODOS os participantes?')) {
+                    participantes = [];
+                    salvarDados();
+                    atualizarLista();
+                }
+            }
+            
+            // Realizar sorteio
+            function realizarSorteio() {
+                if (participantes.length === 0) {
+                    alert('Adicione pelo menos um participante para sortear!');
+                    return;
+                }
+                
+                if (sorteioEmAndamento) return;
+                
+                sorteioEmAndamento = true;
+                let velocidade = 50; // velocidade inicial (ms)
+                let duracao = 5000; // duração total do sorteio (ms)
+                let tempoPassado = 0;
+                
+                // Iniciar a animação da roleta
+                rouletteText.innerHTML = '';
+                rouletteText.classList.add('participant-animation');
+                
+                sorteioInterval = setInterval(() => {
+                    // Selecionar um participante aleatório para exibir
+                    const indice = Math.floor(Math.random() * participantes.length);
+                    const participante = participantes[indice];
+                    
+                    // Exibir o nome na roleta
+                    rouletteText.innerHTML = `
+                        <div class="text-4xl font-bold text-yellow-600">${participante.nome}</div>
+                        <div class="text-xl text-gray-600">${participante.telefone}</div>
+                    `;
+                    
+                    tempoPassado += velocidade;
+                    
+                    // Aumentar o intervalo gradativamente para criar o efeito de desaceleração
+                    if (tempoPassado > duracao * 0.7) {
+                        velocidade += 30;
+                    } else if (tempoPassado > duracao * 0.3) {
+                        velocidade += 10;
+                    }
+                    
+                    // Parar quando chegar na duração definida
+                    if (tempoPassado >= duracao) {
+                        clearInterval(sorteioInterval);
+                        finalizarSorteio(indice);
+                    }
+                }, velocidade);
+            }
+            
+            // Finalizar sorteio e mostrar o vencedor
+            function finalizarSorteio(indice) {
+                sorteioEmAndamento = false;
+                rouletteText.classList.remove('participant-animation');
+                
+                const participante = participantes[indice];
+                resultadoAnterior = participante;
+                
+                // Exibir resultado
+                ganhadorNome.textContent = participante.nome;
+                ganhadorTelefone.textContent = participante.telefone;
+                resultado.classList.remove('hidden');
+                
+                // Criar efeito de confetes
+                criarConfetes();
+            }
+            
+            // Criar confetes animados
+            function criarConfetes() {
+                const container = document.querySelector('.winner-card');
+                const cores = ['#FFD700', '#FF6347', '#00FF7F', '#1E90FF', '#FF69B4'];
+                
+                for (let i = 0; i < 150; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.classList.add('confetti');
+                    
+                    // Posição inicial aleatória
+                    const startLeft = Math.random() * 100;
+                    confetti.style.left = `${startLeft}%`;
+                    
+                    // Cor aleatória
+                    const cor = cores[Math.floor(Math.random() * cores.length)];
+                    confetti.style.backgroundColor = cor;
+                    
+                    // Tamanho e formato aleatório
+                    const size = Math.random() * 10 + 5;
+                    confetti.style.width = `${size}px`;
+                    confetti.style.height = `${size}px`;
+                    
+                    // Rotação aleatória
+                    const rotation = Math.random() * 360;
+                    confetti.style.transform = `rotate(${rotation}deg)`;
+                    
+                    // Animação com valores aleatórios
+                    const animationDuration = Math.random() * 3 + 2;
+                    const animationDelay = Math.random() * 2;
+                    
+                    confetti.style.animation = `confetti-fall ${animationDuration}s linear ${animationDelay}s forwards`;
+                    
+                    container.appendChild(confetti);
+                    
+                    // Remover após a animação
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, (animationDuration + animationDelay) * 1000);
+                }
+            }
+            
+            // Reiniciar sorteio
+            function reiniciarSorteio() {
+                resultado.classList.add('hidden');
+                rouletteText.innerHTML = 'Clique em Sortear para iniciar!';
+                
+                // Reiniciar variáveis
+                clearInterval(sorteioInterval);
+                sorteioEmAndamento = false;
+            }
+            
+            // Exportar dados para JSON
+            function exportarDados() {
+                if (participantes.length === 0) {
+                    alert('Não há participantes para exportar!');
+                    return;
+                }
+                
+                const dados = JSON.stringify(participantes, null, 2);
+                const blob = new Blob([dados], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `sorteio_participantes_${new Date().toISOString().slice(0,10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                
+                // Limpar
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            }
+            
+            // Copiar lista de participantes para área de transferência
+            function copiarLista() {
+                if (participantes.length === 0) {
+                    alert('Não há participantes para copiar!');
+                    return;
+                }
+                
+                const listaTexto = participantes.map(p => `${p.nome} - ${p.telefone}`).join('\n');
+                
+                navigator.clipboard.writeText(listaTexto)
+                    .then(() => {
+                        alert('Lista copiada para área de transferência!');
+                    })
+                    .catch(err => {
+                        console.error('Falha ao copiar: ', err);
+                        alert('Falha ao copiar lista. Tente novamente.');
+                    });
+            }
+            
+            // Compartilhar resultado
+            function compartilharResultado() {
+                if (!resultadoAnterior) {
+                    alert('Nenhum resultado para compartilhar!');
+                    return;
+                }
+                
+                const texto = `🎉 SORTEIO REALIZADO! 🎉\n\n🏆 Ganhador: ${resultadoAnterior.nome}\n📞 ${resultadoAnterior.telefone}\n\nParabéns ao vencedor!`;
+                
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Resultado do Sorteio',
+                        text: texto,
+                    })
+                    .catch(console.error);
+                } else {
+                    navigator.clipboard.writeText(texto)
+                        .then(() => {
+                            alert('Resultado copiado para área de transferência!');
+                        })
+                        .catch(err => {
+                            console.error('Falha ao copiar: ', err);
+                            alert('Falha ao compartilhar. Tente novamente.');
+                        });
+                }
+            }
+            
+            // Importar dados de arquivo JSON
+            function importarDados(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const dados = JSON.parse(e.target.result);
+                        
+                        // Validar formato
+                        if (!Array.isArray(dados)) {
+                            throw new Error('Formato inválido. Deve ser um array de participantes.');
+                        }
+                        
+                        dados.forEach(item => {
+                            if (!item.nome || !item.telefone) {
+                                throw new Error('Formato inválido. Cada item deve ter "nome" e "telefone".');
+                            }
+                        });
+                        
+                        // Adicionar participantes
+                        participantes = participantes.concat(dados);
+                        salvarDados();
+                        atualizarLista();
+                        alert(`${dados.length} participantes importados com sucesso!`);
+                        
+                        // Limpar input de arquivo
+                        event.target.value = '';
+                    } catch (error) {
+                        console.error(error);
+                        alert(`Erro na importação: ${error.message}`);
+                    }
+                };
+                reader.readAsText(file);
+            }
+            
+            // Event Listeners
+            btnAdicionar.addEventListener('click', adicionarParticipante);
+            btnLimparForm.addEventListener('click', limparFormulario);
+            btnLimparTudo.addEventListener('click', limparTodos);
+            btnSortear.addEventListener('click', realizarSorteio);
+            btnReiniciar.addEventListener('click', reiniciarSorteio);
+            btnExportar.addEventListener('click', exportarDados);
+            btnCopiar.addEventListener('click', copiarLista);
+            btnCompartilhar.addEventListener('click', compartilharResultado);
+            importFile.addEventListener('change', importarDados);
+        });
+    </script>
+</body>
+</html>
