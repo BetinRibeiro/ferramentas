@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoPrice Tracker - QR Code Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cryptoDark: '#0a1120',
+                        cryptoBlue: '#3a86ff',
+                        cryptoPurple: '#8338ec',
+                        cryptoViolet: '#5e17eb',
+                        cryptoRed: '#ff006e',
+                        cryptoGreen: '#0ecb81'
+                    },
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                        orbitron: ['Orbitron', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a1120 0%, #1a1f37 100%);
+            min-height: 100vh;
+        }
+        .crypto-card {
+            background: linear-gradient(145deg, rgba(26, 31, 55, 0.7) 0%, rgba(16, 22, 40, 0.5) 100%);
+            border: 1px solid rgba(94, 23, 235, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .crypto-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(94, 23, 235, 0.4);
+        }
+        .price-up {
+            color: #0ecb81;
+        }
+        .price-down {
+            color: #ff006e;
+        }
+        .glow {
+            box-shadow: 0 0 15px rgba(58, 134, 255, 0.5);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        .theme-selector:checked {
+            background-color: #8338ec;
+        }
+        .loader {
+            border-top-color: #3a86ff;
+            animation: spin 1s linear infinite;
+        }
+        .qrcode-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        .download-btn {
+            transition: all 0.3s ease;
+            background: linear-gradient(to right, #8338ec, #5e17eb);
+        }
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(131, 56, 236, 0.4);
+        }
+        .input-glow:focus {
+            box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.3);
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        #qr-placeholder {
+            min-height: 256px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            border: 2px dashed #e9ecef;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="font-poppins text-gray-200">
+    <!-- Header -->
+    <header class="border-b border-gray-800 py-6">
+        <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center space-x-2 mb-4 md:mb-0">
+                <div class="bg-cryptoBlue w-10 h-10 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-coins text-xl"></i>
+                </div>
+                <h1 class="text-2xl md:text-3xl font-bold">
+                    <span class="text-white">Crypto</span><span class="text-cryptoBlue">Price</span> 
+                    <span class="text-xs font-normal bg-cryptoViolet px-2 py-1 rounded-md ml-2">TRACKER</span>
+                </h1>
+            </div>
+            
+            <div class="flex items-center space-x-4 flex-wrap justify-center gap-3 mt-4 md:mt-0">
+                <div class="flex items-center space-x-2">
+                    <span><i class="far fa-moon"></i></span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="theme-toggle" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cryptoPurple"></div>
+                    </label>
+                    <span><i class="far fa-sun"></i></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- QR Code Generator Section -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="text-center mb-12">
+            <h1 class="text-3xl md:text-4xl font-bold mb-3">QR Code Generator</h1>
+            <p class="max-w-2xl mx-auto text-gray-400">Create QR codes for URLs, text messages, contacts, or crypto addresses</p>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Input Section -->
+            <div class="crypto-card rounded-xl p-6">
+                <h2 class="text-xl font-bold mb-6">Create Your QR Code</h2>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-2">Content Type</label>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <button data-type="url" class="qr-type bg-cryptoViolet px-4 py-2 rounded-lg text-center">
+                            <i class="fas fa-link mr-1"></i> URL
+                        </button>
+                        <button data-type="text" class="qr-type bg-cryptoDark hover:bg-cryptoBlue px-4 py-2 rounded-lg text-center">
+                            <i class="fas fa-font mr-1"></i> Text
+                        </button>
+                        <button data-type="crypto" class="qr-type bg-cryptoDark hover:bg-cryptoBlue px-4 py-2 rounded-lg text-center">
+                            <i class="fas fa-wallet mr-1"></i> Crypto
+                        </button>
+                        <button data-type="contact" class="qr-type bg-cryptoDark hover:bg-cryptoBlue px-4 py-2 rounded-lg text-center">
+                            <i class="fas fa-user mr-1"></i> Contact
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="url-input" class="mb-6">
+                    <label for="url" class="block text-sm font-medium mb-2">Enter URL</label>
+                    <input type="url" id="url" placeholder="https://example.com" class="w-full bg-cryptoDark px-4 py-3 rounded-lg focus:ring-2 focus:ring-cryptoBlue focus:outline-none input-glow">
+                </div>
+                
+                <div id="text-input" class="hidden mb-6">
+                    <label for="text" class="block text-sm font-medium mb-2">Enter Text</label>
+                    <textarea id="text" placeholder="Type your text here..." rows="3" class="w-full bg-cryptoDark px-4 py-3 rounded-lg focus:ring-2 focus:ring-cryptoBlue focus:outline-none input-glow"></textarea>
+                </div>
+                
+                <div id="crypto-input" class="hidden mb-6">
+                    <label class="block text-sm font-medium mb-2">Crypto Type</label>
+                    <select id="crypto-type" class="w-full bg-cryptoDark px-4 py-3 rounded-lg focus:ring-2 focus:ring-cryptoBlue focus:outline-none mb-4 input-glow">
+                        <option value="bitcoin">Bitcoin</option>
+                        <option value="ethereum">Ethereum</option>
+                        <option value="solana">Solana</option>
+                        <option value="usdt">Tether (USDT)</option>
+                        <option value="bnb">BNB</option>
+                        <option value="ripple">XRP</option>
+                    </select>
+                    
+                    <label for="crypto-address" class="block text-sm font-medium mb-2">Wallet Address</label>
+                    <input type="text" id="crypto-address" placeholder="Enter crypto wallet address" class="w-full bg-cryptoDark px-4 py-3 rounded-lg focus:ring-2 focus:ring-cryptoBlue focus:outline-none mb-4 input-glow">
+                    
+                    <label for="crypto-amount" class="block text-sm font-medium mb-2">Amount (Optional)</label>
+                    <input type="number" id="crypto-amount" placeholder="0.00" class="w-full bg-cryptoDark px-4 py-3 rounded-lg focus:ring-2 focus:ring-cryptoBlue focus:outline-none input-glow">
+                </div>
+                
+                <div id="contact-input" class="hidden mb-6">
+                    <label for="contact-name" class="block text-sm font-medium mb-2">Name</label>
+                    <input type="text" id="contact-name" placeholder="John Doe" class="w-full bg-cryptoDark px-4 py-3 rounded-lg focus:ring-2 focus:ring-cryptoBlue focus:outline-none mb-4 input-glow">
+                    
+                    <label for="contact-email" class="block text-sm font-medium mb-2">Email</label>
+                    <input type="email" id="contact-email" placeholder="john@example.com" class="w-full bg-cryptoDark px-4 py-3 rounded-lg focus:ring-2 focus:ring-cryptoBlue focus:outline-none mb-4 input-glow">
+                    
+                    <label for="contact-phone" class="block text-sm font-medium mb-2">Phone</label>
+                    <input type="tel" id="contact-phone" placeholder="+1234567890" class="w-full bg-cryptoDark px-4 py-3 rounded-lg focus:ring-2 focus:ring-cryptoBlue focus:outline-none input-glow">
+                </div>
+                
+                <div class="mb-6">
+                    <label for="qr-size" class="block text-sm font-medium mb-2">QR Code Size</label>
+                    <select id="qr-size" class="w-full bg-cryptoDark px-4 py-3 rounded-lg focus:ring-2 focus:ring-cryptoBlue focus:outline-none input-glow">
+                        <option value="128">Small (128px)</option>
+                        <option value="256" selected>Medium (256px)</option>
+                        <option value="384">Large (384px)</option>
+                        <option value="512">Extra Large (512px)</option>
+                    </select>
+                </div>
+                
+                <div class="mb-6 flex items-center">
+                    <input type="checkbox" id="custom-color" class="mr-3 w-5 h-5 bg-cryptoDark border-gray-700 rounded focus:ring-cryptoBlue">
+                    <label for="custom-color" class="text-sm font-medium">Custom QR Code Colors</label>
+                </div>
+                
+                <div id="color-picker" class="hidden mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Foreground Color</label>
+                            <input type="color" id="foreground-color" value="#000000" class="w-full h-12 bg-cryptoDark rounded-lg border border-gray-700">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Background Color</label>
+                            <input type="color" id="background-color" value="#FFFFFF" class="w-full h-12 bg-cryptoDark rounded-lg border border-gray-700">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap gap-3">
+                    <button id="generate-qr" class="flex-1 bg-cryptoGreen hover:bg-green-700 px-6 py-3 rounded-lg font-medium transition duration-200 min-w-[140px]">
+                        <i class="fas fa-qrcode mr-2"></i> Generate
+                    </button>
+                    <button id="download-qr" class="flex-1 download-btn px-6 py-3 rounded-lg font-medium min-w-[140px] hidden">
+                        <i class="fas fa-download mr-2"></i> Download
+                    </button>
+                    <button id="clear-qr" class="flex-1 bg-cryptoRed hover:bg-red-700 px-6 py-3 rounded-lg font-medium transition duration-200 min-w-[140px]">
+                        <i class="fas fa-trash-alt mr-2"></i> Clear
+                    </button>
+                </div>
+            </div>
+            
+            <!-- QR Display Section -->
+            <div class="crypto-card rounded-xl p-6">
+                <h2 class="text-xl font-bold mb-6">Your QR Code</h2>
+                
+                <div id="qr-placeholder" class="mb-6">
+                    <div class="text-center text-gray-500 p-6">
+                        <i class="fas fa-qrcode text-5xl mb-3 opacity-30"></i>
+                        <p class="text-lg">Enter content and click Generate to create your QR Code</p>
+                    </div>
+                </div>
+                
+                <div id="qr-result" class="flex flex-col items-center justify-center mb-6 hidden">
+                    <div class="qrcode-container mb-6">
+                        <canvas id="qrcode-canvas" class="qr-code-image"></canvas>
+                    </div>
+                    
+                    <div id="qr-info" class="bg-cryptoDark rounded-lg p-4 w-full">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-info-circle text-cryptoBlue mr-2"></i>
+                            <p class="text-sm font-medium">Scan this QR code with your mobile device</p>
+                        </div>
+                        
+                        <div class="flex items-center text-sm">
+                            <i class="fas fa-clock mr-2 text-gray-400"></i>
+                            <span>Generated: <span id="generation-time">Just now</span></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-auto">
+                    <h3 class="text-lg font-bold mb-4">How to Use</h3>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-cryptoGreen mt-1 mr-2"></i>
+                            <span>Select the type of content you want to encode</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-cryptoGreen mt-1 mr-2"></i>
+                            <span>Enter your information in the form</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-cryptoGreen mt-1 mr-2"></i>
+                            <span>Customize size and colors if needed</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-cryptoGreen mt-1 mr-2"></i>
+                            <span>Click Generate, then Download your QR code</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- QR Code Examples -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 text-center">QR Code Examples</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="crypto-card rounded-xl p-6">
+                    <div class="qrcode-container mx-auto mb-4">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://cryptoprice.com" alt="Website QR Code" class="w-full h-auto">
+                    </div>
+                    <h3 class="text-lg font-bold mb-2 text-center">Website URL</h3>
+                    <p class="text-sm text-gray-400 text-center">Scan to open our cryptocurrency tracker</p>
+                </div>
+                
+                <div class="crypto-card rounded-xl p-6">
+                    <div class="qrcode-container mx-auto mb-4">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=bitcoin:1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa?amount=0.01" alt="Crypto QR Code" class="w-full h-auto">
+                    </div>
+                    <h3 class="text-lg font-bold mb-2 text-center">Bitcoin Address</h3>
+                    <p class="text-sm text-gray-400 text-center">Scan to send Bitcoin payments</p>
+                </div>
+                
+                <div class="crypto-card rounded-xl p-6">
+                    <div class="qrcode-container mx-auto mb-4">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Thank+you+for+using+our+QR+Code+Generator!" alt="Text QR Code" class="w-full h-auto">
+                    </div>
+                    <h3 class="text-lg font-bold mb-2 text-center">Text Message</h3>
+                    <p class="text-sm text-gray-400 text-center">Scan to read our thank you message</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800 py-8 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center space-x-2">
+                        <div class="bg-cryptoBlue w-8 h-8 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <h3 class="text-lg font-bold">CryptoPrice Tracker</h3>
+                    </div>
+                    <p class="text-gray-400 mt-2">Real-time cryptocurrency data and QR code tools</p>
+                </div>
+                
+                <div class="flex space-x-4">
+                    <div class="bg-cryptoDark rounded-lg p-3 cursor-pointer hover:bg-cryptoBlue">
+                        <i class="fab fa-github"></i>
+                    </div>
+                    <div class="bg-cryptoDark rounded-lg p-3 cursor-pointer hover:bg-cryptoBlue">
+                        <i class="fab fa-twitter"></i>
+                    </div>
+                    <div class="bg-cryptoDark rounded-lg p-3 cursor-pointer hover:bg-cryptoBlue">
+                        <i class="fab fa-discord"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-8 border-t border-gray-800 text-center text-gray-500 text-sm">
+                <p>© 2023 CryptoPrice Tracker. QR Code Generator Tool</p>
+                <p class="mt-2">Your data is processed securely and never stored.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // QR Code Generation Logic
+        document.addEventListener('DOMContentLoaded', function() {
+            // Element references
+            const qrPlaceholder = document.getElementById('qr-placeholder');
+            const qrResult = document.getElementById('qr-result');
+            const qrCanvas = document.getElementById('qrcode-canvas');
+            const generateBtn = document.getElementById('generate-qr');
+            const downloadBtn = document.getElementById('download-qr');
+            const clearBtn = document.getElementById('clear-qr');
+            const qrTypes = document.querySelectorAll('.qr-type');
+            const customColorCheckbox = document.getElementById('custom-color');
+            const colorPicker = document.getElementById('color-picker');
+            
+            // Input sections
+            const urlInput = document.getElementById('url-input');
+            const textInput = document.getElementById('text-input');
+            const cryptoInput = document.getElementById('crypto-input');
+            const contactInput = document.getElementById('contact-input');
+            
+            // State
+            let activeType = 'url';
+            
+            // Set default type as active
+            document.querySelector('.qr-type[data-type="url"]').classList.remove('bg-cryptoDark', 'hover:bg-cryptoBlue');
+            document.querySelector('.qr-type[data-type="url"]').classList.add('bg-cryptoViolet');
+            
+            // QR Type selection
+            qrTypes.forEach(typeBtn => {
+                typeBtn.addEventListener('click', function() {
+                    // Update UI
+                    qrTypes.forEach(btn => {
+                        btn.classList.remove('bg-cryptoViolet');
+                        btn.classList.add('bg-cryptoDark', 'hover:bg-cryptoBlue');
+                    });
+                    this.classList.remove('bg-cryptoDark', 'hover:bg-cryptoBlue');
+                    this.classList.add('bg-cryptoViolet');
+                    
+                    // Update active type
+                    activeType = this.dataset.type;
+                    
+                    // Show/hide input sections
+                    urlInput.style.display = activeType === 'url' ? 'block' : 'none';
+                    textInput.style.display = activeType === 'text' ? 'block' : 'none';
+                    cryptoInput.style.display = activeType === 'crypto' ? 'block' : 'none';
+                    contactInput.style.display = activeType === 'contact' ? 'block' : 'none';
+                });
+            });
+            
+            // Custom color toggle
+            customColorCheckbox.addEventListener('change', function() {
+                colorPicker.style.display = this.checked ? 'block' : 'none';
+            });
+            
+            // Generate QR Code
+            generateBtn.addEventListener('click', function() {
+                let data = '';
+                
+                switch(activeType) {
+                    case 'url':
+                        data = document.getElementById('url').value;
+                        if(!data) {
+                            showError('Please enter a valid URL');
+                            return;
+                        }
+                        break;
+                    case 'text':
+                        data = document.getElementById('text').value;
+                        if(!data) {
+                            showError('Please enter some text');
+                            return;
+                        }
+                        break;
+                    case 'crypto':
+                        const cryptoType = document.getElementById('crypto-type').value;
+                        const address = document.getElementById('crypto-address').value;
+                        const amount = document.getElementById('crypto-amount').value;
+                        
+                        if(!address) {
+                            showError('Please enter a wallet address');
+                            return;
+                        }
+                        
+                        // Format crypto-specific QR data
+                        if(amount) {
+                            data = `${cryptoType}:${address}?amount=${amount}`;
+                        } else {
+                            data = `${cryptoType}:${address}`;
+                        }
+                        break;
+                    case 'contact':
+                        const name = document.getElementById('contact-name').value;
+                        const email = document.getElementById('contact-email').value;
+                        const phone = document.getElementById('contact-phone').value;
+                        
+                        if(!name || !email) {
+                            showError('Please enter name and email');
+                            return;
+                        }
+                        
+                        // Format contact QR data (vCard)
+                        data = `BEGIN:VCARD\nVERSION:3.0\nN:${name}\nFN:${name}\nEMAIL:${email}\nTEL:${phone}\nEND:VCARD`;
+                        break;
+                }
+                
+                if(!data) {
+                    showError('Please provide valid input');
+                    return;
+                }
+                
+                generateQRCode(data);
+            });
+            
+            // Clear QR
+            clearBtn.addEventListener('click', function() {
+                qrPlaceholder.style.display = 'flex';
+                qrResult.style.display = 'none';
+                downloadBtn.classList.add('hidden');
+                
+                // Clear inputs
+                document.getElementById('url').value = '';
+                document.getElementById('text').value = '';
+                document.getElementById('crypto-address').value = '';
+                document.getElementById('crypto-amount').value = '';
+                document.getElementById('contact-name').value = '';
+                document.getElementById('contact-email').value = '';
+                document.getElementById('contact-phone').value = '';
+            });
+            
+            // Download QR
+            downloadBtn.addEventListener('click', function() {
+                const dataUrl = qrCanvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = `qrcode-${Date.now()}.png`;
+                link.href = dataUrl;
+                link.click();
+            });
+            
+            // Generate QR Code function
+            function generateQRCode(data) {
+                // Get options
+                const size = parseInt(document.getElementById('qr-size').value);
+                const useCustomColor = customColorCheckbox.checked;
+                const darkColor = useCustomColor ? document.getElementById('foreground-color').value : '#000000';
+                const lightColor = useCustomColor ? document.getElementById('background-color').value : '#FFFFFF';
+                
+                // Update generation time
+                document.getElementById('generation-time').textContent = new Date().toLocaleTimeString();
+                
+                // Generate QR code
+                QRCode.toCanvas(qrCanvas, data, {
+                    width: size,
+                    margin: 2,
+                    color: {
+                        dark: darkColor,
+                        light: lightColor
+                    },
+                    errorCorrectionLevel: 'H'
+                }, function(error) {
+                    if (error) {
+                        showError('Error generating QR code. ' + error);
+                    } else {
+                        // Show result
+                        qrPlaceholder.style.display = 'none';
+                        qrResult.style.display = 'flex';
+                        downloadBtn.classList.remove('hidden');
+                    }
+                });
+            }
+            
+            // Error notification function
+            function showError(message) {
+                // Create or show error notification
+                let errorEl = document.getElementById('error-notification');
+                
+                if (!errorEl) {
+                    errorEl = document.createElement('div');
+                    errorEl.id = 'error-notification';
+                    errorEl.className = 'fixed top-4 right-4 bg-cryptoRed text-white px-4 py-3 rounded-lg shadow-lg z-50 animate-fade-in';
+                    errorEl.innerHTML = `
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-circle mr-2"></i>
+                            <span>${message}</span>
+                        </div>
+                    `;
+                    document.body.appendChild(errorEl);
+                    
+                    // Auto remove after 3 seconds
+                    setTimeout(() => {
+                        errorEl.remove();
+                    }, 3000);
+                } else {
+                    errorEl.querySelector('span').textContent = message;
+                }
+            }
+            
+            // Theme toggle listener
+            const themeToggle = document.getElementById('theme-toggle');
+            themeToggle.addEventListener('change', function() {
+                document.documentElement.classList.toggle('dark', this.checked);
+                localStorage.setItem('darkMode', this.checked);
+            });
+            
+            // Load theme preference
+            function loadSettings() {
+                const darkMode = localStorage.getItem('darkMode') === 'true';
+                themeToggle.checked = darkMode;
+                document.documentElement.classList.toggle('dark', darkMode);
+            }
+            
+            loadSettings();
+        });
+    </script>
+</body>
+</html>
