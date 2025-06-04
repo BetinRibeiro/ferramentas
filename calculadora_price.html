@@ -202,7 +202,6 @@
                     <table class="min-w-full" id="savedResultsTable">
                         <thead>
                             <tr class="border-b-2 border-gray-200">
-                                <th class="py-3 px-4 text-left text-finance-gray">Data</th>
                                 <th class="py-3 px-4 text-left text-finance-gray">Expressão</th>
                                 <th class="py-3 px-4 text-left text-finance-gray">Resultado</th>
                                 <th class="py-3 px-4 text-left text-finance-gray">Ações</th>
@@ -251,18 +250,11 @@
             }
 
             try {
-                const now = new Date();
-                const formattedDate = now.toLocaleString('pt-BR');
                 const tbody = document.getElementById('savedResultsBody');
                 
                 // Create new row
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-gray-50 border-b border-gray-200';
-                
-                // Date cell
-                const dateCell = document.createElement('td');
-                dateCell.className = 'py-3 px-4 text-gray-600';
-                dateCell.textContent = formattedDate;
                 
                 // Expression cell
                 const exprCell = document.createElement('td');
@@ -298,7 +290,6 @@
                 }
                 
                 // Append cells to row
-                row.appendChild(dateCell);
                 row.appendChild(exprCell);
                 row.appendChild(resultCell);
                 row.appendChild(actionsCell);
