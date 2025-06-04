@@ -21,14 +21,18 @@
         }
     </script>
 </head>
-<body class="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen p-4 flex flex-col items-center justify-center">
-    <div class="w-full max-w-3xl bg-white rounded-2xl shadow-xl overflow-hidden">
+<body class="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen px-4 py-8 md:p-8 flex flex-col items-center justify-center">
+    <div class="py-5 w-full max-w-7xl mx-auto px-4">
+        <div class="flex flex-col md:flex-row gap-8">
+            <div class="w-full md:w-1/2">
+                <!-- Traditional Calculator Section -->
+                <div class="w-full max-w-3xl bg-white rounded-2xl shadow-xl overflow-hidden">
         <!-- Header -->
         <div class="bg-gradient-to-r from-finance-blue to-finance-purple text-white p-6">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <i class="fas fa-calculator text-3xl"></i>
-                    <h1 class="text-2xl font-bold">Cálculo Financeiro - Tabela Price</h1>
+                    <h1 class="text-xl font-bold">Cálculo Financeiro - Tabela Price</h1>
                 </div>
                 <div class="bg-white/20 rounded-full p-2">
                     <i class="fas fa-percentage text-xl"></i>
@@ -118,10 +122,215 @@
                     P = PV * [ (i * (1+i)^n) / ((1+i)^n - 1) ]
                 </p>
             </div>
+            
         </div>
     </div>
 
+
+            </div>
+            <div class="w-full md:w-1/2">
+                <!-- Financial Calculator Section -->
+                <div class="w-full max-w-3xl bg-white rounded-2xl shadow-xl overflow-hidden">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-finance-blue to-finance-purple text-white p-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-calculator text-3xl"></i>
+                    <h1 class="text-xl font-bold">Calculadora Tradicional</h1>
+                </div>
+                <div class="bg-white/20 rounded-full p-2">
+                    <i class="fas fa-square-root-alt text-xl"></i>
+                </div>
+            </div>
+            <p class="mt-2 text-green-100">Calculadora básica para operações matemáticas</p>
+        </div>
+        
+        <!-- Calculator Display -->
+        <div class="p-4 bg-gray-50 border-b border-gray-200">
+            <input type="text" id="calcDisplay" class="w-full text-right text-3xl font-mono bg-transparent outline-none" readonly>
+        </div>
+        
+        <!-- Calculator Buttons -->
+        <div class="grid grid-cols-4 gap-4 p-6">
+            <button class="calc-btn bg-gray-200 hover:bg-gray-300 py-4 px-4 rounded-xl" onclick="appendToCalc('7')">7</button>
+            <button class="calc-btn bg-gray-200 hover:bg-gray-300 py-4 px-4 rounded-xl" onclick="appendToCalc('8')">8</button>
+            <button class="calc-btn bg-gray-200 hover:bg-gray-300 py-4 px-4 rounded-xl" onclick="appendToCalc('9')">9</button>
+            <button class="calc-btn bg-purple-400 hover:bg-purple-600 text-white py-4 px-4 rounded-xl" onclick="clearCalc()">C</button>
+            
+            <button class="calc-btn bg-gray-200 hover:bg-gray-300 py-4 px-4 rounded-xl" onclick="appendToCalc('4')">4</button>
+            <button class="calc-btn bg-gray-200 hover:bg-gray-300 py-4 px-4 rounded-xl" onclick="appendToCalc('5')">5</button>
+            <button class="calc-btn bg-gray-200 hover:bg-gray-300 py-4 px-4 rounded-xl" onclick="appendToCalc('6')">6</button>
+            <button class="calc-btn bg-finance-blue/50 hover:bg-finance-gray/60 text-white py-4 px-4 rounded-xl" onclick="appendToCalc('+')">+</button>
+            
+            <button class="calc-btn bg-gray-200 hover:bg-gray-300 py-4 px-4 rounded-xl" onclick="appendToCalc('1')">1</button>
+            <button class="calc-btn bg-gray-200 hover:bg-gray-300 py-4 px-4 rounded-xl" onclick="appendToCalc('2')">2</button>
+            <button class="calc-btn bg-gray-200 hover:bg-gray-300 py-4 px-4 rounded-xl" onclick="appendToCalc('3')">3</button>
+            <button class="calc-btn bg-finance-blue/50 hover:bg-finance-gray/60 text-white py-4 px-4 rounded-xl" onclick="appendToCalc('-')">-</button>
+            
+            <button class="calc-btn bg-gray-200 hover:bg-gray-300 py-4 px-4 rounded-xl" onclick="appendToCalc('0')">0</button>
+            <button class="calc-btn bg-gray-200 hover:bg-gray-300 py-4 px-4 rounded-xl" onclick="appendToCalc('00')">00</button>
+            <button class="calc-btn bg-gray-200 hover:bg-gray-300 py-4 px-4 rounded-xl" onclick="appendToCalc('.')">.</button>
+            <button class="calc-btn bg-finance-blue/50 hover:bg-finance-gray/60 text-white py-4 px-4 rounded-xl" onclick="appendToCalc('*')">×</button>
+            
+            <button class="calc-btn bg-finance-green/50 hover:bg-finance-green/90 text-white py-4 px-4 rounded-xl" onclick="appendToCalc('(')">(</button>
+            <button class="calc-btn bg-finance-green/50 hover:bg-finance-green/90 text-white  py-4 px-4 rounded-xl" onclick="appendToCalc(')')">)</button>
+            <button class="calc-btn bg-finance-gray/30 hover:bg-finance-blue/90 text-white py-4 px-4 rounded-xl" onclick="calculate()">=</button>
+            <button class="calc-btn bg-finance-blue/50 hover:bg-finance-gray/60 text-white py-4 px-4 rounded-xl" onclick="appendToCalc('/')">÷</button>
+
+
+            <button class="calc-btn bg-red-300 hover:bg-red-600 text-white col-span-2 py-4 px-4 rounded-xl" onclick="deleteLastChar()">
+                <i class="fas fa-backspace mr-2"></i> Apagar
+            </button>
+            <button class="calc-btn bg-black/40 hover:bg-gray-800 text-white col-span-2 py-4 px-4 rounded-xl" onclick="saveResult()">
+                <i class="fas fa-save mr-2"></i> Salvar
+            </button>
+        </div>
+    </div>
+
+            </div>
+        </div>
+
+        <!-- Saved Results Table -->
+        <div class="mt-12 w-full max-w-7xl mx-auto px-4 hidden" id="resultsHistoryContainer">
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="bg-gradient-to-r from-finance-gray to-finance-gray/90 text-white p-6">
+                    <h2 class="text-xl font-bold flex items-center">
+                        <i class="fas fa-history mr-3"></i> Histórico de Resultados
+                    </h2>
+                </div>
+                <div class="p-6 overflow-x-auto">
+                    <table class="min-w-full" id="savedResultsTable">
+                        <thead>
+                            <tr class="border-b-2 border-gray-200">
+                                <th class="py-3 px-4 text-left text-finance-gray">Data</th>
+                                <th class="py-3 px-4 text-left text-finance-gray">Expressão</th>
+                                <th class="py-3 px-4 text-left text-finance-gray">Resultado</th>
+                                <th class="py-3 px-4 text-left text-finance-gray">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="savedResultsBody">
+                            <!-- Results will be added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <script>
+        // Traditional Calculator Functions
+        let calcDisplay = document.getElementById('calcDisplay');
+        
+        function appendToCalc(value) {
+            calcDisplay.value += value;
+        }
+        
+        function clearCalc() {
+            calcDisplay.value = '';
+        }
+        
+        function calculate() {
+            try {
+                // Replace × with * for evaluation
+                let expression = calcDisplay.value.replace(/×/g, '*');
+                calcDisplay.value = eval(expression);
+            } catch (error) {
+                calcDisplay.value = 'Erro';
+            }
+        }
+        
+        function deleteLastChar() {
+            calcDisplay.value = calcDisplay.value.slice(0, -1);
+        }
+        
+        function saveResult() {
+            if (!calcDisplay.value || calcDisplay.value === 'Erro') {
+                alert('Nada para salvar!');
+                return;
+            }
+
+            try {
+                const now = new Date();
+                const formattedDate = now.toLocaleString('pt-BR');
+                const tbody = document.getElementById('savedResultsBody');
+                
+                // Create new row
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 border-b border-gray-200';
+                
+                // Date cell
+                const dateCell = document.createElement('td');
+                dateCell.className = 'py-3 px-4 text-gray-600';
+                dateCell.textContent = formattedDate;
+                
+                // Expression cell
+                const exprCell = document.createElement('td');
+                exprCell.className = 'py-3 px-4 font-mono text-finance-blue';
+                exprCell.textContent = calcDisplay.value;
+                
+                // Result cell
+                const resultCell = document.createElement('td');
+                resultCell.className = 'py-3 px-4 font-semibold text-finance-green';
+
+                // Actions cell
+                const actionsCell = document.createElement('td');
+                actionsCell.className = 'py-3 px-4';
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'text-red-500 hover:text-red-700';
+                deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteBtn.onclick = function() {
+                    row.remove();
+                    // Hide history container if no more results
+                    if (document.getElementById('savedResultsBody').children.length === 0) {
+                        document.getElementById('resultsHistoryContainer').classList.add('hidden');
+                    }
+                };
+                actionsCell.appendChild(deleteBtn);
+                
+                try {
+                    // Replace × with * for evaluation
+                    let expression = calcDisplay.value.replace(/×/g, '*');
+                    const result = eval(expression);
+                    resultCell.textContent = result;
+                } catch (e) {
+                    resultCell.textContent = 'N/A';
+                }
+                
+                // Append cells to row
+                row.appendChild(dateCell);
+                row.appendChild(exprCell);
+                row.appendChild(resultCell);
+                row.appendChild(actionsCell);
+                
+                // Add row to table (at top)
+                tbody.insertBefore(row, tbody.firstChild);
+                
+                // Show the history container if it was hidden
+                const container = document.getElementById('resultsHistoryContainer');
+                if (container.classList.contains('hidden')) {
+                    container.classList.remove('hidden');
+                }
+                
+                // Show feedback
+                const savedAlert = document.createElement('div');
+                savedAlert.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-fade-in';
+                savedAlert.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Resultado salvo!';
+                document.body.appendChild(savedAlert);
+                
+                // Remove feedback after 3 seconds
+                setTimeout(() => {
+                    savedAlert.classList.add('animate-fade-out');
+                    setTimeout(() => savedAlert.remove(), 500);
+                }, 3000);
+                
+            } catch (error) {
+                console.error('Error saving result:', error);
+                alert('Erro ao salvar resultado');
+            }
+        }
+
+        // Price Calculator Functions
         document.addEventListener('DOMContentLoaded', function() {
             const calcularBtn = document.getElementById('calcularBtn');
             const limparBtn = document.getElementById('limparBtn');
@@ -223,30 +432,26 @@
             }
             
             function calcularTaxa(P, PV, n) {
-                // Método de Newton para aproximação (precisão de 0.0001)
-                let taxa = 0.01; // Valor inicial (1%)
+                // Método de bissecção para melhor estabilidade
+                let low = 0.000001; // 0.0001%
+                let high = 1.0;     // 100%
                 const precisao = 0.0001;
                 const maxIteracoes = 100;
                 
-                for (let iteracao = 0; iteracao < maxIteracoes; iteracao++) {
-                    const fator = Math.pow(1 + taxa, n);
-                    const prestacao = PV * (taxa * fator) / (fator - 1);
-                    const diferenca = prestacao - P;
+                for (let i = 0; i < maxIteracoes; i++) {
+                    const mid = (low + high) / 2;
+                    const fator = Math.pow(1 + mid, n);
+                    const prestacao = PV * (mid * fator) / (fator - 1);
                     
-                    if (Math.abs(diferenca) < precisao) {
-                        return taxa;
+                    if (Math.abs(prestacao - P) < precisao) {
+                        return mid;
+                    } else if (prestacao < P) {
+                        low = mid;
+                    } else {
+                        high = mid;
                     }
-                    
-                    // Derivada
-                    const df = (n * PV * Math.pow(1 + taxa, n-1)) / Math.pow(fator - 1, 2);
-                    
-                    // Newton-Raphson
-                    taxa = taxa - diferenca / df;
-                    
-                    // Evitar taxas negativas
-                    if (taxa < 0) taxa = 0.0001;
                 }
-                return taxa;
+                return (low + high) / 2;
             }
             
             function calcularParcelas(P, i, PV) {
@@ -254,6 +459,39 @@
                 return Math.log(P / (P - i * PV)) / Math.log(1 + i);
             }
         });
+
+        // Calculator Button Styles
+        const calcButtons = document.querySelectorAll('.calc-btn');
+        calcButtons.forEach(button => {
+            button.addEventListener('mousedown', () => {
+                button.classList.add('scale-95');
+            });
+            button.addEventListener('mouseup', () => {
+                button.classList.remove('scale-95');
+            });
+            button.addEventListener('mouseleave', () => {
+                button.classList.remove('scale-95');
+            });
+        });
     </script>
+    <style>
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fade-out {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.3s ease-out forwards;
+        }
+        .animate-fade-out {
+            animation: fade-out 0.5s ease-out forwards;
+        }
+        .calc-btn {
+            @apply rounded-lg text-xl font-semibold transition-all duration-200 transform;
+        }
+    </style>
 </body>
 </html>
