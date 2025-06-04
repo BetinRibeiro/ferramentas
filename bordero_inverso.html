@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cálculo de Borderô com Desconto</title>
+    <meta name="timezone" content="America/Sao_Paulo">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Number input arrows */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        /* Print styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #resultContainer, #resultContainer * {
+                visibility: visible;
+            }
+            #resultContainer {
+                position: absolute;
+                top: 0;
+                left: 0;
+                margin: 0;
+                padding: 20px;
+                width: 100%;
+                box-shadow: none;
+                background: none;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-table {
+                font-size: 12px !important;
+                width: 100% !important;
+            }
+            .print-summary {
+                page-break-inside: avoid;
+            }
+            #resultContainer table {
+                width: 100% !important;
+            }
+            #summary .grid {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 1rem !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8 slide-in">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-800">
+                        <i class="fas fa-calculator text-blue-600 mr-2"></i>Cálculo de Borderô com Desconto
+                    </h1>
+                    <p class="text-gray-600 mt-2">Simule o valor líquido com base no desconto proporcional por dias corridos</p>
+                </div>
+                <button onclick="printPage()" class="no-print mt-4 md:mt-0 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200 flex items-center">
+                    <i class="fas fa-print mr-2"></i> Imprimir
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-blue-50 p-6 rounded-lg border border-blue-100">
+                    <h2 class="text-xl font-semibold text-blue-800 mb-4 flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i> Como funciona
+                    </h2>
+                    <ul class="space-y-3 text-gray-700">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle mt-1 mr-2 text-green-500"></i>
+                            <span>Calcula o valor líquido considerando a taxa de desconto</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle mt-1 mr-2 text-green-500"></i>
+                            <span>Desconto proporcional ao prazo até o vencimento</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle mt-1 mr-2 text-green-500"></i>
+                            <span>Mostra detalhes por parcela e total geral</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-exclamation-circle mr-2 text-orange-500"></i> Atenção
+                    </h2>
+                    <ul class="space-y-3 text-gray-700">
+                        <li class="flex items-start">
+                            <i class="fas fa-arrow-right mt-1 mr-2 text-blue-500"></i>
+                            <span>Informe apenas Valor Bruto ou Valor Líquido</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-arrow-right mt-1 mr-2 text-blue-500"></i>
+                            <span>Datas de vencimento são calculadas automaticamente</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-arrow-right mt-1 mr-2 text-blue-500"></i>
+                            <span>O cálculo é feito com base no valor bruto informado</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                <h2 class="text-xl font-semibold text-gray-800 mb-6">
+                    <i class="fas fa-edit mr-2 text-green-600"></i>Dados da Operação
+                </h2>
+                
+                <form id="calculationForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-gray-700 mb-2 font-medium">Valor Bruto (R$)</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">R$</span>
+                            <input type="number" id="valorBruto" min="0" step="0.01" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200" placeholder="0,00">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-700 mb-2 font-medium">Valor Líquido (R$)</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">R$</span>
+                            <input type="number" id="valorLiquido" min="0" step="0.01" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200" placeholder="0,00">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-700 mb-2 font-medium">Número de Parcelas</label>
+                        <input type="number" id="numeroParcelas" min="1"  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200" placeholder="0">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-700 mb-2 font-medium">Taxa de Desconto (% ao mês)</label>
+                        <div class="relative">
+                            <input type="number" id="taxaDesconto" min="0" max="100" step="0.01" class="w-full pl-12 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200" placeholder="0">
+                            <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-700 mb-2 font-medium"> Primeiro Vencimento</label>
+                        <input type="date" id="dataPrimeiroVencimento" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-700 mb-2 font-medium">Intervalo  Parcelas (dias)</label>
+                        <input type="number" id="intervaloParcelas" min="1" value="30" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-200">
+                    </div>
+                    
+                    <div class="md:col-span-2 flex flex-col sm:flex-row justify-center gap-4 mt-4">
+                        <button type="button" onclick="calcularBordero()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200 font-medium flex items-center justify-center">
+                            <i class="fas fa-calculator mr-2"></i> Calcular
+                        </button>
+                        <button type="button" onclick="limparFormulario()" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-200 font-medium flex items-center justify-center">
+                            <i class="fas fa-trash-alt mr-2"></i> Limpar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div id="resultContainer" class="hidden bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8 fade-in">
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-file-invoice-dollar text-green-600 mr-2"></i> Resumo de Desconto de Titulo
+            </h2>
+            
+            <div class="overflow-x-auto mb-8">
+                <table id="resultTable" class="w-full print-table">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-gray-700 font-semibold">Titulo</th>
+                            <th class="px-4 py-3 text-left text-gray-700 font-semibold">Vencimento</th>
+                            <th class="px-4 py-3 text-right text-gray-700 font-semibold">Dias</th>
+                            <th class="px-4 py-3 text-right text-gray-700 font-semibold">Valor Bruto</th>
+                            <th class="px-4 py-3 text-right text-gray-700 font-semibold">Juros (Desconto)</th>
+                            <th class="px-4 py-3 text-right text-gray-700 font-semibold">Valor Líquido</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-gray-200">
+                        <!-- Table rows will be inserted here dynamically -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="summary" class="print-summary">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Resumo</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                        <p class="text-sm text-gray-600">Valor Bruto Total</p>
+                        <p id="totalBruto" class="text-2xl font-bold text-green-700">R$ 0,00</p>
+                        <p class="text-sm text-green-800">100%</p>
+                    </div>
+                    <div class="bg-yellow-100 p-4 rounded-lg border border-yellow-200">
+                        <p class="text-sm text-gray-600">Total de Descontos</p>
+                        <p id="totalDescontos" class="text-2xl font-bold text-black">R$ 0,00</p>
+                        <p id="percDescontos" class="text-sm text-black">0%</p>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <p class="text-sm text-gray-600">Valor Líquido Total</p>
+                        <p id="totalLiquido" class="text-2xl font-bold text-blue-700">R$ 0,00</p>
+                        <p id="percLiquido" class="text-sm text-blue-800">0%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+      // Define a data padrão do campo como a data de hoje + 30 dias
+document.addEventListener("DOMContentLoaded", function () {
+  const today = new Date(); // Pega a data atual
+  const futureDate = new Date(today.setDate(today.getDate() + 29)) // Soma 30 dias à data atual
+    .toISOString() // Converte para o formato ISO (yyyy-mm-ddTHH:MM:SSZ)
+    .split("T")[0]; // Pega apenas a parte da data (yyyy-mm-dd)
+  
+  // Define a data de vencimento padrão no campo como hoje + 30 dias
+  document.getElementById("dataPrimeiroVencimento").value = futureDate;
+
+  // Configura os listeners para os campos de valor
+  document.getElementById("valorBruto").addEventListener("input", function() {
+    if (this.value && this.value > 0) {
+      document.getElementById("valorLiquido").value = "";
+    }
+  });
+
+  document.getElementById("valorLiquido").addEventListener("input", function() {
+    if (this.value && this.value > 0) {
+      document.getElementById("valorBruto").value = "";
+    }
+  });
+});
+
+function calcularBordero() {
+  // Obtém os valores do formulário
+  const valorBrutoInput = document.getElementById("valorBruto").value;
+  const valorLiquidoInput = document.getElementById("valorLiquido").value;
+  const numeroParcelas = parseInt(document.getElementById("numeroParcelas").value);
+  const taxaDesconto = parseFloat(document.getElementById("taxaDesconto").value);
+  
+  // Configura datas
+  const dataInput = document.getElementById("dataPrimeiroVencimento").value;
+  const partes = dataInput.split("-");
+  const dataPrimeiroVencimento = new Date(
+    parseInt(partes[0]),
+    parseInt(partes[1]) - 1,
+    parseInt(partes[2])
+  );
+  const intervaloParcelas = parseInt(document.getElementById("intervaloParcelas").value);
+  
+  // Validações básicas
+  if ((!valorBrutoInput || valorBrutoInput <= 0) && (!valorLiquidoInput || valorLiquidoInput <= 0)) {
+    alert("Por favor, informe um valor válido (bruto ou líquido) maior que zero.");
+    return;
+  } else if (valorBrutoInput && valorBrutoInput > 0 && valorLiquidoInput && valorLiquidoInput > 0) {
+    alert("Por favor, informe apenas um valor (bruto OU líquido), não ambos.");
+    return;
+  }
+  
+  if (isNaN(numeroParcelas) || numeroParcelas <= 0) {
+    alert("Por favor, informe um número válido de parcelas.");
+    return;
+  }
+  
+  if (isNaN(dataPrimeiroVencimento.getTime())) {
+    alert("Por favor, selecione uma data de vencimento válida.");
+    return;
+  }
+  
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  
+  // Variáveis de cálculo
+  let valorBrutoTotal;
+  let valorParcelaBruta;
+  let valorTotalLiquido;
+  let valorBrutoCalculado;
+
+  if (isNaN(numeroParcelas) || numeroParcelas <= 0) {
+    alert("Por favor, informe um número válido de parcelas.");
+    return;
+  }
+
+  if (isNaN(dataPrimeiroVencimento.getTime())) {
+    alert("Por favor, selecione uma data de vencimento válida.");
+    return;
+  }
+
+  // Calcula com base no valor líquido informado
+  if (valorLiquidoInput && valorLiquidoInput > 0) {
+    const valorLiquidoTotal = parseFloat(valorLiquidoInput);
+    
+    // Função que calcula o valor líquido para um determinado valor bruto
+    function calcularLiquido(valorBruto) {
+      let totalLiquido = 0;
+      const vlrParcela = valorBruto / numeroParcelas;
+      
+      for (let i = 1; i <= numeroParcelas; i++) {
+        const dataVencimento = new Date(dataPrimeiroVencimento);
+        if (i > 1) {
+          dataVencimento.setDate(dataVencimento.getDate() + (i - 1) * intervaloParcelas);
+        }
+        
+        const diffDays = Math.floor((dataVencimento - hoje) / (1000 * 60 * 60 * 24)) + 1;
+        let juros = 0;
+        
+        if (diffDays > 0) {
+          const taxaDiaria = taxaDesconto / 100 / 30;
+          juros = taxaDiaria * diffDays * vlrParcela;
+        }
+        
+        totalLiquido += vlrParcela - juros;
+      }
+      
+      return totalLiquido;
+    }
+    
+    // Método da bisseção para encontrar o valor bruto correto
+    let low = 0;
+    let high = valorLiquidoTotal * 2; // Limite superior inicial arbitrário
+    let mid;
+    let iterations = 0;
+    const maxIterations = 100;
+    const tolerance = 0.01; // Precisão de 1 centavo
+    
+    while (high - low > tolerance && iterations < maxIterations) {
+      mid = (high + low) / 2;
+      const liquidoCalculado = calcularLiquido(mid);
+      
+      if (liquidoCalculado < valorLiquidoTotal) {
+        low = mid;
+      } else {
+        high = mid;
+      }
+      
+      iterations++;
+    }
+    
+    valorBrutoCalculado = (high + low) / 2;
+    valorBrutoTotal = valorBrutoCalculado;
+    valorParcelaBruta = valorBrutoTotal / numeroParcelas;
+    valorTotalLiquido = valorLiquidoTotal;
+  } 
+  // Calcula com base no valor bruto informado
+  else {
+    valorBrutoTotal = parseFloat(valorBrutoInput);
+    valorParcelaBruta = valorBrutoTotal / numeroParcelas;
+    valorTotalLiquido = 0; // Será calculado no loop abaixo
+  }
+
+  // Inicializa os totais
+  let totalBruto = valorBrutoTotal;
+  let totalDescontos = 0;
+  let totalLiquido = 0;
+
+  // Limpa os resultados anteriores da tabela
+  const tableBody = document.getElementById("tableBody");
+  tableBody.innerHTML = "";
+
+  // Processa cada parcela
+  for (let i = 1; i <= numeroParcelas; i++) {
+    // Calcula a data de vencimento da parcela atual
+    const dataVencimento = new Date(dataPrimeiroVencimento);
+    if (i > 1) {
+      dataVencimento.setDate(
+        dataVencimento.getDate() + (i - 1) * intervaloParcelas
+      );
+    }
+
+    // Calcula a diferença em dias entre hoje e a data de vencimento (soma 1 para incluir o dia atual)
+    const diffTime = dataVencimento - hoje;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+    // Calcula o valor do juro (desconto) apenas se a data de vencimento for futura
+    let juros = 0;
+    if (diffDays > 0) {
+      // Taxa de desconto diária = taxa mensal / 30 dias
+      const taxaDiaria = taxaDesconto / 100 / 30;
+      juros = taxaDiaria * diffDays * valorParcelaBruta;
+    }
+
+    // Calcula o valor líquido da parcela após o desconto
+    const valorLiquidoParcela = valorParcelaBruta - juros;
+
+    // Atualiza os totais
+    totalDescontos += juros;
+    totalLiquido += valorLiquidoParcela;
+
+    // Cria e adiciona uma nova linha à tabela com os dados da parcela
+    const row = document.createElement("tr");
+    row.className = i % 2 === 0 ? "bg-gray-50" : "bg-white";
+    row.innerHTML = `
+      <td class="px-4 py-3 text-gray-700">${i}</td>
+      <td class="px-4 py-3 text-gray-700">${formatDate(dataVencimento)}</td>
+      <td class="px-4 py-3 text-right text-gray-700">${diffDays}</td>
+      <td class="px-4 py-3 text-right text-gray-700">${formatCurrency(valorParcelaBruta)}</td>
+      <td class="px-4 py-3 text-right text-red-500">${formatCurrency(juros)}</td>
+      <td class="px-4 py-3 text-right text-green-600 font-medium">${formatCurrency(valorLiquidoParcela)}</td>
+    `;
+    tableBody.appendChild(row);
+  }
+
+
+  // Atualiza os campos de total na interface
+  document.getElementById("totalBruto").textContent =
+    formatCurrency(totalBruto);
+  document.getElementById("totalDescontos").textContent =
+    formatCurrency(totalDescontos);
+  document.getElementById("totalLiquido").textContent =
+    formatCurrency(totalLiquido);
+    
+  // Calcula e mostra os percentuais
+  const percDescontos = (totalDescontos / totalBruto * 100).toFixed(2) + '%';
+  const percLiquido = (totalLiquido / totalBruto * 100).toFixed(2) + '%';
+  
+  document.getElementById("percDescontos").textContent = percDescontos;
+  document.getElementById("percLiquido").textContent = percLiquido;
+
+  // Atualiza o campo de valor líquido no formulário
+  document.getElementById("valorLiquido").value = totalLiquido.toFixed(2);
+
+  // Mostra o container de resultados, se estiver oculto
+  document.getElementById("resultContainer").classList.remove("hidden");
+
+  // Rola suavemente até a área dos resultados
+  document
+    .getElementById("resultContainer")
+    .scrollIntoView({ behavior: "smooth" });
+}
+
+// Função para limpar o formulário e redefinir os valores
+function limparFormulario() {
+  // Reseta todos os campos do formulário com id "calculationForm"
+  document.getElementById("calculationForm").reset();
+
+  // Limpa o campo de valor líquido manualmente
+  document.getElementById("valorLiquido").value = "";
+
+  // Redefine a data de vencimento para a data atual + 30 dias
+  const today = new Date();
+  const futureDate = new Date(today.setDate(today.getDate() + 30))
+    .toISOString() // Converte para string no formato ISO
+    .split("T")[0]; // Extrai apenas a data (sem horário)
+  document.getElementById("dataPrimeiroVencimento").value = futureDate;
+
+  // Esconde o container de resultados novamente
+  document.getElementById("resultContainer").classList.add("hidden");
+}
+
+// Função para formatar uma data no padrão brasileiro (dd/mm/aaaa)
+function formatDate(date) {
+  return date.toLocaleDateString("pt-BR");
+}
+
+// Função para formatar um número como moeda brasileira (ex: R$ 1.234,56)
+function formatCurrency(value) {
+  return "R$ " + value.toFixed(2).replace(".", ",");
+}
+
+// Função que imprime a página atual (abre a janela de impressão)
+function printPage() {
+  window.print();
+}
+
+    </script>
+</body>
+</html>
