@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Scanner 400</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Major+Mono+Display&family=Share+Tech+Mono&display=swap');
+        
+        :root {
+            --neon-green: #39ff14;
+            --neon-blue: #00ffff;
+            --neon-purple: #bc13fe;
+            --dark-bg: #0d0f1c;
+            --terminal-green: #4af626;
+            --terminal-blue: #00c4ff;
+            --warning-red: #ff1a4f;
+        }
+        
+        body {
+            background-color: var(--dark-bg);
+            font-family: 'Share Tech Mono', monospace;
+            color: #e0e0ff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .hacker-text {
+            font-family: 'Major Mono Display', monospace;
+        }
+        
+        .terminal-border {
+            border: 1px solid var(--terminal-green);
+            box-shadow: 0 0 10px var(--terminal-green), inset 0 0 5px var(--terminal-green);
+        }
+        
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to bottom, rgba(58, 246, 38, 0.4), transparent);
+            animation: scan 3s infinite linear;
+            z-index: 10;
+        }
+        
+        @keyframes scan {
+            0% { top: -5px; opacity: 0.5; }
+            50% { opacity: 0.8; }
+            100% { top: 100%; opacity: 0; }
+        }
+        
+        .blinking-cursor {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 255, 136, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+        }
+        
+        .neon-text {
+            text-shadow: 0 0 5px var(--terminal-green), 0 0 10px var(--terminal-green);
+        }
+        
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(0, 180, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 180, 255, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .code-text {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9em;
+            color: var(--terminal-green);
+        }
+        
+        .opportunity-flash {
+            animation: flash 0.5s infinite;
+        }
+        
+        @keyframes flash {
+            0%, 100% { background-color: rgba(0, 0, 0, 0); }
+            50% { background-color: rgba(0, 255, 136, 0.2); }
+        }
+        
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            10% { transform: translate(-2px, 2px); }
+            20% { transform: translate(2px, -2px); }
+            30% { transform: translate(0); }
+            40% { transform: translate(-1px, 1px) skew(1deg); }
+            50% { transform: translate(0); }
+            60% { transform: translate(3px, -3px); }
+            70% { transform: translate(-3px, 3px); }
+            80% { transform: translate(0); }
+            90% { transform: translate(1px, -1px); }
+            100% { transform: translate(0); }
+        }
+        
+        .glitch {
+            animation: glitch 1s infinite;
+        }
+        
+        .terminal-scroll::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        .terminal-scroll::-webkit-scrollbar-track {
+            background: rgba(0, 180, 255, 0.1);
+        }
+        
+        .terminal-scroll::-webkit-scrollbar-thumb {
+            background: var(--terminal-green);
+            border-radius: 5px;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'neon-green': '#39ff14',
+                        'neon-blue': '#00ffff',
+                        'neon-purple': '#bc13fe',
+                        'terminal-green': '#4af626',
+                        'warning-red': '#ff1a4f',
+                        'dark-bg': '#0d0f1c',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="relative">
+    <div class="grid-overlay"></div>
+    <div class="min-h-screen flex flex-col py-8 px-4 sm:px-6">
+        <!-- Header Section -->
+        <header class="w-full text-center mb-8 hacker-text relative">
+            <div class="scan-line"></div>
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-2 text-terminal-green neon-text glitch">
+                <i class="fas fa-radar mr-3"></i>CRYPTO SCANNER 400
+            </h1>
+            <p class="text-lg text-neon-blue">TOP 400 CRYPTOCURRENCIES ANALYSIS SYSTEM</p>
+            
+            <div class="mt-4 flex flex-wrap justify-center items-center space-x-4 space-y-2">
+                <div class="px-4 py-2 terminal-border bg-black bg-opacity-70 rounded-lg">
+                    <i class="fas fa-rotate text-neon-blue mr-2"></i>
+                    <span class="text-terminal-green">LAST SYNC:</span>
+                    <span id="lastSync" class="text-white ml-1">INITIALIZING...</span>
+                </div>
+                <div class="px-4 py-2 terminal-border bg-black bg-opacity-70 rounded-lg">
+                    <i class="fas fa-clock text-neon-blue mr-2"></i>
+                    <span class="text-terminal-green">NEXT SCAN:</span>
+                    <span id="nextScan" class="text-white ml-1 blinking-cursor">3:00</span>
+                </div>
+                <div class="px-4 py-2 terminal-border bg-black bg-opacity-70 rounded-lg">
+                    <i class="fas fa-database text-neon-blue mr-2"></i>
+                    <span class="text-terminal-green">CACHE SIZE:</span>
+                    <span id="cacheSize" class="text-white ml-1">0/400</span>
+                </div>
+            </div>
+        </header>
+        
+        <main class="flex flex-col md:flex-row flex-grow gap-6">
+            <!-- System Status Panel -->
+            <div class="w-full md:w-1/4">
+                <div class="bg-black bg-opacity-50 terminal-border rounded-lg p-4 h-full">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-terminal text-neon-green mr-2"></i>
+                        <h2 class="text-xl text-terminal-green font-bold">SYSTEM STATUS</h2>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-neon-blue">TOTAL COINS SCANNED:</p>
+                            <div class="h-4 bg-gray-800 rounded-full mt-1 overflow-hidden">
+                                <div id="scanProgress" class="h-full bg-terminal-green rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                            <p id="totalCoins" class="text-right text-white text-sm">0/400</p>
+                        </div>
+                        
+                        <div>
+                            <p class="text-neon-blue">OPPORTUNITY THRESHOLD:</p>
+                            <div class="flex items-center mt-1">
+                                <input type="range" min="1" max="20" value="5" id="thresholdSlider" class="w-full accent-terminal-green">
+                                <span id="thresholdValue" class="ml-2 text-white">5%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <p class="text-neon-blue">OPERATIONS LOG:</p>
+                            <div id="systemLog" class="terminal-scroll mt-2 h-40 overflow-y-auto bg-black bg-opacity-40 p-3 text-xs code-text leading-relaxed">
+                                > Initializing system...<br>
+                                > Loading cached data...<br>
+                                > Establishing API connection...
+                            </div>
+                        </div>
+                        
+                        <button id="forceScanBtn" class="w-full mt-4 py-2 terminal-border bg-black bg-opacity-60 hover:bg-opacity-100 transition-all flex items-center justify-center text-terminal-green font-bold">
+                            <i class="fas fa-bolt mr-2"></i>FORCE IMMEDIATE SCAN
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Opportunities Dashboard -->
+            <div class="w-full md:w-3/4 flex flex-col">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-alarm-exclamation text-terminal-green mr-2"></i>
+                    <h2 class="text-xl text-terminal-green font-bold">OPPORTUNITIES DASHBOARD</h2>
+                </div>
+                
+                <div id="opportunitiesContainer" class="flex-1 terminal-border bg-black bg-opacity-50 rounded-lg p-4 terminal-scroll overflow-y-auto min-h-[300px]">
+                    <div class="flex flex-col items-center justify-center h-full py-12">
+                        <div class="w-16 h-16 border-t-4 border-terminal-green rounded-full animate-spin mb-4"></div>
+                        <p class="text-terminal-green text-xl">⏳ Scanning TOP 400 cryptocurrencies...</p>
+                        <p class="text-neon-blue mt-2">Checking for price fluctuations above threshold</p>
+                        <div class="mt-8 w-full max-w-md">
+                            <div class="h-1 bg-gray-800 rounded-full overflow-hidden">
+                                <div id="initialProgress" class="h-full bg-neon-green rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                            <p id="initialProgressText" class="text-white text-center mt-1">Initializing scan 0/400</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Coin Overview -->
+                <div class="mt-6">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-coins text-neon-green mr-2"></i>
+                        <h2 class="text-xl text-terminal-green font-bold">TOP COINS OVERVIEW</h2>
+                    </div>
+                    <div id="topCoinsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <div class="terminal-border rounded-lg p-4 bg-black bg-opacity-50">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-gray-700 animate-pulse"></div>
+                                    <div class="ml-3">
+                                        <div class="h-4 bg-gray-700 rounded w-24 mb-2"></div>
+                                        <div class="h-3 bg-gray-700 rounded w-16"></div>
+                                    </div>
+                                </div>
+                                <div class="h-4 bg-gray-700 rounded w-12"></div>
+                            </div>
+                        </div>
+                        <div class="terminal-border rounded-lg p-4 bg-black bg-opacity-50">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-gray-700 animate-pulse"></div>
+                                    <div class="ml-3">
+                                        <div class="h-4 bg-gray-700 rounded w-24 mb-2"></div>
+                                        <div class="h-3 bg-gray-700 rounded w-16"></div>
+                                    </div>
+                                </div>
+                                <div class="h-4 bg-gray-700 rounded w-12"></div>
+                            </div>
+                        </div>
+                        <div class="terminal-border rounded-lg p-4 bg-black bg-opacity-50">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-gray-700 animate-pulse"></div>
+                                    <div class="ml-3">
+                                        <div class="h-4 bg-gray-700 rounded w-24 mb-2"></div>
+                                        <div class="h-3 bg-gray-700 rounded w-16"></div>
+                                    </div>
+                                </div>
+                                <div class="h-4 bg-gray-700 rounded w-12"></div>
+                            </div>
+                        </div>
+                        <div class="terminal-border rounded-lg p-4 bg-black bg-opacity-50">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-gray-700 animate-pulse"></div>
+                                    <div class="ml-3">
+                                        <div class="h-4 bg-gray-700 rounded w-24 mb-2"></div>
+                                        <div class="h-3 bg-gray-700 rounded w-16"></div>
+                                    </div>
+                                </div>
+                                <div class="h-4 bg-gray-700 rounded w-12"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="mt-8 text-center text-neon-blue text-sm">
+            <p>CRYPTO SCANNER 400 — MONITORING TOP 400 CRYPTOCURRENCIES VIA COINGECKO API</p>
+            <p class="mt-1">SYSTEM STATUS: <span class="text-terminal-green">OPERATIONAL</span> | DATA UPDATED EVERY 3 MINUTES</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Simulating API integration
+        document.addEventListener('DOMContentLoaded', async () => {
+            // UI Elements
+            const lastSync = document.getElementById('lastSync');
+            const nextScan = document.getElementById('nextScan');
+            const cacheSize = document.getElementById('cacheSize');
+            const scanProgress = document.getElementById('scanProgress');
+            const totalCoins = document.getElementById('totalCoins');
+            const thresholdSlider = document.getElementById('thresholdSlider');
+            const thresholdValue = document.getElementById('thresholdValue');
+            const systemLog = document.getElementById('systemLog');
+            const forceScanBtn = document.getElementById('forceScanBtn');
+            const opportunitiesContainer = document.getElementById('opportunitiesContainer');
+            const topCoinsContainer = document.getElementById('topCoinsContainer');
+            const initialProgress = document.getElementById('initialProgress');
+            const initialProgressText = document.getElementById('initialProgressText');
+            
+            // Simulated coin data
+            const topCoins = [
+                { id: 'bitcoin', symbol: 'btc', name: 'Bitcoin', price: 62580.42, change: 1.2, image: 'btc.png' },
+                { id: 'ethereum', symbol: 'eth', name: 'Ethereum', price: 3450.28, change: 3.8, image: 'eth.png' },
+                { id: 'tether', symbol: 'usdt', name: 'Tether', price: 1.0, change: -0.1, image: 'usdt.png' },
+                { id: 'solana', symbol: 'sol', name: 'Solana', price: 175.64, change: 6.2, image: 'sol.png' },
+                { id: 'ripple', symbol: 'xrp', name: 'XRP', price: 0.5217, change: 1.7, image: 'xrp.png' },
+                { id: 'cardano', symbol: 'ada', name: 'Cardano', price: 0.4621, change: 0.3, image: 'ada.png' },
+                { id: 'dogecoin', symbol: 'doge', name: 'Dogecoin', price: 0.1324, change: -1.8, image: 'doge.png' },
+                { id: 'polkadot', symbol: 'dot', name: 'Polkadot', price: 6.52, change: 8.1, image: 'dot.png' }
+            ];
+            
+            // Opportunities data
+            const sampleOpportunities = [
+                {
+                    type: 'buy',
+                    coin: { id: 'chainlink', symbol: 'link', name: 'Chainlink', price: 15.42 },
+                    change: 7.8,
+                    timestamp: Date.now()
+                },
+                {
+                    type: 'sell',
+                    coin: { id: 'uniswap', symbol: 'uni', name: 'Uniswap', price: 8.26 },
+                    change: -6.5,
+                    timestamp: Date.now() - 120000
+                },
+                {
+                    type: 'buy',
+                    coin: { id: 'polygon', symbol: 'matic', name: 'Polygon', price: 0.7621 },
+                    change: 12.3,
+                    timestamp: Date.now() - 240000
+                }
+            ];
+            
+            // Function to create an opportunity card
+            function createOpportunityCard(opportunity) {
+                const isBuy = opportunity.type === 'buy';
+                const card = document.createElement('div');
+                card.className = `opportunity-flash terminal-border rounded-lg p-4 mb-4 ${isBuy ? 'bg-green-900 bg-opacity-30' : 'bg-red-900 bg-opacity-30'}`;
+                
+                card.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="mr-4 text-3xl">
+                            ${isBuy ? '<span class="text-terminal-green">🚀</span>' : '<span class="text-warning-red">🔻</span>'}
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold ${isBuy ? 'text-terminal-green' : 'text-warning-red'}">
+                                ${isBuy ? 'OPPORTUNITY DETECTED: BUY' : 'WARNING: POTENTIAL SELL SIGNAL'}
+                            </h3>
+                            <p class="text-white">
+                                ${opportunity.coin.name} (${opportunity.coin.symbol.toUpperCase()})
+                                <span class="${isBuy ? 'text-terminal-green' : 'text-warning-red'} font-bold">
+                                    ${opportunity.change > 0 ? '+' : ''}${opportunity.change.toFixed(2)}%
+                                </span>
+                            </p>
+                        </div>
+                        <div class="ml-auto text-right">
+                            <p class="text-white font-mono">$${opportunity.coin.price.toFixed(2)}</p>
+                            <p class="text-gray-400 text-sm">${formatTime(opportunity.timestamp)}</p>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex justify-between items-center">
+                        <div class="text-xs bg-black bg-opacity-50 py-1 px-3 rounded-full border border-${isBuy ? 'terminal-green' : 'warning-red'}">
+                            ${isBuy ? 'BUY RECOMMENDED' : 'CONSIDER SELLING'}
+                        </div>
+                        <button class="text-xs bg-black bg-opacity-50 hover:bg-opacity-100 transition-all py-1 px-3 rounded-full border border-gray-600">
+                            VIEW DETAILS <i class="fas fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                `;
+                
+                return card;
+            }
+            
+            // Function to create a coin card
+            function createCoinCard(coin) {
+                const isPositive = coin.change >= 0;
+                const card = document.createElement('div');
+                card.className = 'terminal-border rounded-lg p-4 bg-black bg-opacity-50 hover:bg-opacity-70 transition-all cursor-pointer';
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
+                                <i class="fab fa-bitcoin text-xl ${coin.symbol === 'btc' ? 'text-orange-400' : 'text-gray-400'}"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="font-bold text-white">${coin.name}</h3>
+                                <p class="text-gray-400 text-sm">${coin.symbol.toUpperCase()}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-white font-mono">$${coin.price.toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
+                            <p class="${isPositive ? 'text-terminal-green' : 'text-warning-red'} font-bold">
+                                ${isPositive ? '+' : ''}${coin.change.toFixed(2)}%
+                            </p>
+                        </div>
+                    </div>
+                `;
+                
+                return card;
+            }
+            
+            // Update UI functions
+            function updateLastSync() {
+                lastSync.textContent = new Date().toLocaleTimeString();
+            }
+            
+            function formatTime(timestamp) {
+                const now = new Date();
+                const date = new Date(timestamp);
+                
+                if (now - date < 60000) { // Less than a minute ago
+                    return 'Just now';
+                } else if (now - date < 3600000) { // Less than an hour ago
+                    const mins = Math.floor((now - date) / 60000);
+                    return `${mins} min${mins !== 1 ? 's' : ''} ago`;
+                } else {
+                    return date.toLocaleTimeString();
+                }
+            }
+            
+            // Start with some sample opportunities
+            sampleOpportunities.forEach(opp => {
+                opportunitiesContainer.appendChild(createOpportunityCard(opp));
+            });
+            
+            // Initialize top coins display
+            topCoinsContainer.innerHTML = '';
+            topCoins.forEach(coin => {
+                topCoinsContainer.appendChild(createCoinCard(coin));
+            });
+            
+            // Add log messages to system log
+            function addLogMessage(message) {
+                const logEntry = document.createElement('div');
+                logEntry.className = 'code-text';
+                logEntry.innerHTML = `> ${message}`;
+                systemLog.appendChild(logEntry);
+                systemLog.scrollTop = systemLog.scrollHeight;
+            }
+            
+            // Update threshold display
+            thresholdSlider.addEventListener('input', () => {
+                thresholdValue.textContent = thresholdSlider.value + '%';
+            });
+            
+            // Force scan button
+            forceScanBtn.addEventListener('click', () => {
+                forceScanBtn.classList.add('pulse');
+                addLogMessage('FORCE SCAN INITIATED...');
+                
+                // Reset and animate the progress bar
+                initialProgress.style.width = '0%';
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 1;
+                    initialProgress.style.width = `${progress}%`;
+                    initialProgressText.textContent = `Scanning... ${progress}/400`;
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        addLogMessage('SCAN COMPLETE. ANALYZING RESULTS...');
+                        forceScanBtn.classList.remove('pulse');
+                        
+                        // Add a new opportunity
+                        setTimeout(() => {
+                            const newOpp = {
+                                type: Math.random() > 0.3 ? 'buy' : 'sell',
+                                coin: topCoins[Math.floor(Math.random() * topCoins.length)],
+                                change: parseFloat((Math.random() * 10 + 3).toFixed(2)) * (Math.random() > 0.5 ? 1 : -1),
+                                timestamp: Date.now()
+                            };
+                            
+                            opportunitiesContainer.insertBefore(createOpportunityCard(newOpp), opportunitiesContainer.firstChild);
+                            addLogMessage('OPPORTUNITY DETECTED: ' + newOpp.coin.name);
+                            
+                            // Clear the initial state
+                            if (initialProgressText.parentElement.classList.contains('flex')) {
+                                initialProgressText.parentElement.parentElement.classList.add('hidden');
+                            }
+                        }, 800);
+                    }
+                }, 20);
+            });
+            
+            // Simulate initial loading process
+            updateLastSync();
+            cacheSize.textContent = `${Math.floor(Math.random() * 100) + 300}/400`;
+            
+            // Simulate scan progress
+            setTimeout(() => {
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += Math.floor(Math.random() * 10);
+                    if (progress > 100) progress = 100;
+                    initialProgress.style.width = `${progress}%`;
+                    initialProgressText.textContent = `Scanning... ${Math.round(progress * 4)}/400`;
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        
+                        // Replace loading with the opportunities dashboard
+                        opportunitiesContainer.innerHTML = '';
+                        sampleOpportunities.forEach(opp => {
+                            opportunitiesContainer.appendChild(createOpportunityCard(opp));
+                        });
+                        
+                        // Hide initial progress
+                        initialProgressText.parentElement.parentElement.classList.add('hidden');
+                        
+                        // Add to system log
+                        addLogMessage('INITIAL SCAN COMPLETED. MONITORING ACTIVE.');
+                        
+                        // Set up countdown
+                        let seconds = 180;
+                        const countdown = setInterval(() => {
+                            seconds--;
+                            const minutes = Math.floor(seconds / 60);
+                            const secs = seconds % 60;
+                            nextScan.textContent = `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+                            
+                            if (seconds <= 0) {
+                                clearInterval(countdown);
+                                nextScan.innerHTML = '<span class="text-terminal-green font-bold">SCANNING NOW...</span>';
+                                
+                                // Simulate scanning every 3 minutes
+                                setTimeout(() => {
+                                    seconds = 180;
+                                    addLogMessage('PERIODIC SCAN INITIATED...');
+                                    nextScan.textContent = `3:00`;
+                                    setTimeout(() => {
+                                        if (Math.random() > 0.7) {
+                                            const newOpp = {
+                                                type: Math.random() > 0.4 ? 'buy' : 'sell',
+                                                coin: topCoins[Math.floor(Math.random() * topCoins.length)],
+                                                change: parseFloat((Math.random() * 8 + 3).toFixed(2)) * (Math.random() > 0.5 ? 1 : -1),
+                                                timestamp: Date.now()
+                                            };
+                                            
+                                            opportunitiesContainer.insertBefore(createOpportunityCard(newOpp), opportunitiesContainer.firstChild);
+                                            addLogMessage('OPPORTUNITY DETECTED: ' + newOpp.coin.name);
+                                        } else {
+                                            addLogMessage('NO SIGNIFICANT CHANGES FOUND');
+                                        }
+                                    }, 1500);
+                                }, 2000);
+                            }
+                        }, 1000);
+                    }
+                }, 50);
+            }, 
+</body>
+</html>
