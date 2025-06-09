@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lei de Benford - Verificação de Veracidade</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#1e40af',
+                        background: '#f8fafc',
+                        card: '#ffffff',
+                        danger: '#ef4444',
+                        warning: '#f59e0b',
+                        success: '#10b981'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .benford-bar {
+            transition: width 0.8s ease-in-out;
+        }
+        .digit-card {
+            transition: all 0.3s ease;
+        }
+        .digit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+        .tooltip {
+            position: relative;
+        }
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        .tooltip-text {
+            visibility: hidden;
+            width: 220px;
+            background-color: #1e293b;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body class="bg-background min-h-screen text-gray-800">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-secondary mb-3">Analisador de Veracidade</h1>
+            <h2 class="text-xl text-gray-600 mb-6">Lei de Benford - Ferramenta para análise de dados numéricos</h2>
+            
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div class="text-left max-w-lg">
+                        <h3 class="font-semibold text-lg text-secondary mb-2">O que é a Lei de Benford?</h3>
+                        <p class="text-gray-700 mb-4">
+                            A Lei de Benford estabelece que em muitos conjuntos de dados do mundo real, o primeiro dígito não-zero dos números segue uma distribuição específica, onde números menores são mais comuns que os maiores.
+                        </p>
+                        <p class="text-gray-700">
+                            Esta ferramenta verifica se os dados de entrada seguem essa distribuição, o que pode ajudar a identificar informações potencialmente manipuladas.
+                        </p>
+                    </div>
+                    
+                    <div class="bg-blue-50 rounded-xl p-4 border border-primary/20 w-72 flex flex-col items-center">
+                        <span class="bg-secondary text-white rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                            <i class="fas fa-lightbulb text-xl"></i>
+                        </span>
+                        <h4 class="font-bold text-secondary text-center mb-2">Como usar</h4>
+                        <ol class="text-left text-sm space-y-1">
+                            <li>1. Cole o texto com números no campo abaixo</li>
+                            <li>2. Clique em "Analisar Dados"</li>
+                            <li>3. Verifique a distribuição dos dígitos</li>
+                            <li>4. Analise o grau de correspondência</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Input Section -->
+        <section class="bg-card rounded-xl shadow-lg overflow-hidden mb-12">
+            <div class="p-1 bg-gradient-to-r from-primary to-secondary rounded-t-xl">
+                <div class="bg-white rounded-t-lg p-1">
+                    <div class="flex items-center justify-between bg-primary/10 px-6 py-3">
+                        <h3 class="font-bold text-secondary text-lg">
+                            <i class="fas fa-keyboard mr-2"></i> Insira seu texto
+                        </h3>
+                        <div class="flex gap-3">
+                            <button id="exampleBtn" class="text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 py-1 px-3 rounded-lg transition">
+                                <i class="fas fa-lightbulb mr-1"></i> Exemplo
+                            </button>
+                            <button id="clearBtn" class="text-sm bg-red-100 hover:bg-red-200 text-red-800 py-1 px-3 rounded-lg transition">
+                                <i class="fas fa-trash mr-1"></i> Limpar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        <textarea id="textInput" rows="8" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent placeholder-gray-500" placeholder="Cole aqui o texto que contém dados numéricos (ex: relatórios financeiros, bases de dados, etc)"></textarea>
+                        
+                        <div class="flex flex-col sm:flex-row justify-between mt-6 gap-4">
+                            <div class="flex items-center text-gray-700">
+                                <i class="fas fa-info-circle mr-2 text-blue-500"></i>
+                                <span>Números com pelo menos 3 dígitos terão melhor precisão</span>
+                            </div>
+                            <button id="analyzeBtn" class="bg-primary hover:bg-secondary text-white font-bold py-3 px-8 rounded-lg shadow-lg transition flex items-center justify-center">
+                                <i class="fas fa-chart-bar mr-2"></i> Analisar Dados
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Section (Initially hidden) -->
+        <section id="resultsSection" class="hidden bg-card rounded-xl shadow-lg overflow-hidden mb-12">
+            <div class="p-1 bg-gradient-to-r from-primary to-secondary rounded-t-xl">
+                <div class="bg-white rounded-t-lg">
+                    <div class="flex flex-wrap justify-between bg-primary/10 px-6 py-3 items-center">
+                        <h3 class="font-bold text-secondary text-lg">
+                            <i class="fas fa-chart-pie mr-2"></i> Resultados da Análise
+                        </h3>
+                        <div class="flex items-center gap-2">
+                            <div id="confidenceBadge" class="py-1 px-4 rounded-full font-semibold text-white"></div>
+                            <div class="tooltip relative cursor-pointer">
+                                <i class="fas fa-question-circle text-gray-600 hover:text-primary"></i>
+                                <div class="tooltip-text">
+                                    Esta pontuação mede o quanto a distribuição dos primeiros dígitos no seu texto corresponde à distribuição esperada pela Lei de Benford. Quanto maior a pontuação, mais natural os dados parecem.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                            <!-- Summary Cards -->
+                            <div class="bg-blue-50 rounded-xl p-6 border border-primary/20">
+                                <h4 class="font-bold text-secondary text-lg mb-4 text-center">
+                                    <i class="fas fa-info-circle mr-2"></i> Resumo da Análise
+                                </h4>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center border-b pb-3">
+                                        <span class="font-medium">Total de números analisados:</span>
+                                        <span id="totalNumbers" class="font-bold bg-secondary text-white py-1 px-3 rounded-full">0</span>
+                                    </div>
+                                    <div class="flex justify-between items-center border-b pb-3">
+                                        <span class="font-medium">Pontuação de conformidade:</span>
+                                        <span id="scoreValue" class="font-bold text-xl">0%</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-medium">Interpretação:</span>
+                                        <span id="scoreInterpretation" class="font-semibold text-sm">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Detailed Metrics -->
+                            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-primary/20">
+                                <h4 class="font-bold text-secondary text-lg mb-4 text-center">
+                                    <i class="fas fa-chart-line mr-2"></i> Métricas Detalhadas
+                                </h4>
+                                <div class="space-y-3">
+                                    <div>
+                                        <div class="flex justify-between mb-1">
+                                            <span class="font-medium">MAE (Erro Médio Absoluto):</span>
+                                            <span id="maeValue" class="font-bold">0</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div id="maeBar" class="bg-gradient-to-r from-blue-400 to-indigo-600 h-2 rounded-full" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <div class="flex justify-between mb-1">
+                                            <span class="font-medium">KS (Distância Kolmogorov-Smirnov):</span>
+                                            <span id="ksValue" class="font-bold">0</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div id="ksBar" class="bg-gradient-to-r from-blue-400 to-indigo-600 h-2 rounded-full" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-6 text-center">
+                                        <div id="veredict" class="inline-block rounded-lg px-4 py-2 font-bold text-lg"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Distribution Title -->
+                        <h4 class="font-bold text-secondary text-lg mb-6 text-center border-b pb-3">
+                            <i class="fas fa-calculator mr-2"></i> Distribuição dos Primeiros Dígitos
+                        </h4>
+                        
+                        <!-- Bars Comparison -->
+                        <div class="bg-gray-50 rounded-xl p-6 mb-8">
+                            <div class="mb-4">
+                                <div class="flex gap-3 items-center">
+                                    <div class="w-4 h-4 bg-primary rounded"></div>
+                                    <span>Benford (Esperado)</span>
+                                </div>
+                                <div class="flex gap-3 items-center">
+                                    <div class="w-4 h-4 bg-success rounded"></div>
+                                    <span>Análise (Encontrado)</span>
+                                </div>
+                            </div>
+                            
+                            <div class="h-64 flex items-end justify-between gap-2">
+                                <!-- This will be filled dynamically -->
+                            </div>
+                        </div>
+                        
+                        <!-- Digits Distribution -->
+                        <h4 class="font-bold text-secondary text-lg mb-4">
+                            <i class="fas fa-list-ol mr-2"></i> Comparação por Dígito
+                        </h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="digitsContainer">
+                            <!-- Cards will be inserted here by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Information Section -->
+        <section class="bg-card rounded-xl shadow-lg p-8 mt-16">
+            <h3 class="text-2xl font-bold text-center text-secondary mb-6">
+                <i class="fas fa-university mr-2"></i> A Ciência por Trás da Lei de Benford
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h4 class="font-semibold text-lg text-secondary mb-3">Entendendo a Lei de Benford</h4>
+                    <p class="text-gray-700 mb-4">
+                        A Lei de Benford, também conhecida como Lei do Primeiro Dígito, estabelece que em muitos conjuntos de dados numéricos do mundo real, o primeiro dígito não-zero não é distribuído uniformemente.
+                    </p>
+                    <p class="text-gray-700 mb-4">
+                        Dígitos menores têm uma probabilidade de aparecer maior do que dígitos maiores. Especificamente:
+                    </p>
+                    <ul class="list-disc pl-5 text-gray-700 mb-4 space-y-1">
+                        <li>O dígito 1 aparece como primeiro dígito em cerca de 30,1% das vezes</li>
+                        <li>O dígito 2 aparece cerca de 17,6% das vezes</li>
+                        <li>A probabilidade diminui até o dígito 9, que aparece apenas 4,6% das vezes</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold text-lg text-secondary mb-3">Aplicações Práticas</h4>
+                    <p class="text-gray-700 mb-4">
+                        Esta lei é particularmente útil para identificar dados potencialmente manipulados, fraudes contábeis e bancos de dados artificiais:
+                    </p>
+                    <ul class="list-disc pl-5 text-gray-700 mb-4 space-y-1">
+                        <li><span class="font-semibold">Auditoria financeira:</span> Detectando fraudes e manipulações contábeis</li>
+                        <li><span class="font-semibold">Ciência de dados:</span> Verificando integridade de grandes conjuntos de dados</li>
+                        <li><span class="font-semibold">Investigação forense:</span> Identificando documentos com informações falsificadas</li>
+                    </ul>
+                    <p class="text-gray-700">
+                        É importante notar que nem todos os conjuntos de dados seguem a distribuição de Benford naturalmente, portanto os resultados devem ser interpretados com cuidado.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mt-8 bg-blue-50 rounded-lg p-5 border border-primary/20">
+                <h4 class="font-bold text-secondary text-lg mb-3 text-center">
+                    <i class="fas fa-exclamation-triangle mr-2"></i> Limitações
+                </h4>
+                <p class="text-gray-700 text-center">
+                    Esta ferramenta fornece uma indicação estatística, não uma prova definitiva. Conjuntos de dados que não seguem uma distribuição logarítmica natural podem não seguir Benford mesmo quando válidos.
+                </p>
+            </div>
+        </section>
+        
+        <footer class="text-center py-8 text-gray-600 text-sm mt-12">
+            <p>Ferramenta Lei de Benford &copy; 2023 - Análise de veracidade de dados numéricos</p>
+            <p>Esta ferramenta é fornecida apenas para fins informativos e não constitui aconselhamento profissional</p>
+        </footer>
+    </div>
+
+    <script>
+        // Expected distribution according to Benford's Law
+        const benfordDistribution = {
+            1: 0.301, 2: 0.176, 3: 0.125, 4: 0.097, 
+            5: 0.079, 6: 0.067, 7: 0.058, 8: 0.051, 9: 0.046
+        };
+        
+        // DOM Elements
+        const textInput = document.getElementById('textInput');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const resultsSection = document.getElementById('resultsSection');
+        const exampleBtn = document.getElementById('exampleBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const totalNumbers = document.getElementById('totalNumbers');
+        const scoreValue = document.getElementById('scoreValue');
+        const veredict = document.getElementById('veredict');
+        const confidenceBadge = document.getElementById('confidenceBadge');
+        const digitsContainer = document.getElementById('digitsContainer');
+        const maeValue = document.getElementById('maeValue');
+        const ksValue = document.getElementById('ksValue');
+        const maeBar = document.getElementById('maeBar');
+        const ksBar = document.getElementById('ksBar');
+        const scoreInterpretation = document.getElementById('scoreInterpretation');
+        
+        // Event listeners
+        analyzeBtn.addEventListener('click', analyzeText);
+        exampleBtn.addEventListener('click', loadExample);
+        clearBtn.addEventListener('click', clearInput);
+        
+        // Analyze text using Benford's Law
+        function analyzeText() {
+            const text = textInput.value.trim();
+            if (!text) {
+                alert('Por favor, insira um texto para análise.');
+                return;
+            }
+            
+            // Extract numbers from text
+            const numbers = extractNumbers(text);
+            
+            if (numbers.length === 0) {
+                alert('Nenhum número foi encontrado no texto.');
+                return;
+            }
+            
+            // Extract first digits from numbers
+            const firstDigits = extractFirstDigits(numbers);
+            const distribution = calculateDistribution(firstDigits);
+            
+            // Calculate analysis metrics
+            const benfordScore = calculateBenfordScore(distribution);
+            const mae = calculateMAE(distribution);
+            const ks = calculateKS(distribution);
+            
+            // Display results
+            showResults({
+                totalNumbers: numbers.length,
+                distribution: distribution,
+                benfordScore: benfordScore,
+                mae: mae,
+                ks: ks
+            });
+            
+            // Show the results section
+            resultsSection.classList.remove('hidden');
+            
+            // Scroll to results
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Extract numbers from text
+        function extractNumbers(text) {
+            // Regex to find numbers with at least 3 digits
+            const numberRegex = /[\.\d,\-]+/g;
+            const matches = text.match(numberRegex) || [];
+            
+            // Process matches to get pure numbers
+            return matches.map(match => {
+                // Clean the match by removing commas, currency symbols, etc.
+                const cleanMatch = match.replace(/[^\d.-]/g, '');
+                const num = parseFloat(cleanMatch);
+                return isNaN(num) ? null : num;
+            }).filter(num => num !== null);
+        }
+        
+        // Extract first non-zero digits from numbers
+        function extractFirstDigits(numbers) {
+            return numbers.map(number => {
+                const absNum = Math.abs(number);
+                if (absNum < 1) {
+                    // For numbers between 0 and 1, get the first non-zero digit
+                    const str = absNum.toString().replace('0.', '');
+                    for (let char of str) {
+                        if (char !== '0') return parseInt(char);
+                    }
+                    return null;
+                } else {
+                    // For numbers >= 1
+                    const firstDigit = parseInt(Math.floor(absNum).toString()[0]);
+                    return firstDigit;
+                }
+            }).filter(digit => digit >= 1 && digit <= 9);
+        }
+        
+        // Calculate digit distribution
+        function calculateDistribution(digits) {
+            const distribution = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0};
+            
+            // Count each digit
+            digits.forEach(digit => {
+                if (digit >= 1 && digit <= 9) {
+                    distribution[digit]++;
+                }
+            });
+            
+            // Convert counts to percentages
+            for (let digit in distribution) {
+                distribution[digit] = digits.length ? distribution[digit] / digits.length : 0;
+            }
+            
+            return distribution;
+        }
+        
+        // Calculate Benford score (how closely the distribution matches Benford)
+        function calculateBenfordScore(distribution) {
+            let score = 0;
+            for (let digit = 1; digit <= 9; digit++) {
+                const actual = distribution[digit];
+                const expected = benfordDistribution[digit];
+                const deviation = 1 - Math.min(1, Math.abs(actual - expected) / expected);
+                // Weight by Benford probability
+                score += deviation * expected;
+            }
+            // Normalize to 0-100 scale
+            return Math.round(score * 100);
+        }
+        
+        // Calculate Mean Absolute Error
+        function calculateMAE(distribution) {
+            let mae = 0;
+            for (let digit = 1; digit <= 9; digit++) {
+                mae += Math.abs(distribution[digit] - benfordDistribution[digit]);
+            }
+            return (mae / 9).toFixed(4);
+        }
+        
+        // Calculate Kolmogorov-Smirnov statistic
+        function calculateKS(distribution) {
+            let cumulativeActual = 0;
+            let cumulativeExpected = 0;
+            let maxDiff = 0;
+            
+            for (let digit = 1; digit <= 9; digit++) {
+                cumulativeActual += distribution[digit];
+                cumulativeExpected += benfordDistribution[digit];
+                const diff = Math.abs(cumulativeActual - cumulativeExpected);
+                if (diff > maxDiff) maxDiff = diff;
+            }
+            
+            return maxDiff.toFixed(4);
+        }
+        
+        // Show results in UI
+        function showResults(results) {
+            // Update summary information
+            totalNumbers.textContent = results.totalNumbers;
+            scoreValue.textContent = `${results.benfordScore}%`;
+            maeValue.textContent = results.mae;
+            ksValue.textContent = results.ks;
+            
+            // Update progress bars
+            setTimeout(() => {
+                maeBar.style.width = `${100 - Math.min(100, parseFloat(results.mae) * 200)}%`;
+                ksBar.style.width = `${100 - Math.min(100, parseFloat(results.ks) * 200)}%`;
+            }, 100);
+            
+            // Determine result interpretation
+            let verdictText, badgeColor, interpretation;
+            if (results.benfordScore >= 90) {
+                verdictText = "Dados confiáveis";
+                badgeColor = "bg-success";
+                interpretation = "Correspondência excelente com Benford";
+            } else if (results.benfordScore >= 75) {
+                verdictText = "Possivelmente confiáveis";
+                badgeColor = "bg-blue-500";
+                interpretation = "Correspondência boa com Benford";
+            } else if (results.benfordScore >= 60) {
+                verdictText = "Análise cuidadosa necessária";
+                badgeColor = "bg-warning";
+                interpretation = "Correspondência moderada com Benford";
+            } else {
+                verdictText = "Possivelmente manipulados";
+                badgeColor = "bg-danger";
+                interpretation = "Baixa correspondência com Benford - potencial problema";
+            }
+            
+            // Update verdict and badges
+            veredict.textContent = verdictText;
+            veredict.className = `inline-block rounded-lg px-4 py-2 font-bold text-lg ${badgeColor}`;
+            confidenceBadge.textContent = `${results.benfordScore}%`;
+            confidenceBadge.className = `py-1 px-4 rounded-full font-semibold text-white ${badgeColor}`;
+            scoreInterpretation.textContent = interpretation;
+            
+            // Create distribution bars
+            createDistributionChart(results.distribution);
+            
+            // Create digit cards
+            createDigitCards(results.distribution);
+        }
+        
+        // Create distribution chart
+        function createDistributionChart(distribution) {
+            const container = document.querySelector('.h-64');
+            container.innerHTML = '';
+            
+            for (let digit = 1; digit <= 9; digit++) {
+                const actual = distribution[digit] * 100;
+                const expected = benfordDistribution[digit] * 100;
+                
+                const barElement = document.createElement('div');
+                barElement.className = 'flex flex-col items-center w-1/12';
+                
+                barElement.innerHTML = `
+                    <div class="relative w-full flex justify-center">
+                        <div class="absolute top-0 text-xs font-semibold">${digit}</div>
+                        <div class="relative w-full flex flex-col justify-end" style="height: 220px">
+                            <div class="absolute left-1/2 transform -translate-x-1/2 w-2/3 bg-primary opacity-70 rounded-t-lg benford-bar" 
+                                 style="height: ${expected}%"></div>
+                            <div class="absolute left-1/2 transform -translate-x-1/2 w-4/5 bg-success rounded-t-lg benford-bar" 
+                                 style="height: ${actual}%"></div>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-xs">
+                        <span class="text-primary font-semibold">${Math.round(expected)}%</span> / 
+                        <span class="text-success font-semibold">${Math.round(actual)}%</span>
+                    </div>
+                `;
+                
+                container.appendChild(barElement);
+                
+                // Animate the bars after a short delay
+                setTimeout(() => {
+                    const actualBars = barElement.querySelectorAll('.benford-bar');
+                    actualBars.forEach(bar => bar.classList.add('h-0'));
+                }, 10);
+            }
+        }
+        
+        // Create digit comparison cards
+        function createDigitCards(distribution) {
+            digitsContainer.innerHTML = '';
+            
+            for (let digit = 1; digit <= 9; digit++) {
+                const actual = distribution[digit] * 100;
+                const expected = benfordDistribution[digit] * 100;
+                const difference = (actual - expected).toFixed(1);
+                
+                let diffColor, diffIcon;
+                if (actual >= expected) {
+                    diffColor = 'text-success';
+                    diffIcon = 'fa-caret-up';
+                } else {
+                    diffColor = 'text-danger';
+                    diffIcon = 'fa-caret-down';
+                }
+                
+                const card = document.createElement('div');
+                card.className = 'bg-white border border-gray-200 rounded-xl p-5 digit-card';
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-xl font-bold text-secondary">
+                            ${digit}
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm text-gray-500">Diferença</div>
+                            <div class="font-bold ${diffColor}">
+                                <i class="fas ${diffIcon} mr-1"></i>${Math.abs(difference)}%
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Esperado:</span>
+                            <span class="font-semibold">${expected.toFixed(1)}%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Encontrado:</span>
+                            <span class="font-semibold">${actual.toFixed(1)}%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-gradient-to-r from-primary to-secondary h-2 rounded-full" style="width: ${expected}%"></div>
+                    </div>
+                `;
+                
+                digitsContainer.appendChild(card);
+            }
+        }
+        
+        // Load example text
+        function loadExample() {
+            const exampleText = `Dados de valores populacionais em diversos municípios em 2023:
+
+1. São Paulo: 11.253.503 habitantes
+2. Rio de Janeiro: 6.355.949 habitantes
+3. Brasília: 2.817.068 habitantes
+4. Salvador: 2.418.005 habitantes
+5. Fortaleza: 2.400.000 habitantes
+6. Belo Horizonte: 2.315.560 habitantes
+7. Manaus: 1.811.010 habitantes
+8. Curitiba: 1.751.907 habitantes
+9. Recife: 1.555.037 habitantes
+10. Porto Alegre: 1.332.570 habitantes
+11. Belém: 1.303.045 habitantes
+12. Goiânia: 1.302.001 habitantes
+13. Guarulhos: 1.221.979 habitantes
+14. Campinas: 1.088.611 habitantes
+15. São Luís: 1.037.775 habitantes
+16. Maceió: 936.314 habitantes
+17. Campo Grande: 885.711 habitantes
+18. Teresina: 868.075 habitantes
+19. São Gonçalo: 867.070 habitantes
+20. João Pessoa: 791.438 habitantes
+
+Em uma pesquisa realizada com 500 pessoas, o tempo médio gasto em redes sociais foi de 2 horas e 15 minutos diários, com uma distribuição que seguia um pico nos primeiros dígitos.
+
+Para mais informações sobre as bases de dados:
+- Fonte: Instituto Brasileiro de Geografia e Estatística (IBGE)
+- Data de publicação: Janeiro de 2023
+- Código do sistema: 109-4359-2023-08-001
+- Números de documento: 234-567-890, 123-456-789, 345-678-901`;
+            
+            textInput.value = exampleText;
+        }
+        
+        // Clear input field
+        function clearInput() {
+            textInput.value = '';
+        }
+    </script>
+</body>
+</html>
