@@ -1,114 +1,1250 @@
-uma estrutura de dados simples para um sistema básico de fábrica que cobre os 5 pontos
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão de Fábrica - Documentação</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#0ea5e9',
+                        accent: '#8b5cf6',
+                        dark: '#1e293b',
+                        light: '#f1f5f9'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 3px;
+        }
+        .active {
+            background-color: #e0f2fe;
+            border-left: 4px solid #3b82f6;
+            font-weight: 600;
+        }
+        .table-section {
+            transition: all 0.3s ease;
+        }
+        .table-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center">
+                <i class="fas fa-industry text-primary text-3xl mr-3"></i>
+                <h1 class="text-2xl font-bold text-dark">GestãoFactory Pro</h1>
+            </div>
+            
+            <div class="mt-4 md:mt-0 flex gap-3 items-center">
+                <div class="relative">
+                    <input type="text" placeholder="Buscar na documentação..." class="rounded-lg border px-4 py-2 w-full md:w-64 focus:ring-1 focus:ring-primary focus:border-primary">
+                    <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
+                </div>
+                <button class="bg-primary hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition">
+                    <i class="fas fa-user mr-2"></i> Login
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        <!-- Sidebar -->
+        <div class="hidden md:block w-64 bg-white shadow-md sidebar-scroll overflow-y-auto h-[calc(100vh-82px)] sticky top-[82px]">
+            <div class="p-4">
+                <h2 class="text-xl font-semibold mb-4 text-dark">Documentação</h2>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="#introduction" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition active">
+                            <i class="fas fa-home mr-2 text-primary"></i> Introdução
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#database" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">
+                            <i class="fas fa-database mr-2 text-purple-500"></i> Estrutura de Dados
+                        </a>
+                    </li>
+                    <li class="pl-4">
+                        <a href="#products" class="block px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 rounded-lg transition">
+                            <i class="fas fa-cube mr-2 text-blue-400"></i> Produtos
+                        </a>
+                    </li>
+                    <li class="pl-4">
+                        <a href="#orders" class="block px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 rounded-lg transition">
+                            <i class="fas fa-clipboard-list mr-2 text-green-500"></i> Ordens de Produção
+                        </a>
+                    </li>
+                    <li class="pl-4">
+                        <a href="#inventory" class="block px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 rounded-lg transition">
+                            <i class="fas fa-boxes mr-2 text-yellow-500"></i> Movimento de Estoque
+                        </a>
+                    </li>
+                    <li class="pl-4">
+                        <a href="#sales" class="block px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 rounded-lg transition">
+                            <i class="fas fa-shopping-cart mr-2 text-red-500"></i> Vendas/Entregas
+                        </a>
+                    </li>
+                    <li class="pl-4">
+                        <a href="#finance" class="block px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 rounded-lg transition">
+                            <i class="fas fa-money-bill-wave mr-2 text-green-600"></i> Controle Financeiro
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#screens" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">
+                            <i class="fas fa-desktop mr-2 text-blue-600"></i> Telas do Sistema
+                        </a>
+                    </li>
+                    <li class="ml-8">
+                        <a href="#login" class="block px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 rounded-lg transition">
+                            <i class="fas fa-sign-in-alt mr-2"></i> Tela de Login
+                        </a>
+                    </li>
+                    <li class="ml-8">
+                        <a href="#products-screen" class="block px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 rounded-lg transition">
+                            <i class="fas fa-box mr-2"></i> Cadastro de Produtos
+                        </a>
+                    </li>
+                    <li class="ml-8">
+                        <a href="#production" class="block px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 rounded-lg transition">
+                            <i class="fas fa-tasks mr-2"></i> Ordens de Produção
+                        </a>
+                    </li>
+                    <li class="ml-8">
+                        <a href="#inventory-screen" class="block px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 rounded-lg transition">
+                            <i class="fas fa-warehouse mr-2"></i> Controle de Estoque
+                        </a>
+                    </li>
+                    <li class="ml-8">
+                        <a href="#sales-screen" class="block px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 rounded-lg transition">
+                            <i class="fas fa-cash-register mr-2"></i> Vendas/Entregas
+                        </a>
+                    </li>
+                    <li class="ml-8">
+                        <a href="#finance-screen" class="block px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 rounded-lg transition">
+                            <i class="fas fa-chart-line mr-2"></i> Controle Financeiro
+                        </a>
+                    </li>
+                    <li class="ml-8">
+                        <a href="#dashboard" class="block px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 rounded-lg transition">
+                            <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#observations" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">
+                            <i class="fas fa-sticky-note mr-2 text-yellow-500"></i> Observações
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#integrations" class="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">
+                            <i class="fas fa-link mr-2 text-blue-500"></i> Fluxos de Integração
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-auto">
+            <div class="container mx-auto px-4 py-8 max-w-5xl">
+                <!-- Introduction -->
+                <section id="introduction" class="mb-12">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <div class="flex items-center mb-6">
+                            <i class="fas fa-industry text-primary text-4xl mr-4"></i>
+                            <div>
+                                <h1 class="text-3xl font-bold text-dark">Documentação do Sistema</h1>
+                                <p class="text-gray-600">Estrutura de dados e funcionalidades do sistema de gestão de fábrica</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-blue-50 rounded-lg p-6 mb-6">
+                            <h2 class="text-xl font-semibold text-dark mb-3">Visão Geral do Sistema</h2>
+                            <p class="mb-4 text-gray-700">Este sistema de gestão de fábrica foi projetado para automatizar e otimizar os principais processos industriais, incluindo:</p>
+                            <ul class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                    <span>Controle de produção</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                    <span>Gerenciamento de estoque</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                    <span>Registro de vendas</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                    <span>Controle financeiro</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                    <span>Monitoramento de KPIs</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                    <span>Alertas de estoque baixo</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-4">
+                            <div class="bg-white border rounded-lg p-4 flex-1 min-w-[200px]">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-database text-purple-500 text-2xl mr-2"></i>
+                                    <h3 class="font-semibold text-dark">Estrutura de Dados</h3>
+                                </div>
+                                <p class="text-gray-600">Sistema baseado em 5 tabelas principais que cobrem todos os processos fabris</p>
+                            </div>
+                            
+                            <div class="bg-white border rounded-lg p-4 flex-1 min-w-[200px]">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-mobile-alt text-blue-500 text-2xl mr-2"></i>
+                                    <h3 class="font-semibold text-dark">Telas Essenciais</h3>
+                                </div>
+                                <p class="text-gray-600">Interface completa com 8 telas principais para controle de todas as operações</p>
+                            </div>
+                            
+                            <div class="bg-white border rounded-lg p-4 flex-1 min-w-[200px]">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-chart-pie text-green-500 text-2xl mr-2"></i>
+                                    <h3 class="font-semibold text-dark">Dashboard Integrado</h3>
+                                </div>
+                                <p class="text-gray-600">Visão consolidada de todos os indicadores importantes para tomada de decisão</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Database Structure -->
+                <section id="database" class="mb-12">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <div class="flex items-center mb-6">
+                            <i class="fas fa-database text-purple-500 text-3xl mr-3"></i>
+                            <h2 class="text-2xl font-bold text-dark">Estrutura de Dados</h2>
+                        </div>
+                        <p class="text-gray-600 mb-6">O sistema é baseado em 5 tabelas principais que gerenciam todos os processos da fábrica, desde a produção até as vendas e finanças.</p>
+                        
+                        <div class="grid grid-cols-1 gap-6">
+                            <!-- Products Table -->
+                            <div id="products" class="table-section bg-white border border-gray-200 rounded-xl overflow-hidden">
+                                <div class="bg-purple-50 px-6 py-3 flex items-center">
+                                    <i class="fas fa-cube text-purple-600 text-xl mr-3"></i>
+                                    <h3 class="text-lg font-semibold text-purple-800">1. Produtos</h3>
+                                </div>
+                                <div class="p-6">
+                                    <p class="text-gray-600 mb-4">Gerencia todos os itens (matérias-primas e produtos finais) da fábrica.</p>
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full border-collapse">
+                                            <thead>
+                                                <tr class="bg-gray-100">
+                                                    <th class="border border-gray-200 px-4 py-2 text-left">Campo</th>
+                                                    <th class="border border-gray-200 px-4 py-2 text-left">Tipo</th>
+                                                    <th class="border border-gray-200 px-4 py-2 text-left">Descrição</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">produto_id</td>
+                                                    <td class="border border-gray-200 px-4 py-2">INT (PK)</td>
+                                                    <td class="border border-gray-200 px-4 py-2">Identificador único</td>
+                                                </tr>
+                                                <tr class="bg-gray-50">
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">nome</td>
+                                                    <td class="border border-gray-200 px-4 py-2">VARCHAR</td>
+                                                    <td class="border border-gray-200 px-4 py-2">Nome do produto</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">tipo</td>
+                                                    <td class="border border-gray-200 px-4 py-2">ENUM</td>
+                                                    <td class="border border-gray-200 px-4 py-2">'materia_prima' ou 'produto_final'</td>
+                                                </tr>
+                                                <tr class="bg-gray-50">
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">estoque_minimo</td>
+                                                    <td class="border border-gray-200 px-4 py-2">INT</td>
+                                                    <td class="border border-gray-200 px-4 py-2">Quantidade mínima para alerta</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Production Orders -->
+                            <div id="orders" class="table-section bg-white border border-gray-200 rounded-xl overflow-hidden">
+                                <div class="bg-green-50 px-6 py-3 flex items-center">
+                                    <i class="fas fa-clipboard-list text-green-600 text-xl mr-3"></i>
+                                    <h3 class="text-lg font-semibold text-green-800">2. Ordens de Produção</h3>
+                                </div>
+                                <div class="p-6">
+                                    <p class="text-gray-600 mb-4">Controla as ordens de produção de produtos finais.</p>
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full border-collapse">
+                                            <thead>
+                                                <tr class="bg-gray-100">
+                                                    <th class="border border-gray-200 px-4 py-2 text-left">Campo</th>
+                                                    <th class="border border-gray-200 px-4 py-2 text-left">Tipo</th>
+                                                    <th class="border border-gray-200 px-4 py-2 text-left">Descrição</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">ordem_id</td>
+                                                    <td class="border border-gray-200 px-4 py-2">INT (PK)</td>
+                                                    <td class="border border-gray-200 px-4 py-2">Identificador único</td>
+                                                </tr>
+                                                <tr class="bg-gray-50">
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">produto_id</td>
+                                                    <td class="border border-gray-200 px-4 py-2">INT (FK)</td>
+                                                    <td class="border border-gray-200 px-4 py-2">Produto a ser fabricado</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">quantidade</td>
+                                                    <td class="border border-gray-200 px-4 py-2">INT</td>
+                                                    <td class="border border-gray-200 px-4 py-2">Quantidade a produzir</td>
+                                                </tr>
+                                                <tr class="bg-gray-50">
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">data_inicio</td>
+                                                    <td class="border border-gray-200 px-4 py-2">DATE</td>
+                                                    <td class="border border-gray-200 px-4 py-2">Data prevista de início</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">data_fim</td>
+                                                    <td class="border border-gray-200 px-4 py-2">DATE</td>
+                                                    <td class="border border-gray-200 px-4 py-2">Data prevista de término</td>
+                                                </tr>
+                                                <tr class="bg-gray-50">
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">status</td>
+                                                    <td class="border border-gray-200 px-4 py-2">ENUM</td>
+                                                    <td class="border border-gray-200 px-4 py-2">'pendente', 'em_producao', 'finalizada'</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Stock Movement -->
+                            <div id="inventory" class="table-section bg-white border border-gray-200 rounded-xl overflow-hidden">
+                                <div class="bg-yellow-50 px-6 py-3 flex items-center">
+                                    <i class="fas fa-boxes text-yellow-600 text-xl mr-3"></i>
+                                    <h3 class="text-lg font-semibold text-yellow-800">3. Movimento de Estoque</h3>
+                                </div>
+                                <div class="p-6">
+                                    <p class="text-gray-600 mb-4">Registra todas as movimentações de estoque da fábrica.</p>
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full border-collapse">
+                                            <thead>
+                                                <tr class="bg-gray-100">
+                                                    <th class="border border-gray-200 px-4 py-2 text-left">Campo</th>
+                                                    <th class="border border-gray-200 px-4 py-2 text-left">Tipo</th>
+                                                    <th class="border border-gray-200 px-4 py-2 text-left">Descrição</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">movimento_id</td>
+                                                    <td class="border border-gray-200 px-4 py-2">INT (PK)</td>
+                                                    <td class="border border-gray-200 px-4 py-2">Identificador único</td>
+                                                </tr>
+                                                <tr class="bg-gray-50">
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">produto_id</td>
+                                                    <td class="border border-gray-200 px-4 py-2">INT (FK)</td>
+                                                    <td class="border border-gray-200 px-4 py-2">Produto movimentado</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">tipo_movimento</td>
+                                                    <td class="border border-gray-200 px-4 py-2">ENUM</td>
+                                                    <td class="border border-gray-200 px-4 py-2">'entrada' ou 'saida'</td>
+                                                </tr>
+                                                <tr class="bg-gray-50">
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">quantidade</td>
+                                                    <td class="border border-gray-200 px-4 py-2">INT</td>
+                                                    <td class="border border-gray-200 px-4 py-2">Quantidade movimentada</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">data_movimento</td>
+                                                    <td class="border border-gray-200 px-4 py-2">DATE</td>
+                                                    <td class="border border-gray-200 px-4 py-2">Data da movimentação</td>
+                                                </tr>
+                                                <tr class="bg-gray-50">
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">origem_destino</td>
+                                                    <td class="border border-gray-200 px-4 py-2">VARCHAR</td>
+                                                    <td class="border border-gray-200 px-4 py-2">Fonte ou destino (ex: fornecedor, cliente, produção)</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Sales/Deliveries -->
+                            <div id="sales" class="table-section bg-white border border-gray-200 rounded-xl overflow-hidden">
+                                <div class="bg-red-50 px-6 py-3 flex items-center">
+                                    <i class="fas fa-shopping-cart text-red-600 text-xl mr-3"></i>
+                                    <h3 class="text-lg font-semibold text-red-800">4. Vendas / Entregas</h3>
+                                </div>
+                                <div class="p-6">
+                                    <p class="text-gray-600 mb-4">Controla as vendas realizadas e as entregas aos clientes.</p>
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full border-collapse">
+                                            <thead>
+                                                <tr class="bg-gray-100">
+                                                    <th class="border border-gray-200 px-4 py-2 text-left">Campo</th>
+                                                    <th class="border border-gray-200 px-4 py-2 text-left">Tipo</th>
+                                                    <th class="border border-gray-200 px-4 py-2 text-left">Descrição</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">venda_id</td>
+                                                    <td class="border border-gray-200 px-4 py-2">INT (PK)</td>
+                                                    <td class="border border-gray-200 px-4 py-2">Identificador único</td>
+                                                </tr>
+                                                <tr class="bg-gray-50">
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">produto_id</td>
+                                                    <td class="border border-gray-200 px-4 py-2">INT (FK)</td>
+                                                    <td class="border border-gray-200 px-4 py-2">Produto vendido</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">quantidade</td>
+                                                    <td class="border border-gray-200 px-4 py-2">INT</td>
+                                                    <td class="border border-gray-200 px-4 py-2">Quantidade vendida</td>
+                                                </tr>
+                                                <tr class="bg-gray-50">
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">nome_cliente</td>
+                                                    <td class="border border-gray-200 px-4 py-2">VARCHAR</td>
+                                                    <td class="border border-gray-200 px-4 py-2">Nome do cliente</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">data_venda</td>
+                                                    <td class="border border-gray-200 px-4 py-2">DATE</td>
+                                                    <td class="border border-gray-200 px-4 py-2">Data da venda</td>
+                                                </tr>
+                                                <tr class="bg-gray-50">
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">valor_total</td>
+                                                    <td class="border border-gray-200 px-4 py-2">DECIMAL</td>
+                                                    <td class="border border-gray-200 px-4 py-2">Valor total da venda</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Financial Control -->
+                            <div id="finance" class="table-section bg-white border border-gray-200 rounded-xl overflow-hidden">
+                                <div class="bg-teal-50 px-6 py-3 flex items-center">
+                                    <i class="fas fa-money-bill-wave text-teal-600 text-xl mr-3"></i>
+                                    <h3 class="text-lg font-semibold text-teal-800">5. Controle Financeiro</h3>
+                                </div>
+                                <div class="p-6">
+                                    <p class="text-gray-600 mb-4">Gerencia todas as transações financeiras da fábrica.</p>
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full border-collapse">
+                                            <thead>
+                                                <tr class="bg-gray-100">
+                                                    <th class="border border-gray-200 px-4 py-2 text-left">Campo</th>
+                                                    <th class="border border-gray-200 px-4 py-2 text-left">Tipo</th>
+                                                    <th class="border border-gray-200 px-4 py-2 text-left">Descrição</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">financeiro_id</td>
+                                                    <td class="border border-gray-200 px-4 py-2">INT (PK)</td>
+                                                    <td class="border border-gray-200 px-4 py-2">Identificador único</td>
+                                                </tr>
+                                                <tr class="bg-gray-50">
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">tipo_transacao</td>
+                                                    <td class="border border-gray-200 px-4 py-2">ENUM</td>
+                                                    <td class="border border-gray-200 px-4 py-2">'conta_pagar', 'conta_receber', 'despesa_fixa', 'receita'</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">descricao</td>
+                                                    <td class="border border-gray-200 px-4 py-2">VARCHAR</td>
+                                                    <td class="border border-gray-200 px-4 py-2">Descrição da transação</td>
+                                                </tr>
+                                                <tr class="bg-gray-50">
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">valor</td>
+                                                    <td class="border border-gray-200 px-4 py-2">DECIMAL</td>
+                                                    <td class="border border-gray-200 px-4 py-2">Valor da transação</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">data_vencimento</td>
+                                                    <td class="border border-gray-200 px-4 py-2">DATE</td>
+                                                    <td class="border border-gray-200 px-4 py-2">Data do vencimento</td>
+                                                </tr>
+                                                <tr class="bg-gray-50">
+                                                    <td class="border border-gray-200 px-4 py-2 font-medium">status</td>
+                                                    <td class="border border-gray-200 px-4 py-2">ENUM</td>
+                                                    <td class="border border-gray-200 px-4 py-2">'pendente', 'pago'</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Screens -->
+                <section id="screens" class="mb-12">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <div class="flex items-center mb-6">
+                            <i class="fas fa-desktop text-blue-600 text-3xl mr-3"></i>
+                            <h2 class="text-2xl font-bold text-dark">Telas do Sistema</h2>
+                        </div>
+                        <p class="text-gray-600 mb-6">O sistema possui uma interface completa com telas essenciais para operação diária da fábrica.</p>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <!-- Login -->
+                            <div id="login" class="border p-5 rounded-xl bg-white hover:shadow-md transition">
+                                <div class="flex items-center mb-3">
+                                    <div class="bg-blue-100 rounded-lg h-12 w-12 flex items-center justify-center mr-3">
+                                        <i class="fas fa-sign-in-alt text-blue-600"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-dark">1. Tela de Login</h3>
+                                </div>
+                                <ul class="text-gray-600 text-sm space-y-1 mb-3">
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Controle de acesso dos usuários</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Recuperação de senha</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Proteção contra múltiplas tentativas</span>
+                                    </li>
+                                </ul>
+                                <div class="bg-gray-800 rounded-lg text-xs text-gray-400 p-3">
+                                    <span>POST /login</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Product Registration -->
+                            <div id="products-screen" class="border p-5 rounded-xl bg-white hover:shadow-md transition">
+                                <div class="flex items-center mb-3">
+                                    <div class="bg-purple-100 rounded-lg h-12 w-12 flex items-center justify-center mr-3">
+                                        <i class="fas fa-box text-purple-600"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-dark">2. Cadastro de Produtos</h3>
+                                </div>
+                                <ul class="text-gray-600 text-sm space-y-1 mb-3">
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Formulário para adicionar/editar produtos</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Lista com busca e filtro de produtos</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr=2"></i>
+                                        <span>Visualização de estoque atual e estoque mínimo</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr=2"></i>
+                                        <span>Alertas visuais para estoque abaixo do mínimo</span>
+                                    </li>
+                                </ul>
+                                <div class="bg-gray-800 rounded-lg text-xs text-gray-400 p-3">
+                                    <span>GET /products<br>POST /products<br>PUT /products/{id}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Production Orders -->
+                            <div id="production" class="border p-5 rounded-xl bg-white hover:shadow-md transition">
+                                <div class="flex items-center mb-3">
+                                    <div class="bg-green-100 rounded-lg h-12 w-12 flex items-center justify-center mr-3">
+                                        <i class="fas fa-tasks text-green-600"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-dark">3. Ordens de Produção</h3>
+                                </div>
+                                <ul class="text-gray-600 text-sm space-y-1 mb-3">
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Criar nova ordem de produção</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Listar ordens abertas, em produção e finalizadas</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Atualizar status da produção</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Cálculo automático de matérias-primas necessárias</span>
+                                    </li>
+                                </ul>
+                                <div class="bg-gray-800 rounded-lg text-xs text-gray-400 p-3">
+                                    <span>GET /production-orders<br>POST /production-orders<br>PATCH /production-orders/{id}/status</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Inventory Control -->
+                            <div id="inventory-screen" class="border p-5 rounded-xl bg-white hover:shadow-md transition">
+                                <div class="flex items-center mb-3">
+                                    <div class="bg-yellow-100 rounded-lg h-12 w-12 flex items-center justify-center mr-3">
+                                        <i class="fas fa-warehouse text-yellow-600"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-dark">4. Controle de Estoque</h3>
+                                </div>
+                                <ul class="text-gray-600 text-sm space-y-1 mb-3">
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Visualizar movimentações de estoque</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Registrar movimentação manual (entradas/saídas)</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Alertas de produtos com estoque abaixo do mínimo</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Exportação de relatórios</span>
+                                    </li>
+                                </ul>
+                                <div class="bg-gray-800 rounded-lg text-xs text-gray-400 p-3">
+                                    <span>GET /inventory/movements<br>POST /inventory/movements<br>GET /inventory/alerts</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Sales -->
+                            <div id="sales-screen" class="border p-5 rounded-xl bg-white hover:shadow-md transition">
+                                <div class="flex items-center mb-3">
+                                    <div class="bg-red-100 rounded-lg h-12 w-12 flex items-center justify-center mr-3">
+                                        <i class="fas fa-cash-register text-red-600"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-dark">5. Vendas / Entregas</h3>
+                                </div>
+                                <ul class="text-gray-600 text-sm space-y-1 mb-3">
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Registrar nova venda</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Listar vendas realizadas</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Filtros por data e cliente</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Visualizar histórico de vendas</span>
+                                    </li>
+                                </ul>
+                                <div class="bg-gray-800 rounded-lg text-xs text-gray-400 p-3">
+                                    <span>GET /sales<br>POST /sales<br>GET /sales/history?client=CLIENTE</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Financial Control -->
+                            <div id="finance-screen" class="border p-5 rounded-xl bg-white hover:shadow-md transition">
+                                <div class="flex items-center mb-3">
+                                    <div class="bg-teal-100 rounded-lg h-12 w-12 flex items-center justify-center mr-3">
+                                        <i class="fas fa-chart-line text-teal-600"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-dark">6. Controle Financeiro</h3>
+                                </div>
+                                <ul class="text-gray-600 text-sm space-y-1 mb-3">
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Registrar transações financeiras</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Visualizar fluxo de caixa</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Saldo financeiro atual</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Filtrar transações por tipo, status e data</span>
+                                    </li>
+                                </ul>
+                                <div class="bg-gray-800 rounded-lg text-xs text-gray-400 p-3">
+                                    <span>GET /finance<br>POST /finance/transactions<br>GET /finance/balance</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Dashboard -->
+                            <div id="dashboard" class="border p-5 rounded-xl bg-white hover:shadow-md transition">
+                                <div class="flex items-center mb-3">
+                                    <div class="bg-blue-100 rounded-lg h-12 w-12 flex items-center justify-center mr-3">
+                                        <i class="fas fa-tachometer-alt text-blue-600"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-dark">7. Dashboard</h3>
+                                </div>
+                                <ul class="text-gray-600 text-sm space-y-1 mb-3">
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Visão geral com indicadores-chave</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Produtos com estoque baixo</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Ordens de produção pendentes</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Vendas recentes</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Saldo financeiro atual</span>
+                                    </li>
+                                </ul>
+                                <div class="bg-gray-800 rounded-lg text-xs text-gray-400 p-3">
+                                    <span>GET /dashboard<br>GET /dashboard/metrics</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Users -->
+                            <div class="border p-5 rounded-xl bg-white hover:shadow-md transition">
+                                <div class="flex items-center mb-3">
+                                    <div class="bg-gray-100 rounded-lg h-12 w-12 flex items-center justify-center mr-3">
+                                        <i class="fas fa-users text-gray-600"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-dark">8. Gerenciamento de Usuários</h3>
+                                </div>
+                                <ul class="text-gray-600 text-sm space-y-1 mb-3">
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Cadastro e gestão de usuários</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Controle de permissões (admin, operador)</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        <span>Histórico de atividades</span>
+                                    </li>
+                                </ul>
+                                <div class="bg-gray-800 rounded-lg text-xs text-gray-400 p-3">
+                                    <span>GET /users<br>POST /users<br>PUT /users/{id}/permissions</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Observations -->
+                <section id="observations" class="mb-12">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <div class="flex items-center mb-6">
+                            <i class="fas fa-sticky-note text-yellow-500 text-3xl mr-3"></i>
+                            <h2 class="text-2xl font-bold text-dark">Observações Importantes</h2>
+                        </div>
+                        
+                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg mb-6">
+                            <div class="flex">
+                                <i class="fas fa-exclamation-triangle text-yellow-500 text-xl mr-3 mt-1"></i>
+                                <p class="text-gray-700">Esta seção destaca os pontos críticos para compreensão do fluxo de dados e integração entre módulos.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <span class="bg-blue-500 text-white rounded-full h-8 w-8 flex items-center justify-center flex-shrink-0 mt-1">1</span>
+                                <div class="ml-4">
+                                    <h3 class="font-semibold text-dark">Produtos</h3>
+                                    <p class="text-gray-600">A tabela de produtos serve para ambos os tipos, matéria-prima e produto final, diferenciados pelo campo "tipo".</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <span class="bg-blue-500 text-white rounded-full h-8 w-8 flex items-center justify-center flex-shrink-0 mt-1">2</span>
+                                <div class="ml-4">
+                                    <h3 class="font-semibold text-dark">Movimento de Estoque</h3>
+                                    <p class="text-gray-600">Controla toda entrada e saída, seja para matéria-prima, produto final, ou produção. Cada movimentação diminui ou aumenta o saldo atual do estoque.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <span class="bg-blue-500 text-white rounded-full h-8 w-8 flex items-center justify-center flex-shrink-0 mt-1">3</span>
+                                <div class="ml-4">
+                                    <h3 class="font-semibold text-dark">Ordens de Produção</h3>
+                                    <p class="text-gray-600">Quando uma ordem de produção é finalizada, o sistema deve gerar automaticamente movimentos de saída das matérias-primas utilizadas e entrada do produto final produzido.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <span class="bg-blue-500 text-white rounded-full h-8 w-8 flex items-center justify-center flex-shrink-0 mt-1">4</span>
+                                <div class="ml-4">
+                                    <h3 class="font-semibold text-dark">Vendas</h3>
+                                    <p class="text-gray-600">Cada nova venda gera automaticamente um movimento de saída de estoque do produto vendido e uma transação de receita no controle financeiro.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <span class="bg-blue-500 text-white rounded-full h-8 w-8 flex items-center justify-center flex-shrink-0 mt-1">5</span>
+                                <div class="ml-4">
+                                    <h3 class="font-semibold text-dark">Controle Financeiro</h3>
+                                    <p class="text-gray-600">Deve ser integrado com o módulo de vendas para registrar receitas e com o de compras para registrar despesas. Também lida com despesas fixas e contas a pagar/receber.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Integrations -->
+                <section id="integrations" class="mb-12">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <div class="flex items-center mb-6">
+                            <i class="fas fa-link text-blue-500 text-3xl mr-3"></i>
+                            <h2 class="text-2xl font-bold text-dark">Fluxos de Integração</h2>
+                        </div>
+                        <p class="text-gray-600 mb-6">Como as diferentes partes do sistema interagem para automatizar os processos da fábrica.</p>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="border border-gray-200 rounded-xl p-5">
+                                <h3 class="font-semibold text-dark mb-3 text-lg">Produção de Produto Final</h3>
+                                <ol class="space-y-3 text-gray-600">
+                                    <li class="flex items-start">
+                                        <span class="bg-blue-500 text-white rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mr-3">1</span>
+                                        <span>Ordem de produção é criada</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="bg-blue-500 text-white rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mr-3">2</span>
+                                        <span>Sistema verifica disponibilidade de matéria-prima</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="bg-blue-500 text-white rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mr-3">3</span>
+                                        <span>Quando produção começa: reserva de matérias-primas no estoque</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="bg-blue-500 text-white rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mr-3">4</span>
+                                        <span>Quando produção é finalizada: saída de matérias-primas e entrada do produto final no estoque</span>
+                                    </li>
+                                </ol>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-xl p-5">
+                                <h3 class="font-semibold text-dark mb-3 text-lg">Venda a Cliente</h3>
+                                <ol class="space-y-3 text-gray-600">
+                                    <li class="flex items-start">
+                                        <span class="bg-red-500 text-white rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mr-3">1</span>
+                                        <span>Venda é registrada no sistema</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="bg-red-500 text-white rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mr-3">2</span>
+                                        <span>Sistema verifica disponibilidade do produto no estoque</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="bg-red-500 text-white rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mr-3">3</span>
+                                        <span>Movimentação de saída do estoque é gerada</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="bg-red-500 text-white rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mr-3">4</span>
+                                        <span>Transação de receita é registrada no controle financeiro</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="bg-red-500 text-white rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 mr-3">5</span>
+                                        <span>Se estoque fica abaixo do mínimo, alerta é disparado</span>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
 
 
-(Tabelas e Campos)
-1. Produtos
-Campo	Tipo	Descrição
-produto_id	INT (PK)	Identificador único
-nome	VARCHAR	Nome do produto
-tipo	ENUM	'materia_prima' ou 'produto_final'
-estoque_minimo	INT	Quantidade mínima para alerta
+  <header class="mb-10">
+    <h1 class="text-4xl font-bold mb-2">Sistema Básico de Fábrica</h1>
+    <p class="text-gray-600">Estrutura de Dados e Telas Essenciais</p>
+  </header>
 
-2. Ordens de Produção
-Campo	Tipo	Descrição
-ordem_id	INT (PK)	Identificador único
-produto_id	INT (FK)	Produto a ser fabricado
-quantidade	INT	Quantidade a produzir
-data_inicio	DATE	Data prevista de início
-data_fim	DATE	Data prevista de término
-status	ENUM	'pendente', 'em_producao', 'finalizada'
+  <section class="mb-12">
+    <h2 class="text-2xl font-semibold mb-4 border-b-2 border-blue-500 inline-block">1. Tabelas e Campos</h2>
 
-3. Movimento de Estoque
-Campo	Tipo	Descrição
-movimento_id	INT (PK)	Identificador único
-produto_id	INT (FK)	Produto movimentado
-tipo_movimento	ENUM	'entrada' ou 'saida'
-quantidade	INT	Quantidade movimentada
-data_movimento	DATE	Data da movimentação
-origem_destino	VARCHAR	Fonte ou destino (ex: fornecedor, cliente, produção)
+    <!-- Produtos -->
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold mb-2">Produtos</h3>
+      <table class="table-auto w-full border border-gray-300 rounded-md overflow-hidden">
+        <thead class="bg-blue-100 text-left">
+          <tr>
+            <th class="px-4 py-2 border border-gray-300">Campo</th>
+            <th class="px-4 py-2 border border-gray-300">Tipo</th>
+            <th class="px-4 py-2 border border-gray-300">Descrição</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">produto_id</td>
+            <td class="px-4 py-2 border border-gray-300">INT (PK)</td>
+            <td class="px-4 py-2 border border-gray-300">Identificador único</td>
+          </tr>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">nome</td>
+            <td class="px-4 py-2 border border-gray-300">VARCHAR</td>
+            <td class="px-4 py-2 border border-gray-300">Nome do produto</td>
+          </tr>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">tipo</td>
+            <td class="px-4 py-2 border border-gray-300">ENUM</td>
+            <td class="px-4 py-2 border border-gray-300">'materia_prima' ou 'produto_final'</td>
+          </tr>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">estoque_minimo</td>
+            <td class="px-4 py-2 border border-gray-300">INT</td>
+            <td class="px-4 py-2 border border-gray-300">Quantidade mínima para alerta</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-4. Vendas / Entregas
-Campo	Tipo	Descrição
-venda_id	INT (PK)	Identificador único
-produto_id	INT (FK)	Produto vendido
-quantidade	INT	Quantidade vendida
-nome_cliente	VARCHAR	Nome do cliente
-data_venda	DATE	Data da venda
-valor_total	DECIMAL	Valor total da venda
+    <!-- Ordens de Produção -->
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold mb-2">Ordens de Produção</h3>
+      <table class="table-auto w-full border border-gray-300 rounded-md overflow-hidden">
+        <thead class="bg-blue-100 text-left">
+          <tr>
+            <th class="px-4 py-2 border border-gray-300">Campo</th>
+            <th class="px-4 py-2 border border-gray-300">Tipo</th>
+            <th class="px-4 py-2 border border-gray-300">Descrição</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">ordem_id</td>
+            <td class="px-4 py-2 border border-gray-300">INT (PK)</td>
+            <td class="px-4 py-2 border border-gray-300">Identificador único</td>
+          </tr>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">produto_id</td>
+            <td class="px-4 py-2 border border-gray-300">INT (FK)</td>
+            <td class="px-4 py-2 border border-gray-300">Produto a ser fabricado</td>
+          </tr>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">quantidade</td>
+            <td class="px-4 py-2 border border-gray-300">INT</td>
+            <td class="px-4 py-2 border border-gray-300">Quantidade a produzir</td>
+          </tr>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">data_inicio</td>
+            <td class="px-4 py-2 border border-gray-300">DATE</td>
+            <td class="px-4 py-2 border border-gray-300">Data prevista de início</td>
+          </tr>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">data_fim</td>
+            <td class="px-4 py-2 border border-gray-300">DATE</td>
+            <td class="px-4 py-2 border border-gray-300">Data prevista de término</td>
+          </tr>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">status</td>
+            <td class="px-4 py-2 border border-gray-300">ENUM</td>
+            <td class="px-4 py-2 border border-gray-300">'pendente', 'em_producao', 'finalizada'</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-5. Controle Financeiro
-Campo	Tipo	Descrição
-financeiro_id	INT (PK)	Identificador único
-tipo_transacao	ENUM	'conta_pagar', 'conta_receber', 'despesa_fixa', 'receita'
-descricao	VARCHAR	Descrição da transação
-valor	DECIMAL	Valor da transação
-data_vencimento	DATE	Data do vencimento
-status	ENUM	'pendente', 'pago'
+    <!-- Movimento de Estoque -->
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold mb-2">Movimento de Estoque</h3>
+      <table class="table-auto w-full border border-gray-300 rounded-md overflow-hidden">
+        <thead class="bg-blue-100 text-left">
+          <tr>
+            <th class="px-4 py-2 border border-gray-300">Campo</th>
+            <th class="px-4 py-2 border border-gray-300">Tipo</th>
+            <th class="px-4 py-2 border border-gray-300">Descrição</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">movimento_id</td>
+            <td class="px-4 py-2 border border-gray-300">INT (PK)</td>
+            <td class="px-4 py-2 border border-gray-300">Identificador único</td>
+          </tr>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">produto_id</td>
+            <td class="px-4 py-2 border border-gray-300">INT (FK)</td>
+            <td class="px-4 py-2 border border-gray-300">Produto movimentado</td>
+          </tr>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">tipo_movimento</td>
+            <td class="px-4 py-2 border border-gray-300">ENUM</td>
+            <td class="px-4 py-2 border border-gray-300">'entrada' ou 'saida'</td>
+          </tr>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">quantidade</td>
+            <td class="px-4 py-2 border border-gray-300">INT</td>
+            <td class="px-4 py-2 border border-gray-300">Quantidade movimentada</td>
+          </tr>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">data_movimento</td>
+            <td class="px-4 py-2 border border-gray-300">DATE</td>
+            <td class="px-4 py-2 border border-gray-300">Data da movimentação</td>
+          </tr>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">origem_destino</td>
+            <td class="px-4 py-2 border border-gray-300">VARCHAR</td>
+            <td class="px-4 py-2 border border-gray-300">Fonte ou destino (ex: fornecedor, cliente, produção)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
+    <!-- Vendas / Entregas -->
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold mb-2">Vendas / Entregas</h3>
+      <table class="table-auto w-full border border-gray-300 rounded-md overflow-hidden">
+        <thead class="bg-blue-100 text-left">
+          <tr>
+            <th class="px-4 py-2 border border-gray-300">Campo</th>
+            <th class="px-4 py-2 border border-gray-300">Tipo</th>
+            <th class="px-4 py-2 border border-gray-300">Descrição</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">venda_id</td>
+            <td class="px-4 py-2 border border-gray-300">INT (PK)</td>
+            <td class="px-4 py-2 border border-gray-300">Identificador único</td>
+          </tr>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">produto_id</td>
+            <td class="px-4 py-2 border border-gray-300">INT (FK)</td>
+            <td class="px-4 py-2 border border-gray-300">Produto vendido</td>
+          </tr>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">quantidade</td>
+            <td class="px-4 py-2 border border-gray-300">INT</td>
+            <td class="px-4 py-2 border border-gray-300">Quantidade vendida</td>
+          </tr>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">nome_cliente</td>
+            <td class="px-4 py-2 border border-gray-300">VARCHAR</td>
+            <td class="px-4 py-2 border border-gray-300">Nome do cliente</td>
+          </tr>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">data_venda</td>
+            <td class="px-4 py-2 border border-gray-300">DATE</td>
+            <td class="px-4 py-2 border border-gray-300">Data da venda</td>
+          </tr>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">valor_total</td>
+            <td class="px-4 py-2 border border-gray-300">DECIMAL</td>
+            <td class="px-4 py-2 border border-gray-300">Valor total da venda</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-Observações:
-A tabela de produtos serve para ambos os tipos, matéria-prima e produto final, diferenciados pelo campo tipo.
+    <!-- Controle Financeiro -->
+    <div class="mb-8">
+      <h3 class="text-xl font-semibold mb-2">Controle Financeiro</h3>
+      <table class="table-auto w-full border border-gray-300 rounded-md overflow-hidden">
+        <thead class="bg-blue-100 text-left">
+          <tr>
+            <th class="px-4 py-2 border border-gray-300">Campo</th>
+            <th class="px-4 py-2 border border-gray-300">Tipo</th>
+            <th class="px-4 py-2 border border-gray-300">Descrição</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">financeiro_id</td>
+            <td class="px-4 py-2 border border-gray-300">INT (PK)</td>
+            <td class="px-4 py-2 border border-gray-300">Identificador único</td>
+          </tr>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">tipo_transacao</td>
+            <td class="px-4 py-2 border border-gray-300">ENUM</td>
+            <td class="px-4 py-2 border border-gray-300">'conta_pagar', 'conta_receber', 'despesa_fixa', 'receita'</td>
+          </tr>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">descricao</td>
+            <td class="px-4 py-2 border border-gray-300">VARCHAR</td>
+            <td class="px-4 py-2 border border-gray-300">Descrição da transação</td>
+          </tr>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">valor</td>
+            <td class="px-4 py-2 border border-gray-300">DECIMAL</td>
+            <td class="px-4 py-2 border border-gray-300">Valor da transação</td>
+          </tr>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">data_vencimento</td>
+            <td class="px-4 py-2 border border-gray-300">DATE</td>
+            <td class="px-4 py-2 border border-gray-300">Data do vencimento</td>
+          </tr>
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 border border-gray-300">status</td>
+            <td class="px-4 py-2 border border-gray-300">ENUM</td>
+            <td class="px-4 py-2 border border-gray-300">'pendente', 'pago'</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-A tabela movimento de estoque controla toda entrada e saída, seja para matéria-prima, produto final, ou produção.
+    <div class="mb-8">
+      <h3 class="text-lg font-semibold">Observações</h3>
+      <ul class="list-disc pl-6 space-y-1 text-gray-700">
+        <li>A tabela de produtos serve para ambos os tipos, matéria-prima e produto final, diferenciados pelo campo tipo.</li>
+        <li>A tabela movimento de estoque controla toda entrada e saída, seja para matéria-prima, produto final, ou produção.</li>
+        <li>A tabela ordem de produção relaciona qual produto será feito e em que quantidade.</li>
+        <li>A tabela vendas registra as saídas e receitas relacionadas aos clientes.</li>
+        <li>A tabela financeiro controla contas a pagar e receber, assim como despesas fixas e receitas.</li>
+      </ul>
+    </div>
+  </section>
 
-A tabela ordem de produção relaciona qual produto será feito e em que quantidade.
+  <section>
+    <h2 class="text-2xl font-semibold mb-4 border-b-2 border-green-500 inline-block">2. Telas essenciais do sistema</h2>
+    <ol class="list-decimal pl-6 space-y-2 text-gray-700">
+      <li><strong>Tela de Login:</strong> Para controle de acesso do usuário</li>
+      <li><strong>Tela de Cadastro de Produtos:</strong> Formulário para adicionar/editar produtos (matéria-prima e produto final), lista com busca e filtro, visualização do estoque atual e estoque mínimo.</li>
+      <li><strong>Tela de Ordens de Produção:</strong> Criar nova ordem de produção, listar ordens abertas/em produção/finalizadas, atualizar status da produção.</li>
+      <li><strong>Tela de Controle de Estoque:</strong> Visualizar movimentações, registrar movimentação manual, alerta de produtos com estoque abaixo do mínimo.</li>
+      <li><strong>Tela de Vendas / Entregas:</strong> Registrar nova venda, listar vendas com filtros, visualizar histórico de vendas.</li>
+      <li><strong>Tela de Controle Financeiro:</strong> Registrar transações financeiras, visualizar fluxo de caixa e saldo atual, filtrar transações.</li>
+      <li><strong>Dashboard / Tela Inicial:</strong> Visão geral com indicadores rápidos (estoque baixo, ordens pendentes, vendas recentes, saldo financeiro).</li>
+      <li><strong>Tela de Usuários (opcional):</strong> Cadastrar e gerenciar usuários, controle de permissões básicas.</li>
+    </ol>
+  </section>
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-industry text-primary text-2xl mr-2"></i>
+                        <span class="text-xl font-bold">GestãoFactory</span>
+                    </div>
+                    <p class="text-gray-300">Sistema completo para gestão de processos fabris.</p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Links Rápidos</h4>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="#" class="text-gray-300 hover:text-white transition">Documentação</a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-300 hover:text-white transition">Suporte</a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-300 hover:text-white transition">Recursos</a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-gray-300 hover:text-white transition">FAQ</a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Contato</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li class="flex items-start">
+                            <i class="fas fa-envelope mt-1 mr-2"></i>
+                            <span>suporte@gestaofactory.com</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-phone mt-1 mr-2"></i>
+                            <span>(11) 99999-9999</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt mt-1 mr-2"></i>
+                            <span>São Paulo, SP - Brasil</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Newsletter</h4>
+                    <p class="text-gray-300 mb-3">Receba atualizações e novidades</p>
+                    <div class="flex">
+                        <input type="email" placeholder="Seu e-mail" class="px-3 py-2 rounded-l flex-1 text-gray-800">
+                        <button class="bg-primary hover:bg-blue-600 text-white px-4 py-2 rounded-r">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
+                <p>&copy; 2023 GestãoFactory Pro. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
 
-A tabela vendas registra as saídas e receitas relacionadas aos clientes.
+    <script>
+        // Highlight active link in sidebar
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('ul a');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                
+                if(pageYOffset >= (sectionTop - 300)) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if(link.getAttribute('href').substring(1) === current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
 
-A tabela financeiro controla contas a pagar e receber, assim como despesas fixas e receitas.
-
-
-Telas essenciais do sistema
-1. Tela de Login
-Para controle de acesso do usuário
-
-2. Tela de Cadastro de Produtos
-Formulário para adicionar/editar produtos (matéria-prima e produto final)
-
-Lista com busca e filtro dos produtos cadastrados
-
-Visualizar estoque atual e estoque mínimo
-
-3. Tela de Ordens de Produção
-Criar nova ordem de produção (selecionar produto, quantidade, datas)
-
-Listar ordens abertas, em produção e finalizadas
-
-Atualizar status da produção (ex: em produção, finalizada)
-
-4. Tela de Controle de Estoque
-Visualizar movimentações de estoque (entrada e saída)
-
-Registrar movimentação manual (ex: entrada de compra, saída para produção ou venda)
-
-Alerta de produtos com estoque abaixo do mínimo
-
-5. Tela de Vendas / Entregas
-Registrar nova venda (produto, quantidade, cliente, data, valor)
-
-Listar vendas feitas, com filtros por data e cliente
-
-Visualizar histórico de vendas
-
-6. Tela de Controle Financeiro
-Registrar transações financeiras (contas a pagar, contas a receber, despesas fixas, receitas)
-
-Visualizar fluxo de caixa e saldo atual
-
-Filtrar transações por tipo, status e data
-
-7. Dashboard / Tela Inicial
-Visão geral com indicadores rápidos:
-
-Produtos com estoque baixo
-
-Ordens de produção pendentes
-
-Vendas recentes
-
-Saldo financeiro atual
-
-8. Tela de Usuários (opcional para sistema com mais controle)
-Cadastrar e gerenciar usuários que acessam o sistema
-
-Controle de permissões básicas (ex: admin, operador)
