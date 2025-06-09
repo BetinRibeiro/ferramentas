@@ -1,390 +1,424 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Ferramentas</title>
+    <title>Lista de Ferramentas</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#0d9488',
-                        secondary: '#0891b2',
-                        dark: '#0f172a',
+                        primary: {
+                            500: '#3B82F6',
+                            600: '#2563EB',
+                        },
+                        secondary: {
+                            500: '#10B981',
+                            600: '#059669',
+                        }
+                    },
+                    boxShadow: {
+                        'card': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                        'hover': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
                     }
                 }
             }
         }
     </script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
         .card {
             transition: all 0.3s ease;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            position: relative;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+        }
+        
+        .card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #3B82F6, #10B981);
         }
         
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            background: rgba(255, 255, 255, 0.9);
         }
         
         .card-icon {
-            font-size: 2.5rem;
-            color: #0891b2;
-            margin-bottom: 1rem;
             transition: all 0.3s ease;
         }
         
         .card:hover .card-icon {
-            transform: scale(1.1);
-            color: #0d9488;
+            transform: scale(1.1) rotate(5deg);
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .header {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
         
-        .animate-fade-in {
-            animation: fadeIn 0.6s ease forwards;
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
         }
         
-        .category-tab {
-            transition: all 0.3s ease;
-        }
-        
-        .category-tab.active {
-            background-color: #0d9488;
-            color: white;
-        }
-        
-        .category-tab:not(.active):hover {
-            background-color: #f0f9ff;
-        }
-        
-        .search-container {
-            position: relative;
-        }
-        
-        .search-container i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #64748b;
-        }
-        
-        .search-container input {
-            padding-left: 40px;
-        }
-        
-        .highlight {
-            background-color: #fffbeb;
-            color: #0d9488;
-            font-weight: 600;
+        .floating-icon {
+            animation: float 3s ease-in-out infinite;
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
-        <!-- Cabeçalho -->
-        <header class="mb-8 text-center">
-            <div class="inline-block bg-gradient-to-r from-primary to-secondary p-4 rounded-xl shadow-lg mb-4">
-                <i class="fas fa-toolbox text-white text-4xl"></i>
-            </div>
-            <h1 class="text-2xl md:text-3xl font-bold text-dark">Painel de Ferramentas</h1>
-            <p class="text-gray-600 max-w-2xl mx-auto mt-2">Acesse todas as suas ferramentas essenciais em um só lugar</p>
-            
-            <!-- Barra de pesquisa -->
-            <div class="mt-6 max-w-md mx-auto search-container">
-                <i class="fas fa-search"></i>
-                <input type="text" id="searchInput" placeholder="Pesquisar ferramenta..." class="w-full p-3 border border-gray-300 rounded-lg focus:ring focus:ring-primary focus:border-primary transition-all duration-300">
-            </div>
-        </header>
-        
-        <!-- Abas de categorias -->
-        <div class="flex flex-wrap justify-center gap-2 mb-8">
-            <button class="category-tab active px-4 py-2 rounded-full font-medium" data-category="all">Todas</button>
-            <button class="category-tab px-4 py-2 rounded-full font-medium" data-category="calculators">Calculadoras</button>
-            <button class="category-tab px-4 py-2 rounded-full font-medium" data-category="security">Segurança</button>
-            <button class="category-tab px-4 py-2 rounded-full font-medium" data-category="construction">Construção</button>
-            <button class="category-tab px-4 py-2 rounded-full font-medium" data-category="games">Jogos</button>
-            <button class="category-tab px-4 py-2 rounded-full font-medium" data-category="other">Outros</button>
-        </div>
-        
-        <!-- Grid de ferramentas -->
-        <div id="toolsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            <!-- Cartões serão gerados via JavaScript -->
-        </div>
-        
-        <!-- Sem resultados -->
-        <div id="noResults" class="hidden py-16 text-center">
-            <div class="flex justify-center mb-4">
-                <div class="bg-gray-100 p-4 rounded-full">
-                    <i class="fas fa-search text-gray-400 text-4xl"></i>
+<body class="antialiased">
+    <!-- Header -->
+    <header class="header bg-white py-4">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <i class="fas fa-toolbox text-primary-500 text-2xl mr-3 floating-icon"></i>
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-800">Coleção de Ferramentas</h1>
+                </div>
+                <div>
+                    <div class="relative">
+                        <input type="text" placeholder="Pesquisar ferramenta..." class="pl-10 pr-4 py-2 rounded-full bg-gray-100 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    </div>
                 </div>
             </div>
-            <h3 class="text-xl font-medium text-gray-500 mb-2">Nenhuma ferramenta encontrada</h3>
-            <p class="text-gray-500 mb-4">Tente usar termos diferentes ou filtre por outra categoria</p>
-            <button onclick="resetSearch()" class="bg-primary hover:bg-teal-700 text-white py-2 px-6 rounded-lg flex items-center gap-2 mx-auto">
-                <i class="fas fa-redo"></i> Limpar pesquisa
-            </button>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="text-center mb-10">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Lista de Ferramentas Disponíveis</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">Selecione uma das ferramentas abaixo para acessar diretamente. Todas as ferramentas foram projetadas para oferecer funcionalidades úteis em diversas áreas.</p>
+            <div class="bg-gradient-to-r from-primary-500 to-secondary-500 h-1 w-20 rounded-full mx-auto mt-4"></div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Ferramenta 1 -->
+            <a href="analisa_veracidade_texto.html" class="card">
+                <div class="p-5 flex flex-col">
+                    <div class="card-icon bg-primary-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                        <i class="fas fa-clipboard-check text-primary-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-lg mb-2">Analisa Veracidade Texto</h3>
+                    <p class="text-gray-600 text-sm">Verifique a precisão e confiabilidade de qualquer conteúdo textual.</p>
+                </div>
+            </a>
+
+            <!-- Ferramenta 2 -->
+            <a href="apostas_probabilidade.html" class="card">
+                <div class="p-5 flex flex-col">
+                    <div class="card-icon bg-green-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                        <i class="fas fa-dice text-green-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-lg mb-2">Apostas Probabilidade</h3>
+                    <p class="text-gray-600 text-sm">Calcule probabilidades e otimize suas estratégias de apostas.</p>
+                </div>
+            </a>
+
+            <!-- Ferramenta 3 -->
+            <a href="arquivo_senha.html" class="card">
+                <div class="p-5 flex flex-col">
+                    <div class="card-icon bg-yellow-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                        <i class="fas fa-lock text-yellow-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-lg mb-2">Arquivo Senha</h3>
+                    <p class="text-gray-600 text-sm">Gerencie e proteja seus arquivos com senha forte e segura.</p>
+                </div>
+            </a>
+
+            <!-- Ferramenta 4 -->
+            <a href="bet_simulator.html" class="card">
+                <div class="p-5 flex flex-col">
+                    <div class="card-icon bg-purple-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                        <i class="fas fa-gamepad text-purple-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-lg mb-2">Bet Simulator</h3>
+                    <p class="text-gray-600 text-sm">Simule cenários de apostas sem arriscar seu dinheiro real.</p>
+                </div>
+            </a>
+
+            <!-- Ferramenta 5 -->
+            <a href="boderedo.html" class="card">
+                <div class="p-5 flex flex-col">
+                    <div class="card-icon bg-blue-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                        <i class="fas fa-calculator text-blue-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-lg mb-2">Boderedo</h3>
+                    <p class="text-gray-600 text-sm">Ferramenta especializada em cálculos financeiros complexos.</p>
+                </div>
+            </a>
+
+            <!-- Ferramenta 6 -->
+            <a href="bordero_inverso.html" class="card">
+                <div class="p-5 flex flex-col">
+                    <div class="card-icon bg-teal-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                        <i class="fas fa-exchange-alt text-teal-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-lg mb-2">Bordero Inverso</h3>
+                    <p class="text-gray-600 text-sm">Calcule parâmetros inversos em operações financeiras complexas.</p>
+                </div>
+            </a>
+
+            <!-- Ferramenta 7 -->
+            <a href="calculadora_fita.html" class="card">
+                <div class="p-5 flex flex-col">
+                    <div class="card-icon bg-pink-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                        <i class="fas fa-tape text-pink-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-lg mb-2">Calculadora Fita</h3>
+                    <p class="text-gray-600 text-sm">Realize cálculos de forma intuitiva, simulando uma fita de calculadora.</p>
+                </div>
+            </a>
+
+            <!-- Ferramenta 8 -->
+            <a href="calculadora_price.html" class="card">
+                <div class="p-5 flex flex-col">
+                    <div class="card-icon bg-red-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                        <i class="fas fa-money-bill-wave text-red-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-lg mb-2">Calculadora Price</h3>
+                    <p class="text-gray-600 text-sm">Calcule financiamentos, empréstimos e parcelas usando sistema Price.</p>
+                </div>
+            </a>
+
+            <!-- Ferramenta 9 -->
+            <a href="calculadora_racao_suino.html" class="card">
+                <div class="p-5 flex flex-col">
+                    <div class="card-icon bg-green-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                        <i class="fas fa-piggy-bank text-green-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-lg mb-2">Calculadora Ração Suino</h3>
+                    <p class="text-gray-600 text-sm">Otimize fórmulas e custos de ração para criação de suínos.</p>
+                </div>
+            </a>
+
+            <!-- Ferramenta 10 -->
+            <a href="calculo_reverso_bordero.html" class="card">
+                <div class="p-5 flex flex-col">
+                    <div class="card-icon bg-indigo-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                        <i class="fas fa-undo-alt text-indigo-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-lg mb-2">Cálculo Reverso Bordero</h3>
+                    <p class="text-gray-600 text-sm">Resolva problemas financeiros a partir de resultados conhecidos.</p>
+                </div>
+            </a>
+
+            <!-- Ferramenta 11 -->
+            <a href="cronograma_obra.html" class="card">
+                <div class="p-5 flex flex-col">
+                    <div class="card-icon bg-orange-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                        <i class="fas fa-calendar-alt text-orange-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-lg mb-2">Cronograma Obra</h3>
+                    <p class="text-gray-600 text-sm">Planeje e acompanhe prazos de projetos de construção civil.</p>
+                </div>
+            </a>
+
+            <!-- Ferramenta 12 -->
+            <a href="gado_forte.html" class="card">
+                <div class="p-5 flex flex-col">
+                    <div class="card-icon bg-amber-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                        <i class="fas fa-cow text-amber-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-lg mb-2">Gado Forte</h3>
+                    <p class="text-gray-600 text-sm">Gerencie e otimize sua criação de gado e propriedades rurais.</p>
+                </div>
+            </a>
+
+            <!-- Ferramenta 13 -->
+            <a href="geolocation.html" class="card">
+                <div class="p-5 flex flex-col">
+                    <div class="card-icon bg-lime-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                        <i class="fas fa-map-marker-alt text-lime-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-lg mb-2">Geolocation</h3>
+                    <p class="text-gray-600 text-sm">Identifique e rastreie localizações geográficas com precisão.</p>
+                </div>
+            </a>
+
+            <!-- Ferramenta 14 -->
+            <a href="gerador_cpf.html" class="card">
+                <div class="p-5 flex flex-col">
+                    <div class="card-icon bg-emerald-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                        <i class="fas fa-id-card text-emerald-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-lg mb-2">Gerador CPF</h3>
+                    <p class="text-gray-600 text-sm">Gere números válidos de CPF para testes e validações.</p>
+                </div>
+            </a>
+
+            <!-- Ferramenta 15 -->
+            <a href="gestor_senha.html" class="card">
+                <div class="p-5 flex flex-col">
+                    <div class="card-icon bg-cyan-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                        <i class="fas fa-key text-cyan-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-lg mb-2">Gestor Senha</h3>
+                    <p class="text-gray-600 text-sm">Armazene e gere senhas fortes com segurança para todos os seus serviços.</p>
+                </div>
+            </a>
+
+            <!-- Ferramenta 16 -->
+            <a href="info_sistem.html" class="card">
+                <div class="p-5 flex flex-col">
+                    <div class="card-icon bg-gray-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                        <i class="fas fa-info-circle text-gray-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-lg mb-2">Info Sistem</h3>
+                    <p class="text-gray-600 text-sm">Obtenha informações detalhadas sobre seu sistema e hardware.</p>
+                </div>
+            </a>
+
+            <!-- Ferramenta 17 -->
+            <a href="memoria.html" class="card">
+                <div class="p-5 flex flex-col">
+                    <div class="card-icon bg-violet-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                        <i class="fas fa-brain text-violet-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-lg mb-2">Memória</h3>
+                    <p class="text-gray-600 text-sm">Teste e melhore sua capacidade de memorização com exercícios.</p>
+                </div>
+            </a>
+
+            <!-- Ferramenta 18 -->
+            <a href="orcamento_impressao.html" class="card">
+                <div class="p-5 flex flex-col">
+                    <div class="card-icon bg-rose-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                        <i class="fas fa-print text-rose-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-lg mb-2">Orçamento Impressão</h3>
+                    <p class="text-gray-600 text-sm">Calcule custos de projetos de impressão e gráfica.</p>
+                </div>
+            </a>
+
+            <!-- Ferramenta 19 -->
+            <a href="orcamento_obra.html" class="card">
+                <div class="p-5 flex flex-col">
+                    <div class="card-icon bg-blue-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                        <i class="fas fa-hard-hat text-blue-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-lg mb-2">Orçamento Obra</h3>
+                    <p class="text-gray-600 text-sm">Elabore orçamentos detalhados para projetos de construção.</p>
+                </div>
+            </a>
+
+            <!-- Ferramenta 20 -->
+            <a href="qrcode.html" class="card">
+                <div class="p-5 flex flex-col">
+                    <div class="card-icon bg-fuchsia-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                        <i class="fas fa-qrcode text-fuchsia-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-lg mb-2">QRCode</h3>
+                    <p class="text-gray-600 text-sm">Crie e leia códigos QR com diversas opções de personalização.</p>
+                </div>
+            </a>
+
+            <!-- Ferramenta 21 -->
+            <a href="roletes.html" class="card">
+                <div class="p-5 flex flex-col">
+                    <div class="card-icon bg-sky-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                        <i class="fas fa-ruler-combined text-sky-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-lg mb-2">Roletes</h3>
+                    <p class="text-gray-600 text-sm">Calcule dimensões e especificações técnicas de roletes.</p>
+                </div>
+            </a>
+
+            <!-- Ferramenta 22 -->
+            <a href="sorteio.html" class="card">
+                <div class="p-5 flex flex-col">
+                    <div class="card-icon bg-amber-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                        <i class="fas fa-random text-amber-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-lg mb-2">Sorteio</h3>
+                    <p class="text-gray-600 text-sm">Realize sorteios aleatórios entre participantes com critérios customizados.</p>
+                </div>
+            </a>
+
+            <!-- Ferramenta 23 -->
+            <a href="vinte_um.html" class="card">
+                <div class="p-5 flex flex-col">
+                    <div class="card-icon bg-green-100 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-3">
+                        <i class="fas fa-dice-d20 text-green-600"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-lg mb-2">Vinte Um</h3>
+                    <p class="text-gray-600 text-sm">Jogue o clássico jogo de cartas 21/Blackjack contra o computador.</p>
+                </div>
+            </a>
         </div>
     </div>
 
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-6 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h3 class="text-lg font-semibold">Coleção de Ferramentas</h3>
+                    <p class="text-gray-400 text-sm">Soluções práticas para necessidades diversas</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-white">
+                        <i class="fab fa-facebook"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-6 pt-6 text-center text-gray-400 text-sm">
+                <p>&copy; 2025 Coleção de Ferramentas. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
     <script>
-        // Dados das ferramentas
-        const tools = [
-            {
-                id: 1,
-                name: "Arquivo Senha",
-                filename: "arquivo_senha.html",
-                icon: "fa-lock",
-                color: "bg-red-100",
-                category: "security",
-                description: "Armazene e gerencie suas senhas com segurança"
-            },
-            {
-                id: 2,
-                name: "Boderedo",
-                filename: "boderedo.html",
-                icon: "fa-calculator",
-                color: "bg-blue-100",
-                category: "calculators",
-                description: "Ferramenta para cálculos Boderedo"
-            },
-            {
-                id: 3,
-                name: "Calculadora Price",
-                filename: "calculadora_price.html",
-                icon: "fa-chart-line",
-                color: "bg-green-100",
-                category: "calculators",
-                description: "Calcule financiamentos com o método Price"
-            },
-            {
-                id: 4,
-                name: "Cálculo Ração Suíno",
-                filename: "calculadora_racao_suino.html",
-                icon: "fa-piggy-bank",
-                color: "bg-amber-100",
-                category: "calculators",
-                description: "Determine a quantidade ideal de ração para suínos"
-            },
-            {
-                id: 5,
-                name: "Cronograma Obra",
-                filename: "cronograma_obra.html",
-                icon: "fa-calendar-alt",
-                color: "bg-indigo-100",
-                category: "construction",
-                description: "Planeje e acompanhe o cronograma de obras"
-            },
-            {
-                id: 6,
-                name: "Gestor Senhas",
-                filename: "gestor_senha.html",
-                icon: "fa-key",
-                color: "bg-purple-100",
-                category: "security",
-                description: "Gerencie suas senhas de forma segura e organizada"
-            },
-            {
-                id: 7,
-                name: "Jogo da Memória",
-                filename: "memoria.html",
-                icon: "fa-brain",
-                color: "bg-orange-100",
-                category: "games",
-                description: "Exercite sua memória com este jogo clássico"
-            },
-            {
-                id: 8,
-                name: "Orçamento Obra",
-                filename: "orcamento_obra.html",
-                icon: "fa-file-invoice-dollar",
-                color: "bg-lime-100",
-                category: "construction",
-                description: "Calcule orçamentos completos para obras"
-            },
-            {
-                id: 9,
-                name: "Gerador QR Code",
-                filename: "qrcode.html",
-                icon: "fa-qrcode",
-                color: "bg-teal-100",
-                category: "other",
-                description: "Crie QR codes personalizados rapidamente"
-            },
-            {
-                id: 10,
-                name: "Roletes",
-                filename: "roletes.html",
-                icon: "fa-cogs",
-                color: "bg-sky-100",
-                category: "other",
-                description: "Ferramenta para cálculo de roletes"
-            },
-            {
-                id: 11,
-                name: "Sorteador",
-                filename: "sorteio.html",
-                icon: "fa-random",
-                color: "bg-pink-100",
-                category: "other",
-                description: "Sorteie números, nomes e muito mais"
-            },
-            {
-                id: 12,
-                name: "Jogo 21",
-                filename: "vinte_um.html",
-                icon: "fa-dice",
-                color: "bg-emerald-100",
-                category: "games",
-                description: "Desafie o dealer neste clássico jogo de cartas"
-            }
-        ];
-
-        // Exibir ferramentas na página
-        function displayTools(toolArray) {
-            const toolsContainer = document.getElementById('toolsContainer');
-            toolsContainer.innerHTML = '';
+        // Implementação da funcionalidade de busca
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.querySelector('input[type="text"]');
             
-            if (toolArray.length === 0) {
-                document.getElementById('noResults').classList.remove('hidden');
-                return;
-            }
-            
-            document.getElementById('noResults').classList.add('hidden');
-            
-            toolArray.forEach((tool, index) => {
-                const delay = index * 50; // Para animação em cascata
-                const card = document.createElement('a');
-                card.href = tool.filename;
-                card.className = `card block p-6 rounded-xl bg-white overflow-hidden animate-fade-in`;
-                card.style.animationDelay = `${delay}ms`;
-                
-                card.innerHTML = `
-                    <div class="text-center">
-                        <div class="card-icon inline-flex items-center justify-center w-16 h-16 ${tool.color} rounded-full mx-auto">
-                            <i class="${tool.icon}"></i>
-                        </div>
-                        <h3 class="text-lg font-semibold mb-2">${tool.name}</h3>
-                        <p class="text-sm text-gray-600">${tool.description}</p>
-                        <span class="block mt-4 text-xs font-medium py-1 px-3 ${tool.category === 'games' ? 'bg-yellow-100 text-yellow-800' : 
-                         tool.category === 'security' ? 'bg-red-100 text-red-800' : 
-                         tool.category === 'construction' ? 'bg-blue-100 text-blue-800' : 
-                         tool.category === 'calculators' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'} 
-                         rounded-full inline-block">${getCategoryName(tool.category)}</span>
-                    </div>
-                `;
-                
-                toolsContainer.appendChild(card);
-            });
-        }
-
-        // Obter nome da categoria para exibição
-        function getCategoryName(categoryKey) {
-            const categories = {
-                all: "Todas",
-                calculators: "Calculadoras",
-                security: "Segurança",
-                construction: "Construção",
-                games: "Jogos",
-                other: "Outros"
-            };
-            return categories[categoryKey] || "Outros";
-        }
-
-        // Filtrar ferramentas por categoria
-        function filterTools(category) {
-            const filteredTools = category === 'all' 
-                ? tools 
-                : tools.filter(tool => tool.category === category);
-            
-            displayTools(filteredTools);
-        }
-
-        // Filtrar ferramentas por texto de pesquisa
-        function searchTools(query) {
-            if (!query) {
-                return filterTools('all');
-            }
-            
-            const normalizedQuery = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            const results = tools.filter(tool => {
-                const name = tool.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                const desc = tool.description.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                const category = tool.category.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                
-                return name.includes(normalizedQuery) || 
-                       desc.includes(normalizedQuery) || 
-                       category.includes(normalizedQuery);
-            });
-            
-            displayTools(results);
-        }
-
-        // Resetar pesquisa
-        function resetSearch() {
-            document.getElementById('searchInput').value = '';
-            document.querySelectorAll('.category-tab').forEach(btn => {
-                if(btn.dataset.category === 'all') {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-            
-            displayTools(tools);
-        }
-
-        // Inicialização da página
-        window.onload = function() {
-            // Exibir todas as ferramentas inicialmente
-            displayTools(tools);
-            
-            // Configurar eventos das abas
-            document.querySelectorAll('.category-tab').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.category-tab').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    filterTools(this.dataset.category);
-                });
-            });
-            
-            // Configurar evento de pesquisa
-            const searchInput = document.getElementById('searchInput');
-            searchInput.addEventListener('input', function() {
-                // Ao iniciar uma pesquisa, desmarcar todas as categorias
-                document.querySelectorAll('.category-tab').forEach(btn => btn.classList.remove('active'));
-                document.querySelector('.category-tab[data-category="all"]').classList.add('active');
-                
-                if (this.value === '') {
-                    displayTools(tools);
-                } else {
-                    searchTools(this.value);
-                }
-            });
-            
-            // Destacar categoria ativa na URL
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('category')) {
-                const cat = urlParams.get('category');
-                if (cat) {
-                    document.querySelectorAll('.category-tab').forEach(btn => {
-                        if (btn.dataset.category === cat) {
-                            btn.classList.add('active');
-                            filterTools(cat);
+            if(searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase().trim();
+                    const cards = document.querySelectorAll('.card');
+                    
+                    cards.forEach(card => {
+                        const title = card.querySelector('h3').textContent.toLowerCase();
+                        const content = card.querySelector('p').textContent.toLowerCase();
+                        
+                        if(title.includes(searchTerm) || content.includes(searchTerm)) {
+                            card.style.display = 'block';
                         } else {
-                            btn.classList.remove('active');
+                            card.style.display = 'none';
                         }
                     });
-                }
+                });
             }
-        };
+        });
     </script>
 </body>
 </html>
