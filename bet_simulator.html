@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brasileirão Bet Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brazil-green': '#009C3B',
+                        'brazil-yellow': '#FFDF00',
+                        'brazil-blue': '#002776',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #f0f0f0;
+            --text-secondary: #b3b3b3;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+        }
+        
+        .btn-primary {
+            @apply bg-brazil-green hover:bg-green-700 text-white font-bold py-2 px-4 ounded transition-colors;
+        }
+        
+        .match-card {
+            @apply bg-gray-800 rounded-xl shadow-lg p-4 hover:shadow-xl transition-shadow border border-gray-700;
+        }
+        
+        .selected-bet {
+            @apply border-2 border-brazil-yellow;
+        }
+        
+        .team-logo {
+            width: 40px;
+            height: 40px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            display: inline-block;
+            margin: 0 auto;
+        }
+    </style>
+    
+    <style>
+        /* Clubes brasileiros */
+        .fla-logo { background-image: url('https://logodetimes.com/times/flamengo/logo-flamengo-256.png'); }
+        .pal-logo { background-image: url('https://logodetimes.com/times/palmeiras/logo-palmeiras-256.png'); }
+        .cam-logo { background-image: url('https://logodetimes.com/times/atletico-mineiro/logo-atletico-mineiro-256.png'); }
+        .flu-logo { background-image: url('https://logodetimes.com/times/fluminense/logo-fluminense-256.png'); }
+        .sao-logo { background-image: url('https://logodetimes.com/times/sao-paulo/logo-sao-paulo-256.png'); }
+        .int-logo { background-image: url('https://logodetimes.com/times/internacional/logo-internacional-256.png'); }
+        .gre-logo { background-image: url('https://logodetimes.com/times/gremio/logo-gremio-256.png'); }
+        .cor-logo { background-image: url('https://logodetimes.com/times/corinthians/logo-corinthians-256.png'); }
+        .san-logo { background-image: url('https://logodetimes.com/times/santos/logo-santos-256.png'); }
+        .bgt-logo { background-image: url('https://logodetimes.com/times/red-bull-bragantino/logo-red-bull-bragantino-256.png'); }
+        .cap-logo { background-image: url('https://logodetimes.com/times/atletico-paranaense/logo-atletico-paranaense-256.png'); }
+        .bot-logo { background-image: url('https://logodetimes.com/times/botafogo/logo-botafogo-256.png'); }
+        .cru-logo { background-image: url('https://logodetimes.com/times/cruzeiro/logo-cruzeiro-256.png'); }
+        .vas-logo { background-image: url('https://logodetimes.com/times/vasco-da-gama/logo-vasco-da-gama-256.png'); }
+        .goi-logo { background-image: url('https://logodetimes.com/times/goias/logo-goias-256.png'); }
+        .bah-logo { background-image: url('https://logodetimes.com/times/bahia/logo-bahia-256.png'); }
+        .cui-logo { background-image: url('https://logodetimes.com/times/cuiaba/logo-cuiaba-256.png'); }
+        .cfc-logo { background-image: url('https://logodetimes.com/times/coritiba/logo-coritiba-256.png'); }
+        .amg-logo { background-image: url('https://logodetimes.com/times/america-mineiro/logo-america-mineiro-256.png'); }
+        .for-logo { background-image: url('https://logodetimes.com/times/fortaleza/logo-fortaleza-256.png'); }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 pb-10">
+        <!-- Header -->
+        <header class="py-6 text-center">
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <div class="text-center">
+                    <h1 class="text-3xl md:text-4xl font-bold text-brazil-blue">
+                        <i class="fa-solid fa-futbol text-brazil-yellow mr-2"></i> Brasileirão Bet Simulator
+                    </h1>
+                    <p class="text-gray-600 mt-2">Simule apostas nos jogos do Campeonato Brasileiro com probabilidades realistas</p>
+                </div>
+                <div class="flex space-x-4">
+                    <div class="bg-white rounded-lg shadow p-4 flex flex-col items-center">
+                        <span class="text-gray-500 text-sm">Rodada Atual</span>
+                        <span id="current-round" class="font-bold text-2xl text-brazil-blue">1</span>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-4 flex flex-col items-center">
+                        <span class="text-gray-500 text-sm">Saldo</span>
+                        <span id="user-balance" class="font-bold text-2xl text-brazil-green">R$ 1000,00</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Round Matches -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-xl shadow p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold text-brazil-blue">Jogos da Rodada</h2>
+                        <select id="round-selector" class="border rounded-md p-2 text-sm">
+                            <option value="1" selected>Rodada 1</option>
+                            <option value="2">Rodada 2</option>
+                            <option value="3">Rodada 3</option>
+                            <option value="4">Rodada 4</option>
+                            <option value="5">Rodada 5</option>
+                        </select>
+                    </div>
+                    
+                    <div id="matches-container" class="space-y-6">
+                        <!-- Matches will be generated dynamically -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bet Slip -->
+            <div>
+                <div class="bg-white rounded-xl shadow p-6 sticky top-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold text-brazil-blue">Minhas Apostas</h2>
+                        <button id="clear-bets" class="text-gray-500 hover:text-red-500">
+                            <i class="fa-solid fa-trash"></i> Limpar
+                        </button>
+                    </div>
+                    
+                    <div id="bet-slip" class="space-y-4">
+                        <p class="text-gray-500 text-center py-10">Selecione apostas nos jogos ao lado</p>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <div class="flex justify-between mb-4">
+                            <span class="font-medium">Total:</span>
+                            <span id="total-odds" class="font-bold text-lg">1.00</span>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="stake">
+                                Valor da Aposta (R$)
+                            </label>
+                            <input
+                                type="number" 
+                                id="stake" 
+                                min="1" 
+                                max="1000" 
+                                step="1" 
+                                value="10" 
+                                class="w-full border rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brazil-yellow"
+                            >
+                        </div>
+                        
+                        <div class="mb-4 text-sm text-gray-600">
+                            <div class="flex justify-between">
+                                <span>Retorno Potencial:</span>
+                                <span id="potential-return">R$ 10,00</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Lucro Potencial:</span>
+                                <span id="potential-profit">R$ 0,00</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex space-x-4">
+                            <button id="simulate-bet" class="btn-primary flex-1">
+                                Simular Aposta
+                            </button>
+                            <button id="next-round" class="bg-brazil-blue hover:bg-blue-800 text-white font-bold py-2 px-4 rounded transition-colors">
+                                <i class="fa-solid fa-forward"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Result Section -->
+        <div id="simulation-results" class="mt-8 bg-gray-800 rounded-xl shadow p-6 hidden border border-gray-700">
+            <h2 class="text-xl font-bold text-brazil-blue mb-4">Resultado da Simulação</h2>
+            <div class="grid grid-cols-1 gap-4">
+                <!-- Results will be generated dynamically -->
+            </div>
+            <div class="mt-6 pt-4 border-t">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <span class="text-gray-700">Resultado final:</span>
+                        <span id="final-result" class="ml-2 font-bold text-xl"></span>
+                    </div>
+                    <button id="close-results" class="btn-primary">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mock teams with strength ratings (1-5 stars)
+            const teams = [
+                {id: 1, name: "Flamengo", logo: "FLA", strength: 5, badge: "fla"},
+                {id: 2, name: "Palmeiras", logo: "PAL", strength: 5, badge: "pal"},
+                {id: 3, name: "Atlético-MG", logo: "CAM", strength: 4.5, badge: "cam"},
+                {id: 4, name: "Fluminense", logo: "FLU", strength: 4, badge: "flu"},
+                {id: 5, name: "São Paulo", logo: "SAO", strength: 4, badge: "sao"},
+                {id: 6, name: "Internacional", logo: "INT", strength: 4, badge: "int"},
+                {id: 7, name: "Grêmio", logo: "GRE", strength: 4, badge: "gre"},
+                {id: 8, name: "Corinthians", logo: "COR", strength: 3.5, badge: "cor"},
+                {id: 9, name: "Santos", logo: "SAN", strength: 3.5, badge: "san"},
+                {id: 10, name: "Bragantino", logo: "BGT", strength: 3.5, badge: "bgt"},
+                {id: 11, name: "Athletico-PR", logo: "CAP", strength: 3.5, badge: "cap"},
+                {id: 12, name: "Botafogo", logo: "BOT", strength: 3.5, badge: "bot"},
+                {id: 13, name: "Cruzeiro", logo: "CRU", strength: 3, badge: "cru"},
+                {id: 14, name: "Vasco", logo: "VAS", strength: 3, badge: "vas"},
+                {id: 15, name: "Goiás", logo: "GOI", strength: 2.5, badge: "goi"},
+                {id: 16, name: "Bahia", logo: "BAH", strength: 2.5, badge: "bah"},
+                {id: 17, name: "Cuiabá", logo: "CUI", strength: 2.5, badge: "cui"},
+                {id: 18, name: "Coritiba", logo: "CFC", strength: 2, badge: "cfc"},
+                {id: 19, name: "América-MG", logo: "AMG", strength: 2, badge: "amg"},
+                {id: 20, name: "Fortaleza", logo: "FOR", strength: 3.5, badge: "for"}
+            ];
+            
+            // Structure to store user bets
+            let userBets = {};
+            let currentRound = 1;
+            let userBalance = 1000;
+            
+            // Initialize the app
+            generateRoundMatches();
+            updateBalanceDisplay();
+            attachEventListeners();
+            
+            // Generate matches for the current round
+            function generateRoundMatches() {
+                // Clear matches container
+                const container = document.getElementById('matches-container');
+                container.innerHTML = '';
+                
+                // Shuffle teams to generate matches
+                const shuffledTeams = [...teams].sort(() => Math.random() - 0.5);
+                
+                // Create matches for the round
+                for (let i = 0; i < 10; i++) {
+                    const homeTeam = shuffledTeams[i];
+                    const awayTeam = shuffledTeams[i + 10];
+                    
+                    // Create match element
+                    const matchElement = createMatchElement(homeTeam, awayTeam);
+                    container.appendChild(matchElement);
+                }
+                
+                // Clear any previous bets for this round
+                userBets = {};
+                updateBetSlip();
+            }
+            
+            // Create HTML for a match
+            function createMatchElement(homeTeam, awayTeam) {
+                const matchElement = document.createElement('div');
+                matchElement.classList.add('match-card');
+                
+                // Calculate odds based on team strength
+                const odds = calculateOdds(homeTeam, awayTeam);
+                
+                matchElement.innerHTML = `
+                    <div class="flex flex-col items-center">
+                        <h3 class="text-center font-semibold text-gray-300 mb-3">${homeTeam.name} vs ${awayTeam.name}</h3>
+                        
+                        <div class="flex items-center justify-center mb-3 gap-6">
+                            <div class="text-center">
+                                <div class="team-logo ${homeTeam.badge}-logo" title="${homeTeam.name}"></div>
+                                <div class="text-xs text-gray-400 flex justify-center mt-1">
+                                    ${getStrengthStars(homeTeam.strength)}
+                                </div>
+                            </div>
+                            <span class="text-gray-400 font-bold">x</span>
+                            <div class="text-center">
+                                <div class="team-logo ${awayTeam.badge}-logo" title="${awayTeam.name}"></div>
+                                <div class="text-xs text-gray-400 flex justify-center mt-1">
+                                    ${getStrengthStars(awayTeam.strength)}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-center gap-3 mt-2">
+                            <button data-match="${homeTeam.id}-${awayTeam.id}" data-bet="1" data-odds="${odds.home}" class="bet-btn py-1.5 px-4 bg-green-50 rounded-lg border">
+                                <div class="font-medium">${odds.home.toFixed(2)}</div>
+                                <div class="text-xs text-gray-500">Vitória</div>
+                            </button>
+                            <button data-match="${homeTeam.id}-${awayTeam.id}" data-bet="X" data-odds="${odds.draw}" class="bet-btn py-1.5 px-4 bg-yellow-50 rounded-lg border">
+                                <div class="font-medium">${odds.draw.toFixed(2)}</div>
+                                <div class="text-xs text-gray-500">Empate</div>
+                            </button>
+                            <button data-match="${homeTeam.id}-${awayTeam.id}" data-bet="2" data-odds="${odds.away}" class="bet-btn py-1.5 px-4 bg-blue-50 rounded-lg border">
+                                <div class="font-medium">${odds.away.toFixed(2)}</div>
+                                <div class="text-xs text-gray-500">Vitória</div>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                return matchElement;
+            }
+            
+            // Calculate realistic odds based on team strength
+            function calculateOdds(homeTeam, awayTeam) {
+                // Base odds with home advantage
+                let homeChance = homeTeam.strength * 1.3; // Home advantage multiplier
+                let awayChance = awayTeam.strength;
+                let drawChance = (homeTeam.strength + awayTeam.strength) / 3;
+                
+                // Normalize chances
+                const totalChance = homeChance + awayChance + drawChance;
+                homeChance /= totalChance;
+                awayChance /= totalChance;
+                drawChance /= totalChance;
+                
+                // Add bookmaker margin (5%)
+                const odds = {
+                    home: 1.0 / homeChance * 0.95,
+                    away: 1.0 / awayChance * 0.95,
+                    draw: 1.0 / drawChance * 0.95
+                };
+                
+                return odds;
+            }
+            
+            // Generate star ratings
+            function getStrengthStars(strength) {
+                const fullStars = Math.floor(strength);
+                const halfStar = strength - fullStars >= 0.5;
+                
+                let starsHtml = '';
+                for (let i = 0; i < fullStars; i++) {
+                    starsHtml += '<i class="fa-solid fa-star text-yellow-400"></i>';
+                }
+                
+                if (halfStar) {
+                    starsHtml += '<i class="fa-solid fa-star-half-stroke text-yellow-400"></i>';
+                }
+                
+                return starsHtml;
+            }
+            
+            // Update bet slip display
+            function updateBetSlip() {
+                const betSlip = document.getElementById('bet-slip');
+                
+                if (Object.keys(userBets).length === 0) {
+                    betSlip.innerHTML = '<p class="text-gray-500 text-center py-10">Selecione apostas nos jogos ao lado</p>';
+                    document.getElementById('total-odds').textContent = '1.00';
+                    updatePotentialReturn();
+                    return;
+                }
+                
+                let betsHtml = '';
+                let totalOdds = 1;
+                
+                Object.values(userBets).forEach(bet => {
+                    betsHtml += `
+                        <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                            <div>
+                                <span class="font-medium">${bet.matchName}</span>
+                                <div class="text-sm text-gray-600">${bet.selection} @ ${bet.odds.toFixed(2)}</div>
+                            </div>
+                            <button 
+                                data-match="${bet.matchId}" 
+                                class="remove-bet text-gray-400 hover:text-red-500"
+                            >
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    `;
+                    
+                    totalOdds *= bet.odds;
+                });
+                
+                betSlip.innerHTML = betsHtml;
+                document.getElementById('total-odds').textContent = totalOdds.toFixed(2);
+                updatePotentialReturn();
+            }
+            
+            // Update potential return calculation
+            function updatePotentialReturn() {
+                const stake = parseFloat(document.getElementById('stake').value) || 0;
+                const totalOdds = parseFloat(document.getElementById('total-odds').textContent) || 1;
+                
+                const potentialReturn = stake * totalOdds;
+                const potentialProfit = potentialReturn - stake;
+                
+                document.getElementById('potential-return').textContent = 
+                    `R$ ${potentialReturn.toFixed(2).replace('.', ',')}`;
+                document.getElementById('potential-profit').textContent = 
+                    `R$ ${potentialProfit.toFixed(2).replace('.', ',')}`;
+            }
+            
+            // Update user balance display
+            function updateBalanceDisplay() {
+                document.getElementById('user-balance').textContent = 
+                    `R$ ${userBalance.toFixed(2).replace('.', ',')}`;
+            }
+            
+            // Simulate the selected bets
+            function simulateBet() {
+                const stake = parseFloat(document.getElementById('stake').value);
+                
+                // Validation
+                if (Object.keys(userBets).length === 0) {
+                    alert('Selecione pelo menos uma aposta antes de simular.');
+                    return;
+                }
+                
+                if (isNaN(stake) || stake < 1) {
+                    alert('Insira um valor válido para a aposta.');
+                    return;
+                }
+                
+                if (stake > userBalance) {
+                    alert('Saldo insuficiente para realizar esta aposta.');
+                    return;
+                }
+                
+                // Deduct stake from balance
+                userBalance -= stake;
+                updateBalanceDisplay();
+                
+                // Clear results container
+                const resultsContainer = document.getElementById('simulation-results');
+                const resultsGrid = resultsContainer.querySelector('.grid');
+                resultsGrid.innerHTML = '';
+                
+                // Show results container
+                resultsContainer.classList.remove('hidden');
+                
+                // Calculate total odds
+                const totalOdds = parseFloat(document.getElementById('total-odds').textContent);
+                let wonMatches = 0;
+                let lostMatches = 0;
+                
+                // Generate results for each bet
+                Object.entries(userBets).forEach(([key, bet]) => {
+                    const result = simulateMatchResult(key);
+                    const won = result === bet.selection;
+                    
+                    if (won) wonMatches++;
+                    else lostMatches++;
+                    
+                    const resultElement = document.createElement('div');
+                    resultElement.classList.add('bg-gray-50', 'p-4', 'rounded-lg', 'border-l-4');
+                    resultElement.style.borderColor = won ? '#009C3B' : '#dc2626';
+                    
+                    resultElement.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="font-medium">${bet.matchName}</span>
+                                <div class="text-sm">
+                                    <span class="text-gray-600">Aposta: ${bet.selection} @ ${bet.odds.toFixed(2)}</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-right text-sm">
+                                    <span>Resultado: ${result}</span>
+                                </div>
+                                <div class="${won ? 'text-green-600' : 'text-red-600'} font-semibold">
+                                    ${won ? 'Ganhou' : 'Perdeu'}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    resultsGrid.appendChild(resultElement);
+                });
+                
+                // Calculate final result
+                const returnAmount = wonMatches > 0 && lostMatches === 0 ? 
+                    (stake * totalOdds) : 0;
+                
+                userBalance += returnAmount;
+                updateBalanceDisplay();
+                
+                const finalText = lostMatches === 0 ? 
+                    `Parabéns! Você ganhou R$ ${returnAmount.toFixed(2).replace('.', ',')}` :
+                    `Que pena! Você perdeu R$ ${stake.toFixed(2).replace('.', ',')}`;
+                
+                document.getElementById('final-result').textContent = finalText;
+                
+                // Scroll to results
+                resultsContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            // Simulate a single match result (based on odds and randomness)
+            function simulateMatchResult(matchId) {
+                const [homeId, awayId] = matchId.split('-');
+                const homeTeam = teams.find(t => t.id == homeId);
+                const awayTeam = teams.find(t => t.id == awayId);
+                
+                // Get the odds for this match
+                const odds = calculateOdds(homeTeam, awayTeam);
+                
+                // Create weighted array of possible outcomes
+                const outcomes = [];
+                
+                // Add home win outcomes
+                for (let i = 0; i < Math.round(100 / odds.home); i++) {
+                    outcomes.push('1');
+                }
+                
+                // Add draw outcomes
+                for (let i = 0; i < Math.round(100 / odds.draw); i++) {
+                    outcomes.push('X');
+                }
+                
+                // Add away win outcomes
+                for (let i = 0; i < Math.round(100 / odds.away); i++) {
+                    outcomes.push('2');
+                }
+                
+                // Return random outcome
+                return outcomes[Math.floor(Math.random() * outcomes.length)];
+            }
+            
+            // Move to next round
+            function goToNextRound() {
+                currentRound++;
+                
+                if (currentRound > 5) currentRound = 1;
+                
+                document.getElementById('round-selector').value = currentRound;
+                document.getElementById('current-round').textContent = currentRound;
+                
+                generateRoundMatches();
+                
+                // Hide results if visible
+                document.getElementById('simulation-results').classList.add('hidden');
+            }
+            
+            // Attach all event listeners
+            function attachEventListeners() {
+                // Bet buttons
+                document.addEventListener('click', function(e) {
+                    if (e.target.closest('.bet-btn')) {
+                        const btn = e.target.closest('.bet-btn');
+                        const matchId = btn.dataset.match;
+                        const selection = btn.dataset.bet;
+                        const odds = parseFloat(btn.dataset.odds);
+                        
+                        // Get match name
+                        const matchCard = btn.closest('.match-card');
+                        const matchName = matchCard.querySelector('h3').textContent;
+                        
+                        // Update user bets
+                        userBets[matchId] = {
+                            matchId,
+                            matchName,
+                            selection,
+                            odds
+                        };
+                        
+                        // Highlight selected button
+                        document.querySelectorAll(`[data-match="${matchId}"]`).forEach(el => {
+                            el.classList.remove('selected-bet');
+                        });
+                        btn.classList.add('selected-bet');
+                        
+                        // Update bet slip
+                        updateBetSlip();
+                    }
+                    
+                    // Remove bet
+                    if (e.target.closest('.remove-bet')) {
+                        const removeBtn = e.target.closest('.remove-bet');
+                        const matchId = removeBtn.dataset.match;
+                        
+                        // Remove highlight
+                        document.querySelectorAll(`[data-match="${matchId}"]`).forEach(el => {
+                            el.classList.remove('selected-bet');
+                        });
+                        
+                        // Remove bet
+                        delete userBets[matchId];
+                        updateBetSlip();
+                    }
+                });
+                
+                // Clear bets button
+                document.getElementById('clear-bets').addEventListener('click', function() {
+                    // Clear highlights
+                    document.querySelectorAll('.bet-btn').forEach(btn => {
+                        btn.classList.remove('selected-bet');
+                    });
+                    
+                    // Clear user bets
+                    userBets = {};
+                    updateBetSlip();
+                });
+                
+                // Stake input
+                document.getElementById('stake').addEventListener('input', updatePotentialReturn);
+                
+                // Simulate bet button
+                document.getElementById('simulate-bet').addEventListener('click', simulateBet);
+                
+                // Next round button
+                document.getElementById('next-round').addEventListener('click', goToNextRound);
+                
+                // Close results button
+                document.getElementById('close-results').addEventListener('click', function() {
+                    document.getElementById('simulation-results').classList.add('hidden');
+                });
+                
+                // Round selector
+                document.getElementById('round-selector').addEventListener('change', function() {
+                    currentRound = parseInt(this.value);
+                    document.getElementById('current-round').textContent = currentRound;
+                    generateRoundMatches();
+                    
+                    // Hide results if visible
+                    document.getElementById('simulation-results').classList.add('hidden');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
