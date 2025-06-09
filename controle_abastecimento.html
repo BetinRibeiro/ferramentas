@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Abastecimento e KM Rodado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#60a5fa',
+                        accent: '#10b981',
+                        danger: '#ef4444',
+                        warning: '#f59e0b'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .input-field {
+            transition: border-color 0.3s ease;
+        }
+        
+        .input-field:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            background-color: #e5e7eb;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .animate-gauge {
+            animation: gauge-fill 1s ease-out forwards;
+        }
+        
+        @keyframes gauge-fill {
+            from { width: 0; }
+            to { width: var(--fill-percent); }
+        }
+        
+        .fuel-icon {
+            font-size: 28px;
+            padding: 12px;
+            border-radius: 50%;
+        }
+        
+        .slide-in {
+            animation: slide-in 0.3s ease-out forwards;
+        }
+        
+        @keyframes slide-in {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+    <div class="max-w-6xl mx-auto p-4">
+        <!-- Cabeçalho -->
+        <header class="mb-8 py-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center gap-4">
+                    <div class="bg-gradient-to-r from-primary to-secondary rounded-lg p-3">
+                        <i class="fas fa-gas-pump text-white text-3xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Controle de Abastecimento</h1>
+                        <p class="text-gray-600">Registre abastecimentos e acompanhe consumo e gastos</p>
+                    </div>
+                </div>
+                
+                <!-- Seletor de mês/ano -->
+                <div class="flex items-center gap-3">
+                    <button id="prevMonth" class="bg-white text-gray-600 p-2 rounded-lg shadow hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    
+                    <div class="bg-white rounded-lg shadow">
+                        <select id="monthSelect" class="bg-transparent p-2 rounded-lg focus:outline-none">
+                            <option value="0">Janeiro</option>
+                            <option value="1">Fevereiro</option>
+                            <option value="2">Março</option>
+                            <option value="3">Abril</option>
+                            <option value="4">Maio</option>
+                            <option value="5">Junho</option>
+                            <option value="6">Julho</option>
+                            <option value="7">Agosto</option>
+                            <option value="8">Setembro</option>
+                            <option value="9">Outubro</option>
+                            <option value="10">Novembro</option>
+                            <option value="11">Dezembro</option>
+                        </select>
+                        <select id="yearSelect" class="bg-transparent p-2 rounded-lg border-l border-gray-200 focus:outline-none">
+                            <!-- Opções serão preenchidas por JavaScript -->
+                        </select>
+                    </div>
+                    
+                    <button id="nextMonth" class="bg-white text-gray-600 p-2 rounded-lg shadow hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Painel de abastecimentos -->
+            <div class="lg:col-span-2">
+                <div class="bg-white card p-6 mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Novo Abastecimento</h2>
+                    
+                    <form id="fuelForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Data do Abastecimento</label>
+                            <input type="date" id="fuelDate" class="w-full input-field p-3 bg-gray-50 border border-gray-300 rounded-lg" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Quilometragem Atual (KM)</label>
+                            <input type="number" id="fuelKm" class="w-full input-field p-3 bg-gray-50 border border-gray-300 rounded-lg" min="0" step="0.1" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Total Abastecido em R$</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">R$</span>
+                                <input type="number" id="fuelValue" class="w-full input-field pl-8 p-3 bg-gray-50 border border-gray-300 rounded-lg" min="0" step="0.01" placeholder="0,00">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Valor por Litro (R$)</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">R$</span>
+                                <input type="number" id="fuelPrice" class="w-full input-field pl-8 p-3 bg-gray-50 border border-gray-300 rounded-lg" min="0" step="0.001" placeholder="0,000">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Litros Abastecidos</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"><i class="fas fa-gas-pump text-xs"></i></span>
+                                <input type="number" id="fuelLiters" class="w-full input-field pl-8 p-3 bg-gray-50 border border-gray-300 rounded-lg" min="0" step="0.01" placeholder="0,00">
+                            </div>
+                        </div>
+                        
+                        <div class="col-span-2 mt-2">
+                            <button type="submit" class="w-full bg-gradient-to-r from-primary to-secondary text-white font-medium py-3 px-4 rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+                                <i class="fas fa-plus"></i>
+                                Adicionar Abastecimento
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="bg-white card p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold text-gray-800">Histórico de Abastecimentos</h2>
+                        <span id="currentMonth" class="font-medium text-gray-600">Setembro 2023</span>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-100">
+                                <tr class="text-left text-gray-600 text-sm">
+                                    <th class="p-3 rounded-tl-lg">Data</th>
+                                    <th class="p-3">KM</th>
+                                    <th class="p-3">Litros</th>
+                                    <th class="p-3">R$/L</th>
+                                    <th class="p-3">Total (R$)</th>
+                                    <th class="p-3 rounded-tr-lg">Consumo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fuelHistory" class="divide-y divide-gray-200">
+                                <!-- Dados serão preenchidos por JavaScript -->
+                            </tbody>
+                        </table>
+                        
+                        <div id="noFuelData" class="py-12 text-center">
+                            <div class="mb-4 text-gray-400">
+                                <i class="fas fa-gas-pump text-4xl"></i>
+                            </div>
+                            <p class="text-gray-500 font-medium">Nenhum abastecimento registrado neste mês</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Painel de indicadores -->
+            <div>
+                <div class="bg-white card p-6 mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-6">Indicadores do Mês</h2>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="font-medium text-gray-700">Média de Consumo (km/l)</h3>
+                                <span id="avgConsumption" class="text-lg font-bold text-primary">-</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div id="avgConsumptionBar" class="progress-fill bg-primary" style="--fill-percent: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="font-medium text-gray-700">Média Diária (km/dia)</h3>
+                                <span id="avgDaily" class="text-lg font-bold text-secondary">-</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div id="avgDailyBar" class="progress-fill bg-secondary" style="--fill-percent: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="font-medium text-gray-700">Gasto por Dia (R$/dia)</h3>
+                                <span id="costPerDay" class="text-lg font-bold text-accent">-</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div id="costPerDayBar" class="progress-fill bg-accent" style="--fill-percent: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white card p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-6">Resumo do Mês</h2>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-gray-50 rounded-lg p-4 text-center">
+                            <div class="fuel-icon bg-blue-100 text-primary inline-flex items-center justify-center mb-3">
+                                <i class="fas fa-gas-pump"></i>
+                            </div>
+                            <p class="text-sm text-gray-600">Total Abastecido</p>
+                            <p id="totalFuel" class="font-bold text-xl mt-1">-</p>
+                        </div>
+                        
+                        <div class="bg-gray-50 rounded-lg p-4 text-center">
+                            <div class="fuel-icon bg-green-100 text-accent inline-flex items-center justify-center mb-3">
+                                <i class="fas fa-tachometer-alt"></i>
+                            </div>
+                            <p class="text-sm text-gray-600">KM Percorridos</p>
+                            <p id="totalKm" class="font-bold text-xl mt-1">-</p>
+                        </div>
+                        
+                        <div class="bg-gray-50 rounded-lg p-4 text-center">
+                            <div class="fuel-icon bg-red-100 text-danger inline-flex items-center justify-center mb-3">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <p class="text-sm text-gray-600">Gasto Total (R$)</p>
+                            <p id="totalCost" class="font-bold text-xl mt-1">-</p>
+                        </div>
+                        
+                        <div class="bg-gray-50 rounded-lg p-4 text-center">
+                            <div class="fuel-icon bg-yellow-100 text-warning inline-flex items-center justify-center mb-3">
+                                <i class="fas fa-money-check-alt"></i>
+                            </div>
+                            <p class="text-sm text-gray-600">Custo por KM (R$)</p>
+                            <p id="costPerKm" class="font-bold text-xl mt-1">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração do IndexedDB
+        const DB_NAME = 'FuelControlDB';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'abastecimentos';
+        let db;
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+
+        // Inicializa o banco de dados
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                
+                request.onerror = event => {
+                    console.error('Erro ao abrir o banco de dados', event);
+                    reject('Erro ao abrir o banco de dados');
+                };
+                
+                request.onsuccess = event => {
+                    db = event.target.result;
+                    resolve(db);
+                };
+                
+                request.onupgradeneeded = event => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+                        store.createIndex('mesReferencia', 'mesReferencia', { unique: false });
+                    }
+                };
+            });
+        }
+
+        // Obtém todos os registros para o mês selecionado
+        function getRecordsForMonth(month, year) {
+            return new Promise((resolve, reject) => {
+                if (!db) {
+                    reject('Banco de dados não inicializado');
+                    return;
+                }
+                
+                const mesRef = `${String(month + 1).padStart(2, '0')}-${year}`;
+                const transaction = db.transaction(STORE_NAME, 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const index = store.index('mesReferencia');
+                const request = index.getAll(mesRef);
+                
+                request.onsuccess = event => {
+                    resolve(event.target.result);
+                };
+                
+                request.onerror = event => {
+                    reject('Erro ao buscar registros');
+                };
+            });
+        }
+
+        // Adiciona um novo abastecimento
+        function addFuelRecord(record) {
+            return new Promise((resolve, reject) => {
+                if (!db) {
+                    reject('Banco de dados não inicializado');
+                    return;
+                }
+                
+                const transaction = db.transaction(STORE_NAME, 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.add(record);
+                
+                request.onsuccess = () => {
+                    resolve('Registro adicionado com sucesso');
+                };
+                
+                request.onerror = event => {
+                    reject('Erro ao adicionar registro');
+                };
+            });
+        }
+
+        // Calcula o consumo do veículo
+        function calculateConsumption(records) {
+            if (!records || records.length < 2) {
+                return { hasEnoughData: false };
+            }
+            
+            // Ordenar por data
+            records.sort((a, b) => new Date(a.data) - new Date(b.data));
+            
+            const data = [];
+            
+            for (let i = 1; i < records.length; i++) {
+                const current = records[i];
+                const previous = records[i - 1];
+                
+                const kmPercorridos = current.kmAtual - previous.kmAtual;
+                const litrosConsumidos = current.litros;
+                const kmPorLitro = litrosConsumidos > 0 ? kmPercorridos / litrosConsumidos : 0;
+                
+                if (kmPorLitro > 0) {
+                    data.push({
+                        data: current.data,
+                        kmPercorridos,
+                        litrosConsumidos,
+                        kmPorLitro,
+                        kmAtual: current.kmAtual
+                    });
+                }
+            }
+            
+            return data;
+        }
+
+        // Calcula os indicadores para o mês
+        function calculateMonthlyIndicators(records) {
+            if (records.length === 0) {
+                return {
+                    totalCost: 0,
+                    totalKm: 0,
+                    totalLiters: 0,
+                    avgConsumption: 0,
+                    avgDaily: 0,
+                    costPerDay: 0,
+                    costPerKm: 0
+                };
+            }
+            
+            // Filtrar registros válidos (com km atual e litros)
+            const validRecords = records.filter(r => r.kmAtual !== undefined && r.litros !== undefined);
+            
+            // Ordenar por data
+            validRecords.sort((a, b) => new Date(a.data) - new Date(b.data));
+            
+            let totalCost = 0;
+            let totalLiters = 0;
+            let avgConsumption = 0;
+            let avgDaily = 0;
+            let costPerDay = 0;
+            let costPerKm = 0;
+            
+            // Calcular totais
+            validRecords.forEach(record => {
+                totalCost += record.valorTotal || 0;
+                totalLiters += record.litros || 0;
+            });
+            
+            // Calcular KM totais
+            const firstKm = validRecords[0].kmAtual;
+            const lastKm = validRecords[validRecords.length - 1].kmAtual;
+            const totalKm = validRecords.length > 1 ? lastKm - firstKm : 0;
+            
+            // Calcular consumo médio ponderado
+            const consumptionData = calculateConsumption(validRecords);
+            if (consumptionData.length > 0 && consumptionData.some(d => d.kmPorLitro > 0)) {
+                const weightedAvg = consumptionData.reduce((sum, data) => {
+                    return sum + (data.kmPorLitro * data.litrosConsumidos);
+                }, 0) / consumptionData.reduce((sum, data) => sum + data.litrosConsumidos, 0);
+                
+                avgConsumption = parseFloat(weightedAvg.toFixed(2));
+            }
+            
+            // Calcular datas
+            const firstDate = new Date(validRecords[0].data);
+            const lastDate = new Date(validRecords[validRecords.length - 1].data);
+            const days = Math.max(1, (lastDate - firstDate) / (1000 * 60 * 60 * 24));
+            
+            // Calcular médias diárias
+            avgDaily = days ? parseFloat((totalKm / days).toFixed(2)) : 0;
+            costPerDay = days ? parseFloat((totalCost / days).toFixed(2)) : 0;
+            costPerKm = totalKm ? parseFloat((totalCost / totalKm).toFixed(3)) : 0;
+            
+            return {
+                totalCost,
+                totalKm,
+                totalLiters,
+                avgConsumption,
+                avgDaily,
+                costPerDay,
+                costPerKm
+            };
+        }
+
+        // Preenche a tabela de histórico com dados
+        function populateHistoryTable(records) {
+            const table = document.getElementById('fuelHistory');
+            const noData = document.getElementById('noFuelData');
+            
+            // Limpar tabela
+            table.innerHTML = '';
+            
+            if (!records || records.length === 0) {
+                noData.classList.remove('hidden');
+                return;
+            }
+            
+            noData.classList.add('hidden');
+            
+            // Ordenar registros por data (mais recente primeiro)
+            records.sort((a, b) => new Date(b.data) - new Date(a.data));
+            
+            records.forEach((record, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'fuel-record slide-in';
+                
+                // Formatar data
+                const date = new Date(record.data);
+                const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+                
+                tr.innerHTML = `
+                    <td class="p-3 text-sm font-medium text-gray-800">${formattedDate}</td>
+                    <td class="p-3 text-gray-700">${record.kmAtual.toFixed(1).replace('.', ',')}</td>
+                    <td class="p-3 text-gray-700">${record.litros ? record.litros.toFixed(2).replace('.', ',') : '-'}</td>
+                    <td class="p-3 text-gray-700">${record.valorLitro ? record.valorLitro.toFixed(3).replace('.', ',') : '-'}</td>
+                    <td class="p-3 text-gray-700">${record.valorTotal ? 'R$ ' + record.valorTotal.toFixed(2).replace('.', ',') : '-'}</td>
+                    <td class="p-3">
+                        ${index > 0 ? `${(record.kmAtual - records[index-1].kmAtual) / record.litros || 0}`.substring(0, 4) : '-'}
+                    </td>
+                `;
+                
+                table.appendChild(tr);
+                
+                // Atrasar animação para efeito cascata
+                tr.style.animationDelay = `${index * 0.05}s`;
+            });
+        }
+
+        // Atualiza os indicadores na UI
+        function updateIndicators(indicators) {
+            // Atualizar cartões de resumo
+            document.getElementById('totalFuel').textContent = `${indicators.totalLiters.toFixed(2).replace('.', ',')} L`;
+            document.getElementById('totalKm').textContent = indicators.totalKm.toFixed(1).replace('.', ',') + ' km';
+            document.getElementById('totalCost').textContent = `R$ ${indicators.totalCost.toFixed(2).replace('.', ',')}`;
+            document.getElementById('costPerKm').textContent = indicators.costPerKm ? `R$ ${indicators.costPerKm.toFixed(3).replace('.', ',')}` : '-';
+            
+            // Atualizar principais indicadores
+            document.getElementById('avgConsumption').textContent = indicators.avgConsumption > 0 ? 
+                `${indicators.avgConsumption.toFixed(2).replace('.', ',')} km/l` : '-';
+            
+            document.getElementById('avgDaily').textContent = indicators.avgDaily > 0 ? 
+                `${indicators.avgDaily.toFixed(2).replace('.', ',')} km/dia` : '-';
+            
+            document.getElementById('costPerDay').textContent = indicators.costPerDay > 0 ? 
+                `R$ ${indicators.costPerDay.toFixed(2).replace('.', ',')}` : '-';
+            
+            // Animar barras de progresso
+            setTimeout(() => {
+                const avgBar = document.getElementById('avgConsumptionBar');
+                const avgDailyBar = document.getElementById('avgDailyBar');
+                const costPerDayBar = document.getElementById('costPerDayBar');
+                
+                // Reseta animação removendo classes
+                avgBar.classList.remove('animate-gauge');
+                avgDailyBar.classList.remove('animate-gauge');
+                costPerDayBar.classList.remove('animate-gauge');
+                
+                // Definir novas porcentagens
+                if (indicators.avgConsumption > 0) {
+                    const avgPercent = Math.min(100, indicators.avgConsumption * 5);
+                    avgBar.style.setProperty('--fill-percent', `${avgPercent}%`);
+                    setTimeout(() => avgBar.classList.add('animate-gauge'), 10);
+                }
+                
+                if (indicators.avgDaily > 0) {
+                    const avgDailyPercent = Math.min(100, indicators.avgDaily / 2);
+                    avgDailyBar.style.setProperty('--fill-percent', `${avgDailyPercent}%`);
+                    setTimeout(() => avgDailyBar.classList.add('animate-gauge'), 10);
+                }
+                
+                if (indicators.costPerDay > 0) {
+                    const costPerDayPercent = Math.min(100, indicators.costPerDay / 5);
+                    costPerDayBar.style.setProperty('--fill-percent', `${costPerDayPercent}%`);
+                    setTimeout(() => costPerDayBar.classList.add('animate-gauge'), 10);
+                }
+            }, 10);
+        }
+
+        // Carrega registros para o mês e ano selecionados
+        async function loadRecordsForMonth(month, year) {
+            try {
+                const records = await getRecordsForMonth(month, year);
+                populateHistoryTable(records);
+                
+                const indicators = calculateMonthlyIndicators(records);
+                updateIndicators(indicators);
+                
+                // Atualizar UI com o mês atual
+                const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", 
+                                   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+                document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
+                document.getElementById('monthSelect').value = month;
+                document.getElementById('yearSelect').value = year;
+                
+            } catch (error) {
+                console.error('Erro ao carregar registros:', error);
+                document.getElementById('fuelHistory').innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-500">${error}</td></tr>`;
+            }
+        }
+
+        // Inicializa o seletor de anos
+        function initYearSelector() {
+            const yearSelect = document.getElementById('yearSelect');
+            const currentYear = new Date().getFullYear();
+            
+            // Adiciona opções para anos recentes
+            for (let year = currentYear - 5; year <= currentYear + 1; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                if (year === currentYear) {
+                    option.selected = true;
+                }
+                yearSelect.appendChild(option);
+            }
+        }
+
+        // Lida com cálculo automático dos campos do formulário
+        function autoCalculateFields() {
+            const fuelValue = parseFloat(document.getElementById('fuelValue').value);
+            const fuelPrice = parseFloat(document.getElementById('fuelPrice').value);
+            const fuelLiters = parseFloat(document.getElementById('fuelLiters').value);
+            
+            // Cálculo com base nas regras especificadas
+            if (fuelPrice && fuelLiters) {
+                // Preenche o valor total
+                document.getElementById('fuelValue').value = (fuelPrice * fuelLiters).toFixed(2);
+            } else if (fuelValue && fuelLiters) {
+                // Preenche o preço por litro
+                document.getElementById('fuelPrice').value = (fuelValue / fuelLiters).toFixed(3);
+            } else if (fuelValue && fuelPrice) {
+                // Preenche os litros
+                document.getElementById('fuelLiters').value = (fuelValue / fuelPrice).toFixed(2);
+            }
+        }
+
+        // Event listeners para campos de cálculo automático
+        document.getElementById('fuelValue').addEventListener('input', autoCalculateFields);
+        document.getElementById('fuelPrice').addEventListener('input', autoCalculateFields);
+        document.getElementById('fuelLiters').addEventListener('input', autoCalculateFields);
+
+        // Form submission handler
+        document.getElementById('fuelForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fuelDate = document.getElementById('fuelDate').value;
+            const fuelKm = parseFloat(document.getElementById('fuelKm').value);
+            const fuelValue = parseFloat(document.getElementById('fuelValue').value);
+            const fuelPrice = parseFloat(document.getElementById('fuelPrice').value);
+            const fuelLiters = parseFloat(document.getElementById('fuelLiters').value);
+            
+            // Validar dados mínimos
+            if (!fuelDate || isNaN(fuelKm)) {
+                alert('Preencha pelo menos a data e a quilometragem atual');
+                return;
+            }
+            
+            // Verificar se um dos campos de valor está preenchido
+            if (isNaN(fuelValue) && isNaN(fuelPrice) && isNaN(fuelLiters)) {
+                alert('Preencha pelo menos um dos campos: valor total, preço por litro ou litros abastecidos');
+                return;
+            }
+            
+            // Converter data para formato MM-YYYY para armazenamento
+            const dateObj = new Date(fuelDate);
+            const monthRef = `${String(dateObj.getMonth() + 1).padStart(2, '0')}-${dateObj.getFullYear()}`;
+            
+            const record = {
+                data: fuelDate,
+                kmAtual: fuelKm,
+                valorTotal: isNaN(fuelValue) ? null : fuelValue,
+                valorLitro: isNaN(fuelPrice) ? null : fuelPrice,
+                litros: isNaN(fuelLiters) ? null : fuelLiters,
+                mesReferencia: monthRef
+            };
+            
+            try {
+                await addFuelRecord(record);
+                
+                // Recarregar registros se o mês for o mesmo do novo registro
+                const recordMonth = dateObj.getMonth();
+                const recordYear = dateObj.getFullYear();
+                
+                if (recordMonth === currentMonth && recordYear === currentYear) {
+                    await loadRecordsForMonth(currentMonth, currentYear);
+                }
+                
+                // Limpar formulário
+                document.getElementById('fuelForm').reset();
+                document.getElementById('fuelDate').valueAsDate = new Date();
+                
+            } catch (error) {
+                console.error('Erro ao salvar registro:', error);
+                alert('Erro ao salvar registro. Por favor, tente novamente.');
+            }
+        });
+
+        // Handle month navigation
+        document.getElementById('prevMonth').addEventListener('click', () => {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            loadRecordsForMonth(currentMonth, currentYear);
+        });
+
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            loadRecordsForMonth(currentMonth, currentYear);
+        });
+
+        // Handle month/year selector changes
+        document.getElementById('monthSelect').addEventListener('change', () => {
+            currentMonth = parseInt(document.getElementById('monthSelect').value);
+            loadRecordsForMonth(currentMonth, currentYear);
+        });
+
+        document.getElementById('yearSelect').addEventListener('change', () => {
+            currentYear = parseInt(document.getElementById('yearSelect').value);
+            loadRecordsForMonth(currentMonth, currentYear);
+        });
+
+        // Initialize the application
+        async function init() {
+            try {
+                await initDB();
+                initYearSelector();
+                document.getElementById('fuelDate').valueAsDate = new Date();
+                loadRecordsForMonth(currentMonth, currentYear);
+            } catch (error) {
+                console.error('Erro ao inicializar o aplicativo:', error);
+                alert('Erro ao inicializar o aplicativo. Por favor, recarregue a página.');
+            }
+        }
+
+        // Start the application
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
