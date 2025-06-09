@@ -1,0 +1,114 @@
+uma estrutura de dados simples para um sistema básico de fábrica que cobre os 5 pontos
+
+
+(Tabelas e Campos)
+1. Produtos
+Campo	Tipo	Descrição
+produto_id	INT (PK)	Identificador único
+nome	VARCHAR	Nome do produto
+tipo	ENUM	'materia_prima' ou 'produto_final'
+estoque_minimo	INT	Quantidade mínima para alerta
+
+2. Ordens de Produção
+Campo	Tipo	Descrição
+ordem_id	INT (PK)	Identificador único
+produto_id	INT (FK)	Produto a ser fabricado
+quantidade	INT	Quantidade a produzir
+data_inicio	DATE	Data prevista de início
+data_fim	DATE	Data prevista de término
+status	ENUM	'pendente', 'em_producao', 'finalizada'
+
+3. Movimento de Estoque
+Campo	Tipo	Descrição
+movimento_id	INT (PK)	Identificador único
+produto_id	INT (FK)	Produto movimentado
+tipo_movimento	ENUM	'entrada' ou 'saida'
+quantidade	INT	Quantidade movimentada
+data_movimento	DATE	Data da movimentação
+origem_destino	VARCHAR	Fonte ou destino (ex: fornecedor, cliente, produção)
+
+4. Vendas / Entregas
+Campo	Tipo	Descrição
+venda_id	INT (PK)	Identificador único
+produto_id	INT (FK)	Produto vendido
+quantidade	INT	Quantidade vendida
+nome_cliente	VARCHAR	Nome do cliente
+data_venda	DATE	Data da venda
+valor_total	DECIMAL	Valor total da venda
+
+5. Controle Financeiro
+Campo	Tipo	Descrição
+financeiro_id	INT (PK)	Identificador único
+tipo_transacao	ENUM	'conta_pagar', 'conta_receber', 'despesa_fixa', 'receita'
+descricao	VARCHAR	Descrição da transação
+valor	DECIMAL	Valor da transação
+data_vencimento	DATE	Data do vencimento
+status	ENUM	'pendente', 'pago'
+
+
+Observações:
+A tabela de produtos serve para ambos os tipos, matéria-prima e produto final, diferenciados pelo campo tipo.
+
+A tabela movimento de estoque controla toda entrada e saída, seja para matéria-prima, produto final, ou produção.
+
+A tabela ordem de produção relaciona qual produto será feito e em que quantidade.
+
+A tabela vendas registra as saídas e receitas relacionadas aos clientes.
+
+A tabela financeiro controla contas a pagar e receber, assim como despesas fixas e receitas.
+
+
+Telas essenciais do sistema
+1. Tela de Login
+Para controle de acesso do usuário
+
+2. Tela de Cadastro de Produtos
+Formulário para adicionar/editar produtos (matéria-prima e produto final)
+
+Lista com busca e filtro dos produtos cadastrados
+
+Visualizar estoque atual e estoque mínimo
+
+3. Tela de Ordens de Produção
+Criar nova ordem de produção (selecionar produto, quantidade, datas)
+
+Listar ordens abertas, em produção e finalizadas
+
+Atualizar status da produção (ex: em produção, finalizada)
+
+4. Tela de Controle de Estoque
+Visualizar movimentações de estoque (entrada e saída)
+
+Registrar movimentação manual (ex: entrada de compra, saída para produção ou venda)
+
+Alerta de produtos com estoque abaixo do mínimo
+
+5. Tela de Vendas / Entregas
+Registrar nova venda (produto, quantidade, cliente, data, valor)
+
+Listar vendas feitas, com filtros por data e cliente
+
+Visualizar histórico de vendas
+
+6. Tela de Controle Financeiro
+Registrar transações financeiras (contas a pagar, contas a receber, despesas fixas, receitas)
+
+Visualizar fluxo de caixa e saldo atual
+
+Filtrar transações por tipo, status e data
+
+7. Dashboard / Tela Inicial
+Visão geral com indicadores rápidos:
+
+Produtos com estoque baixo
+
+Ordens de produção pendentes
+
+Vendas recentes
+
+Saldo financeiro atual
+
+8. Tela de Usuários (opcional para sistema com mais controle)
+Cadastrar e gerenciar usuários que acessam o sistema
+
+Controle de permissões básicas (ex: admin, operador)
