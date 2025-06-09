@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Orçamento</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        accent: '#8B5CF6',
+                        dark: '#1F2937'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .print-container {
+            display: none;
+        }
+        
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .print-container, .print-container * {
+                visibility: visible;
+            }
+            .print-container {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 20px;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+        
+        .item-row:hover {
+            background-color: rgba(59, 130, 246, 0.05);
+            transition: background-color 0.3s;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div class="container mx-auto max-w-6xl p-4">
+        <!-- Header -->
+        <header class="mb-8 text-center py-6">
+            <div class="flex items-center justify-center mb-4">
+                <i class="fas fa-file-invoice-dollar text-4xl text-primary mr-4"></i>
+                <h1 class="text-3xl md:text-4xl font-bold text-dark">Sistema de Orçamento</h1>
+            </div>
+            <p class="text-gray-600 max-w-2xl mx-auto">Registre produtos ou serviços, calcule automaticamente valores, aplique descontos e gere orçamentos impressionantes.</p>
+        </header>
+
+        <!-- Main Section -->
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Left Panel - Form -->
+            <div class="lg:w-3/5 bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="p-6">
+                    <h2 class="text-xl font-semibold text-dark border-b pb-2 mb-4">Adicionar Itens</h2>
+                    
+                    <form id="productForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="md:col-span-2">
+                            <label for="productName" class="block text-sm font-medium text-gray-700 mb-1">Produto/Serviço</label>
+                            <input type="text" id="productName" placeholder="Nome do produto ou serviço" class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary" required>
+                        </div>
+                        
+                        <div>
+                            <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
+                            <input type="number" id="quantity" min="1" value="1" class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary" required>
+                        </div>
+                        
+                        <div>
+                            <label for="price" class="block text-sm font-medium text-gray-700 mb-1">Preço Unitário (R$)</label>
+                            <input type="number" id="price" min="0" step="0.01" placeholder="0,00" class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary" required>
+                        </div>
+                        
+                        <div>
+                            <label for="discount" class="block text-sm font-medium text-gray-700 mb-1">Desconto (%)</label>
+                            <input type="number" id="discount" min="0" max="100" value="0" placeholder="0" class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
+                        </div>
+                        
+                        <div class="md:col-span-3">
+                            <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+                            <input type="text" id="notes" placeholder="Detalhes adicionais" class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
+                        </div>
+                        
+                        <div class="flex items-end">
+                            <button type="submit" class="w-full bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition font-medium flex items-center justify-center">
+                                <i class="fas fa-plus mr-2"></i> Adicionar Item
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <h2 class="text-xl font-semibold text-dark border-b pb-2 mb-4 mt-8">Lista de Itens</h2>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Qtd</th>
+                                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Preço</th>
+                                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Desc.</th>
+                                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="itemsList" class="bg-white divide-y divide-gray-200">
+                                <!-- Itens serão adicionados aqui pelo JavaScript -->
+                            </tbody>
+                        </table>
+                        <p id="emptyListMessage" class="text-gray-500 text-center py-8 italic">Nenhum item adicionado ainda. Comece adicionando produtos acima.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Panel - Summary and Payment -->
+            <div class="lg:w-2/5">
+                <div class="bg-white rounded-xl shadow-md overflow-hidden mb-6">
+                    <div class="p-6">
+                        <h2 class="text-xl font-semibold text-dark border-b pb-2 mb-4">Resumo</h2>
+                        
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Subtotal:</span>
+                                <span id="subtotal" class="font-semibold">R$ 0,00</span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <span class="text-gray-600 mr-2">Desconto Total:</span>
+                                    <span id="discountPercent" class="text-xs bg-gray-100 px-2 py-1 rounded">0%</span>
+                                </div>
+                                <span id="discountTotal" class="font-semibold text-red-500">- R$ 0,00</span>
+                            </div>
+                            
+                            <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+                                <span class="text-lg font-semibold">Total:</span>
+                                <span id="totalAmount" class="text-2xl font-bold text-primary">R$ 0,00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md overflow-hidden mb-6">
+                    <div class="p-6">
+                        <h2 class="text-xl font-semibold text-dark border-b pb-2 mb-4">Forma de Pagamento</h2>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <input type="radio" id="cash" name="payment" value="cash" class="hidden peer" checked>
+                                <label for="cash" class="flex items-center justify-center p-3 border rounded-lg cursor-pointer peer-checked:border-primary peer-checked:bg-blue-50">
+                                    <i class="fas fa-money-bill-wave text-green-500 text-xl mr-2"></i>
+                                    <span>À Vista</span>
+                                </label>
+                            </div>
+                            
+                            <div>
+                                <input type="radio" id="debit" name="payment" value="debit" class="hidden peer">
+                                <label for="debit" class="flex items-center justify-center p-3 border rounded-lg cursor-pointer peer-checked:border-primary peer-checked:bg-blue-50">
+                                    <i class="fas fa-credit-card text-blue-500 text-xl mr-2"></i>
+                                    <span>Débito</span>
+                                </label>
+                            </div>
+                            
+                            <div>
+                                <input type="radio" id="credit" name="payment" value="credit" class="hidden peer">
+                                <label for="credit" class="flex items-center justify-center p-3 border rounded-lg cursor-pointer peer-checked:border-primary peer-checked:bg-blue-50">
+                                    <i class="fas fa-credit-card text-purple-500 text-xl mr-2"></i>
+                                    <span>Crédito</span>
+                                </label>
+                            </div>
+                            
+                            <div>
+                                <input type="radio" id="pix" name="payment" value="pix" class="hidden peer">
+                                <label for="pix" class="flex items-center justify-center p-3 border rounded-lg cursor-pointer peer-checked:border-primary peer-checked:bg-blue-50">
+                                    <i class="fas fa-qrcode text-purple-400 text-xl mr-2"></i>
+                                    <span>PIX</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div id="installmentsContainer" class="mt-4 hidden">
+                            <label for="installments" class="block text-sm font-medium text-gray-700 mb-1">Parcelamento</label>
+                            <select id="installments" class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
+                                <option value="1">1x</option>
+                                <option value="2">2x</option>
+                                <option value="3">3x</option>
+                                <option value="4">4x</option>
+                                <option value="5">5x</option>
+                                <option value="6">6x</option>
+                                <option value="10">10x</option>
+                                <option value="12">12x</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <h2 class="text-xl font-semibold text-dark border-b pb-2 mb-4">Cliente</h2>
+                        
+                        <div class="mb-4">
+                            <label for="clientName" class="block text-sm font-medium text-gray-700 mb-1">Nome do Cliente</label>
+                            <input type="text" id="clientName" placeholder="Nome completo" class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="clientContact" class="block text-sm font-medium text-gray-700 mb-1">Contato (Email/Telefone)</label>
+                            <input type="text" id="clientContact" placeholder="Email ou telefone" class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
+                        </div>
+                        
+                        <div>
+                            <label for="validity" class="block text-sm font-medium text-gray-700 mb-1">Validade do Orçamento (dias)</label>
+                            <select id="validity" class="w-full px-4 py-2 border rounded-lg focus:ring-primary focus:border-primary">
+                                <option value="3">3 dias</option>
+                                <option value="7" selected>7 dias</option>
+                                <option value="15">15 dias</option>
+                                <option value="30">30 dias</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="mt-8 flex flex-wrap gap-4 justify-center no-print">
+            <button id="resetBtn" class="px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition flex items-center">
+                <i class="fas fa-redo mr-2"></i> Limpar Tudo
+            </button>
+            <button id="saveBtn" class="px-6 py-3 bg-secondary hover:bg-emerald-600 rounded-lg font-medium text-white transition flex items-center">
+                <i class="fas fa-save mr-2"></i> Salvar Orçamento
+            </button>
+            <button id="printBtn" class="px-6 py-3 bg-primary hover:bg-blue-700 rounded-lg font-medium text-white transition flex items-center">
+                <i class="fas fa-print mr-2"></i> Imprimir
+            </button>
+        </div>
+        
+        <!-- Printable Container -->
+        <div class="print-container">
+            <div class="max-w-3xl mx-auto p-8 border border-gray-200">
+                <div class="text-center mb-8">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="text-left">
+                            <h2 class="text-2xl font-bold text-primary">Sua Empresa</h2>
+                            <p class="text-gray-600">Av. Principal, 1234 - Cidade</p>
+                            <p class="text-gray-600">CNPJ: 00.000.000/0001-00</p>
+                        </div>
+                        <div>
+                            <h1 class="text-3xl font-bold text-center">ORÇAMENTO</h1>
+                            <p class="text-gray-600 text-sm">Nº: <span id="printBudgetNumber">OB20230001</span></p>
+                            <p class="text-gray-600 text-sm mt-2">Validade: <span id="printValidity">7 dias</span></p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-gray-600"><span id="printDate"></span></p>
+                            <p class="font-semibold">Cliente:</p>
+                            <p id="printClientName" class="mb-1">[Nome do Cliente]</p>
+                            <p id="printClientContact" class="text-sm text-gray-600">[Contato]</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <table class="w-full mb-6 border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="border border-gray-300 py-2 px-4 text-left font-semibold">Descrição</th>
+                            <th class="border border-gray-300 py-2 px-4 text-center font-semibold">Qtd</th>
+                            <th class="border border-gray-300 py-2 px-4 text-right font-semibold">Preço Unitário</th>
+                            <th class="border border-gray-300 py-2 px-4 text-right font-semibold">Desconto</th>
+                            <th class="border border-gray-300 py-2 px-4 text-right font-semibold">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="printItems">
+                        <!-- Itens impressos aqui -->
+                    </tbody>
+                </table>
+                
+                <div class="flex justify-between mb-6">
+                    <div class="w-2/3 pr-4">
+                        <div class="mb-2">
+                            <label class="font-semibold block mb-1">Condições de Pagamento:</label>
+                            <p id="printPaymentMethod">[Forma de pagamento]</p>
+                        </div>
+                        <div>
+                            <label class="font-semibold block mb-1">Observações:</label>
+                            <p id="printNotes">[Observações adicionais]</p>
+                        </div>
+                    </div>
+                    
+                    <div class="w-1/3 border border-gray-300 rounded-lg p-4">
+                        <div class="flex justify-between mb-1">
+                            <span>Subtotal:</span>
+                            <span id="printSubtotal">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between mb-1">
+                            <span>Desconto Total:</span>
+                            <span id="printDiscountTotal" class="text-red-500">- R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between mt-4 pt-2 border-t border-gray-300">
+                            <span class="font-bold">Total:</span>
+                            <span id="printTotal" class="text-xl font-bold">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-12 text-center">
+                    <div class="mb-16 text-sm text-gray-500">
+                        <p>Este documento não é uma nota fiscal - É apenas um orçamento.</p>
+                        <p>Em caso de dúvidas, entre em contato: contato@empresa.com | (11) 9999-9999</p>
+                    </div>
+                    <div class="flex justify-between">
+                        <div class="text-center">
+                            <p class="border-t border-gray-400 pt-2 inline-block w-48">Assinatura do Cliente</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="font-bold">Sua Empresa</p>
+                            <p class="border-t border-gray-400 pt-2 inline-block w-48">Assinatura do Responsável</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis de estado
+        let items = [];
+        let nextId = 1;
+        let subtotal = 0;
+        let discountTotal = 0;
+        let totalAmount = 0;
+        
+        // Elementos do DOM
+        const productForm = document.getElementById('productForm');
+        const itemsList = document.getElementById('itemsList');
+        const emptyListMessage = document.getElementById('emptyListMessage');
+        const subtotalElement = document.getElementById('subtotal');
+        const discountTotalElement = document.getElementById('discountTotal');
+        const discountPercentElement = document.getElementById('discountPercent');
+        const totalAmountElement = document.getElementById('totalAmount');
+        const resetBtn = document.getElementById('resetBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const printBtn = document.getElementById('printBtn');
+        const installmentsContainer = document.getElementById('installmentsContainer');
+        const paymentRadios = document.querySelectorAll('input[name="payment"]');
+        
+        // Formatar moeda
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
+        }
+        
+        // Atualizar resumo
+        function updateSummary() {
+            subtotal = items.reduce((sum, item) => 
+                sum + (item.price * item.quantity), 0);
+            
+            discountTotal = items.reduce((sum, item) => 
+                sum + (item.price * item.quantity * (item.discount / 100)), 0);
+            
+            totalAmount = subtotal - discountTotal;
+            
+            const discountPercentage = subtotal > 0 
+                ? (discountTotal / subtotal * 100).toFixed(1) 
+                : 0;
+            
+            subtotalElement.textContent = formatCurrency(subtotal);
+            discountTotalElement.textContent = `- ${formatCurrency(discountTotal)}`;
+            discountPercentElement.textContent = `${discountPercentage}%`;
+            totalAmountElement.textContent = formatCurrency(totalAmount);
+            
+            // Exibir/ocultar mensagem de lista vazia
+            emptyListMessage.style.display = items.length > 0 ? 'none' : 'block';
+        }
+        
+        // Adicionar item
+        function addItem(e) {
+            e.preventDefault();
+            
+            const productName = document.getElementById('productName').value;
+            const quantity = parseInt(document.getElementById('quantity').value);
+            const price = parseFloat(document.getElementById('price').value);
+            const discount = parseFloat(document.getElementById('discount').value) || 0;
+            const notes = document.getElementById('notes').value;
+            
+            const item = {
+                id: nextId++,
+                name: productName,
+                quantity,
+                price,
+                discount,
+                notes,
+                itemTotal: (price * quantity) * (1 - discount/100)
+            };
+            
+            items.push(item);
+            
+            renderItems();
+            updateSummary();
+            
+            // Limpar o formulário
+            document.getElementById('productName').value = '';
+            document.getElementById('quantity').value = '1';
+            document.getElementById('price').value = '';
+            document.getElementById('discount').value = '0';
+            document.getElementById('notes').value = '';
+            document.getElementById('productName').focus();
+        }
+        
+        // Remover item
+        function removeItem(id) {
+            items = items.filter(item => item.id !== id);
+            renderItems();
+            updateSummary();
+        }
+        
+        // Renderizar itens
+        function renderItems() {
+            itemsList.innerHTML = '';
+            
+            items.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'item-row';
+                row.innerHTML = `
+                    <td class="px-4 py-3">
+                        <div class="font-medium">${item.name}</div>
+                        <div class="text-gray-500 text-xs italic">${item.notes || 'Nenhuma observação'}</div>
+                    </td>
+                    <td class="px-4 py-3 text-center">${item.quantity}</td>
+                    <td class="px-4 py-3 text-center">${formatCurrency(item.price)}</td>
+                    <td class="px-4 py-3 text-center">${item.discount}%</td>
+                    <td class="px-4 py-3 text-center font-medium">${formatCurrency(item.price * item.quantity * (1 - item.discount/100))}</td>
+                    <td class="px-4 py-3 text-center">
+                        <button onclick="removeItem(${item.id})" class="text-red-500 hover:text-red-700 transition">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                itemsList.appendChild(row);
+            });
+        }
+        
+        // Configurar pagamento parcelado
+        function setupPaymentOptions() {
+            paymentRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'credit') {
+                        installmentsContainer.classList.remove('hidden');
+                    } else {
+                        installmentsContainer.classList.add('hidden');
+                    }
+                });
+            });
+        }
+        
+        // Atualizar método de pagamento para impressão
+        function updatePrintPaymentMethod() {
+            const selectedPayment = document.querySelector('input[name="payment"]:checked').value;
+            let paymentText = selectedPayment === 'cash' ? 'À Vista' :
+                             selectedPayment === 'debit' ? 'Cartão de Débito' :
+                             selectedPayment === 'credit' ? 'Cartão de Crédito' : 'PIX';
+            
+            if (selectedPayment === 'credit') {
+                const installments = document.getElementById('installments').value;
+                paymentText += ` (${installments}x de ${formatCurrency(totalAmount / parseInt(installments))})`;
+            }
+            
+            document.getElementById('printPaymentMethod').textContent = paymentText;
+        }
+        
+        // Gerar orçamento para impressão
+        function setupPrintDocument() {
+            const today = new Date();
+            const dateStr = today.toLocaleDateString('pt-BR');
+            document.getElementById('printDate').textContent = dateStr;
+            
+            document.getElementById('printClientName').textContent = 
+                document.getElementById('clientName').value || '[Nome não especificado]';
+            
+            document.getElementById('printClientContact').textContent = 
+                document.getElementById('clientContact').value || '[Contato não especificado]';
+                
+            const validity = document.getElementById('validity');
+            document.getElementById('printValidity').textContent = 
+                `${validity.options[validity.selectedIndex].text}`;
+            
+            // Forma de pagamento
+            const selectedPayment = document.querySelector('input[name="payment"]:checked').value;
+            let paymentText = selectedPayment.charAt(0).toUpperCase() + selectedPayment.slice(1);
+            
+            if (selectedPayment === 'credit') {
+                const installments = document.getElementById('installments').value;
+                paymentText += ` (${installments}x)`;
+            }
+            
+            document.getElementById('printPaymentMethod').textContent = paymentText;
+            
+            // Itens
+            const printItems = document.getElementById('printItems');
+            printItems.innerHTML = '';
+            
+            items.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="border border-gray-300 py-2 px-4">${item.name}</td>
+                    <td class="border border-gray-300 py-2 px-4 text-center">${item.quantity}</td>
+                    <td class="border border-gray-300 py-2 px-4 text-right">${formatCurrency(item.price)}</td>
+                    <td class="border border-gray-300 py-2 px-4 text-right">${item.discount}%</td>
+                    <td class="border border-gray-300 py-2 px-4 text-right">${formatCurrency(item.price * item.quantity * (1 - item.discount/100))}</td>
+                `;
+                printItems.appendChild(row);
+            });
+            
+            // Totais
+            document.getElementById('printSubtotal').textContent = formatCurrency(subtotal);
+            document.getElementById('printDiscountTotal').textContent = `- ${formatCurrency(discountTotal)}`;
+            document.getElementById('printTotal').textContent = formatCurrency(totalAmount);
+        }
+        
+        // Imprimir orçamento
+        function printBudget() {
+            if (items.length === 0) {
+                alert('Adicione itens antes de imprimir!');
+                return;
+            }
+            
+            setupPrintDocument();
+            
+            // Atualizar os totais no documento de impressão
+            document.getElementById('printSubtotal').textContent = formatCurrency(subtotal);
+            document.getElementById('printDiscountTotal').textContent = `- ${formatCurrency(discountTotal)}`;
+            document.getElementById('printTotal').textContent = formatCurrency(totalAmount);
+            
+            // Forçar o estilo de impressão antes de chamar window.print()
+            const printContainer = document.querySelector('.print-container');
+            printContainer.style.display = 'block';
+            
+            setTimeout(() => {
+                window.print();
+                printContainer.style.display = 'none';
+            }, 100);
+        }
+        
+        // Resetar tudo
+        function resetAll() {
+            if (confirm('Tem certeza que deseja limpar todos os dados?')) {
+                items = [];
+                nextId = 1;
+                renderItems();
+                updateSummary();
+                
+                // Resetar formulários
+                document.getElementById('productForm').reset();
+                document.getElementById('clientName').value = '';
+                document.getElementById('clientContact').value = '';
+                document.getElementById('validity').value = '7';
+                
+                // Resetar pagamento
+                document.getElementById('cash').checked = true;
+                installmentsContainer.classList.add('hidden');
+                
+                alert('Todos os dados foram limpos!');
+            }
+        }
+        
+        // Salvar orçamento (simulação)
+        function saveBudget() {
+            if (items.length === 0) {
+                alert('Adicione itens antes de salvar!');
+                return;
+            }
+            
+            const clientName = document.getElementById('clientName').value || 'Sem nome';
+            alert(`Orçamento para ${clientName} salvo com sucesso!`);
+            // Em uma aplicação real, aqui teríamos código para enviar para um servidor ou armazenar
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            productForm.addEventListener('submit', addItem);
+            resetBtn.addEventListener('click', resetAll);
+            saveBtn.addEventListener('click', saveBudget);
+            printBtn.addEventListener('click', printBudget);
+            setupPaymentOptions();
+            
+            // Configurar data para impressão
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = (today.getMonth() + 1).toString().padStart(2, '0');
+            const day = today.getDate().toString().padStart(2, '0');
+            document.getElementById('printBudgetNumber').textContent = `OB${year}${month}${day}0001`;
+            
+            // Atualizar método de pagamento quando alterado
+            paymentRadios.forEach(radio => {
+                radio.addEventListener('change', updatePrintPaymentMethod);
+            });
+            
+            // Atualizar método de pagamento quando alterar parcelas
+            document.getElementById('installments').addEventListener('change', updatePrintPaymentMethod);
+        });
+    </script>
+</body>
+</html>
