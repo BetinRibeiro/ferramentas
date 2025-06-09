@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Financeira Completa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        'primary-dark': '#4338CA',
+                        secondary: '#10B981',
+                        'secondary-dark': '#059669',
+                        danger: '#EF4444',
+                        'danger-dark': '#DC2626'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .calculator-btn {
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        
+        .calculator-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .history-item {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 768px) {
+            .flex-container {
+                flex-direction: column;
+            }
+            
+            .extrato-container {
+                margin-top: 2rem;
+                max-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-6xl bg-white rounded-2xl shadow-xl overflow-hidden flex-container flex md:flex-row flex-col">
+        <!-- Painel da Calculadora -->
+        <div class="md:w-1/2 w-full p-6">
+            <h1 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-calculator text-primary mr-2"></i> Calculadora Financeira
+            </h1>
+            
+            <!-- Display -->
+            <div class="bg-gray-50 rounded-xl p-4 mb-6 shadow-inner">
+                <div class="text-right">
+                    <div id="currentOperation" class="text-gray-500 text-lg h-6"></div>
+                    <div id="display" class="text-3xl font-bold text-gray-800 truncate">0</div>
+                </div>
+            </div>
+            
+            <!-- Teclado da Calculadora -->
+            <div class="grid grid-cols-4 gap-3 mb-4">
+                <button onclick="clearDisplay()" class="calculator-btn bg-red-100 text-danger hover:bg-danger hover:text-white h-16 rounded-xl font-bold">C</button>
+                <button onclick="appendToDisplay('%')" class="calculator-btn bg-gray-200 hover:bg-gray-300 h-16 rounded-xl font-bold">%</button>
+                <button onclick="appendToDisplay('(')" class="calculator-btn bg-gray-200 hover:bg-gray-300 h-16 rounded-xl font-bold">(</button>
+                <button onclick="appendToDisplay(')')" class="calculator-btn bg-gray-200 hover:bg-gray-300 h-16 rounded-xl font-bold">)</button>
+                
+                <button onclick="appendToDisplay('7')" class="calculator-btn bg-gray-50 hover:bg-gray-100 h-16 rounded-xl text-xl">7</button>
+                <button onclick="appendToDisplay('8')" class="calculator-btn bg-gray-50 hover:bg-gray-100 h-16 rounded-xl text-xl">8</button>
+                <button onclick="appendToDisplay('9')" class="calculator-btn bg-gray-50 hover:bg-gray-100 h-16 rounded-xl text-xl">9</button>
+                <button onclick="appendToDisplay('/')" class="calculator-btn bg-gray-200 hover:bg-gray-300 h-16 rounded-xl font-bold">÷</button>
+                
+                <button onclick="appendToDisplay('4')" class="calculator-btn bg-gray-50 hover:bg-gray-100 h-16 rounded-xl text-xl">4</button>
+                <button onclick="appendToDisplay('5')" class="calculator-btn bg-gray-50 hover:bg-gray-100 h-16 rounded-xl text-xl">5</button>
+                <button onclick="appendToDisplay('6')" class="calculator-btn bg-gray-50 hover:bg-gray-100 h-16 rounded-xl text-xl">6</button>
+                <button onclick="appendToDisplay('*')" class="calculator-btn bg-gray-200 hover:bg-gray-300 h-16 rounded-xl font-bold">×</button>
+                
+                <button onclick="appendToDisplay('1')" class="calculator-btn bg-gray-50 hover:bg-gray-100 h-16 rounded-xl text-xl">1</button>
+                <button onclick="appendToDisplay('2')" class="calculator-btn bg-gray-50 hover:bg-gray-100 h-16 rounded-xl text-xl">2</button>
+                <button onclick="appendToDisplay('3')" class="calculator-btn bg-gray-50 hover:bg-gray-100 h-16 rounded-xl text-xl">3</button>
+                <button onclick="appendToDisplay('-')" class="calculator-btn bg-gray-200 hover:bg-gray-300 h-16 rounded-xl font-bold">−</button>
+                
+                <button onclick="appendToDisplay('0')" class="calculator-btn bg-gray-50 hover:bg-gray-100 h-16 rounded-xl text-xl">0</button>
+                <button onclick="appendToDisplay('.')" class="calculator-btn bg-gray-50 hover:bg-gray-100 h-16 rounded-xl text-xl">.</button>
+                <button onclick="calculate()" class="calculator-btn bg-primary hover:bg-primary-dark text-white h-16 rounded-xl font-bold">=</button>
+                <button onclick="appendToDisplay('+')" class="calculator-btn bg-gray-200 hover:bg-gray-300 h-16 rounded-xl font-bold">+</button>
+            </div>
+            
+            <!-- Funções Financeiras -->
+            <div class="grid grid-cols-2 gap-4 mt-6">
+                <button onclick="adicionarEntrada()" class="bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl flex items-center justify-center font-medium">
+                    <i class="fas fa-plus-circle mr-2"></i>Adicionar Entrada
+                </button>
+                <button onclick="adicionarSaida()" class="bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl flex items-center justify-center font-medium">
+                    <i class="fas fa-minus-circle mr-2"></i>Adicionar Saída
+                </button>
+                <button onclick="limparHistorico()" class="bg-gray-500 hover:bg-gray-600 text-white py-3 rounded-xl flex items-center justify-center font-medium col-span-2">
+                    <i class="fas fa-trash-alt mr-2"></i>Limpar Histórico
+                </button>
+            </div>
+        </div>
+        
+        <!-- Extrato Financeiro -->
+        <div class="md:w-1/2 w-full bg-gray-50 p-6 extrato-container md:border-l border-gray-200">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-receipt text-primary mr-2"></i>Extrato Financeiro
+                </h2>
+                <div class="bg-indigo-100 text-primary py-1 px-3 rounded-full font-bold">
+                    Saldo: R$ <span id="saldoTotal">0.00</span>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-4 mb-4 shadow">
+                <div class="flex justify-between text-sm text-gray-500 mb-2">
+                    <span>Transações (entradas/saídas)</span>
+                    <span>Valor</span>
+                </div>
+                <div id="historicoExtrato" class="max-h-80 overflow-y-auto">
+                    <div class="text-center py-8 text-gray-400">
+                        <i class="fas fa-file-invoice text-3xl mb-2"></i>
+                        <p>Nenhuma transação registrada</p>
+                        <p class="text-sm mt-2">Use os botões "Adicionar Entrada/Saída" para registrar transações</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-4 shadow">
+                <h3 class="font-bold text-gray-700 mb-2 flex items-center">
+                    <i class="fas fa-chart-pie text-primary mr-2"></i> Resumo
+                </h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-green-50 p-3 rounded-lg">
+                        <div class="text-green-800 text-sm">Entradas</div>
+                        <div class="text-lg font-bold text-green-700">R$ <span id="totalEntradas">0.00</span></div>
+                    </div>
+                    <div class="bg-red-50 p-3 rounded-lg">
+                        <div class="text-red-800 text-sm">Saídas</div>
+                        <div class="text-lg font-bold text-red-700">R$ <span id="totalSaidas">0.00</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Estado do sistema
+        const keyMap = {
+            '0': '0', '1': '1', '2': '2', '3': '3', '4': '4',
+            '5': '5', '6': '6', '7': '7', '8': '8', '9': '9',
+            '.': '.', '+': '+', '-': '-', '*': '*', '/': '/',
+            '%': '%', '(': '(', ')': ')',
+            'Enter': '=', '=': '=', 
+            'Escape': 'C', 'Delete': 'C',
+            'Backspace': 'backspace'
+        };
+
+        // Mapeamento visual para feedback de teclas pressionadas
+        const keyToButton = {
+            '0': "[onclick=\"appendToDisplay('0')\"]",
+            '1': "[onclick=\"appendToDisplay('1')\"]",
+            '2': "[onclick=\"appendToDisplay('2')\"]",
+            '3': "[onclick=\"appendToDisplay('3')\"]", 
+            '4': "[onclick=\"appendToDisplay('4')\"]",
+            '5': "[onclick=\"appendToDisplay('5')\"]",
+            '6': "[onclick=\"appendToDisplay('6')\"]",
+            '7': "[onclick=\"appendToDisplay('7')\"]",
+            '8': "[onclick=\"appendToDisplay('8')\"]",
+            '9': "[onclick=\"appendToDisplay('9')\"]",
+            '.': "[onclick=\"appendToDisplay('.')\"]",
+            '+': "[onclick=\"appendToDisplay('+')\"]",
+            '-': "[onclick=\"appendToDisplay('-')\"]",
+            '*': "[onclick=\"appendToDisplay('*')\"]",
+            '/': "[onclick=\"appendToDisplay('/')\"]",
+            '%': "[onclick=\"appendToDisplay('%')\"]",
+            '(': "[onclick=\"appendToDisplay('(')\"]",
+            ')': "[onclick=\"appendToDisplay(')')\"]",
+            '=': "[onclick=\"calculate()\"]",
+            'Enter': "[onclick=\"calculate()\"]",
+            'C': "[onclick=\"clearDisplay()\"]",
+            'Escape': "[onclick=\"clearDisplay()\"]",
+            'Delete': "[onclick=\"clearDisplay()\"]"
+        };
+
+        document.addEventListener('keydown', function(e) {
+            const key = keyMap[e.key];
+            if (!key) return;
+
+            // Feedback visual
+            const buttonSelector = keyToButton[key];
+            if (buttonSelector) {
+                const button = document.querySelector(`button${buttonSelector}`);
+                if (button) {
+                    button.classList.add('transform', 'scale-95', 'shadow-inner');
+                    setTimeout(() => {
+                        button.classList.remove('transform', 'scale-95', 'shadow-inner');
+                    }, 100);
+                }
+            }
+
+            // Executa a ação correspondente
+            if (key === 'backspace') {
+                displayValue = displayValue.slice(0, -1) || '0';
+                updateDisplay();
+            } else if (key === '=' || key === 'Enter') {
+                calculate();
+            } else if (key === 'C' || key === 'Escape' || key === 'Delete') {
+                clearDisplay();
+            } else {
+                appendToDisplay(key);
+            }
+        });
+
+        // Estado do sistema
+        let displayValue = '0';
+        let currentOperation = '';
+        let historico = [];
+        let totalEntradas = 0;
+        let totalSaidas = 0;
+        let saldoTotal = 0;
+        
+        // Elementos DOM
+        const displayElement = document.getElementById('display');
+        const operationElement = document.getElementById('currentOperation');
+        const extratoElement = document.getElementById('historicoExtrato');
+        const saldoElement = document.getElementById('saldoTotal');
+        const entradasElement = document.getElementById('totalEntradas');
+        const saidasElement = document.getElementById('totalSaidas');
+        
+        function updateDisplay() {
+            displayElement.textContent = displayValue;
+            operationElement.textContent = currentOperation;
+        }
+        
+        function appendToDisplay(value) {
+            if (displayValue === '0' && value !== '.') {
+                displayValue = '';
+            }
+            
+            if (value === '.' && displayValue.includes('.')) {
+                return;
+            }
+            
+            displayValue += value;
+            updateDisplay();
+        }
+        
+        function clearDisplay() {
+            displayValue = '0';
+            currentOperation = '';
+            updateDisplay();
+        }
+        
+        function calculate(focusAfter = true) {
+            try {
+                let expression = displayValue
+                    .replace(/×/g, '*')
+                    .replace(/÷/g, '/')
+                    .replace(/−/g, '-');
+                
+                // Substitui porcentagens por operações equivalentes
+                expression = expression.replace(/(\d+(\.\d+)?)%/g, (match, p1) => {
+                    return `(${p1}/100)`;
+                });
+                
+                const result = eval(expression);
+                currentOperation = displayValue + ' =';
+                displayValue = parseFloat(result.toFixed(4)).toString();
+                
+                // Remover zeros desnecessários após o decimal
+                if (displayValue.includes('.')) {
+                    displayValue = displayValue.replace(/\.?0+$/, '');
+                }
+                
+                updateDisplay();
+            } catch (error) {
+                currentOperation = 'Erro';
+                displayValue = '0';
+                updateDisplay();
+                setTimeout(() => {
+                    clearDisplay();
+                }, 1500);
+            }
+            
+            if (focusAfter) {
+                displayElement.focus();
+            }
+        }
+        
+        function adicionarEntrada() {
+            const valor = parseFloat(displayValue);
+            if (isNaN(valor) || valor <= 0) {
+                alert('Digite um valor válido para a entrada.');
+                return;
+            }
+            
+            const transacao = {
+                id: Date.now(),
+                tipo: 'entrada',
+                valor: valor,
+                descricao: 'Entrada financeira',
+                data: new Date().toLocaleString('pt-BR')
+            };
+            
+            historico.push(transacao);
+            totalEntradas += valor;
+            saldoTotal += valor;
+            atualizarExtrato();
+            clearDisplay();
+        }
+        
+        function adicionarSaida() {
+            const valor = parseFloat(displayValue);
+            if (isNaN(valor) || valor <= 0) {
+                alert('Digite um valor válido para a saída.');
+                return;
+            }
+            
+            const transacao = {
+                id: Date.now(),
+                tipo: 'saida',
+                valor: valor,
+                descricao: 'Saída financeira',
+                data: new Date().toLocaleString('pt-BR')
+            };
+            
+            historico.push(transacao);
+            totalSaidas += valor;
+            saldoTotal -= valor;
+            atualizarExtrato();
+            clearDisplay();
+        }
+        
+        function limparHistorico() {
+            if (!historico.length) return;
+            
+            if (confirm('Tem certeza que deseja limpar todo o histórico?')) {
+                historico = [];
+                totalEntradas = 0;
+                totalSaidas = 0;
+                saldoTotal = 0;
+                atualizarExtrato();
+            }
+        }
+        
+        function atualizarExtrato() {
+            // Atualizar totais
+            entradasElement.textContent = totalEntradas.toFixed(2);
+            saidasElement.textContent = totalSaidas.toFixed(2);
+            saldoElement.textContent = saldoTotal.toFixed(2);
+            
+            // Atualizar histórico
+            if (historico.length === 0) {
+                extratoElement.innerHTML = `
+                    <div class="text-center py-8 text-gray-400">
+                        <i class="fas fa-file-invoice text-3xl mb-2"></i>
+                        <p>Nenhuma transação registrada</p>
+                        <p class="text-sm mt-2">Use os botões "Adicionar Entrada/Saída" para registrar transações</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            extratoElement.innerHTML = '';
+            historico.forEach(transacao => {
+                const item = document.createElement('div');
+                item.classList.add('history-item', 'border-b', 'border-gray-100', 'py-3', 'flex', 'items-center');
+                
+                const icon = transacao.tipo === 'entrada' ? 
+                    `<div class="bg-green-100 w-10 h-10 rounded-full flex items-center justify-center text-green-600">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>` : 
+                    `<div class="bg-red-100 w-10 h-10 rounded-full flex items-center justify-center text-red-600">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>`;
+                
+                item.innerHTML = `
+                    ${icon}
+                    <div class="ml-3 flex-1 min-w-0">
+                        <div class="font-medium truncate">${transacao.descricao}</div>
+                        <div class="text-xs text-gray-500">${transacao.data}</div>
+                    </div>
+                    <div class="${transacao.tipo === 'entrada' ? 'text-green-600' : 'text-red-600'} font-medium">
+                        ${transacao.tipo === 'entrada' ? '+' : '-'} R$ ${transacao.valor.toFixed(2)}
+                    </div>
+                `;
+                extratoElement.prepend(item);
+            });
+        }
+        
+        // Inicialização
+        updateDisplay();
+        displayElement.focus();
+        
+        // Focar no display quando clicar em qualquer lugar da calculadora
+        document.querySelector('.p-6').addEventListener('click', () => {
+            displayElement.focus();
+        });
+    </script>
+</body>
+</html>
