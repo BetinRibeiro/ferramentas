@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Municipal - Prefeitura</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0c4a6e 0%, #082f49 100%);
+            background-attachment: fixed;
+        }
+        
+        .dashboard-card {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .status-ok { background-color: #10b981; }
+        .status-alert { background-color: #f59e0b; }
+        .status-critical { background-color: #ef4444; }
+        
+        .chart-container {
+            position: relative;
+            height: 200px;
+        }
+        
+        .section-title {
+            position: relative;
+            padding-left: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .section-title::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: #0ea5e9;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="text-gray-200 min-h-screen pb-10">
+    <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <header class="py-6 border-b border-primary-800">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold">Dashboard de Monitoramento Municipal</h1>
+                    <p class="text-primary-300">Gestão pública em tempo real</p>
+                </div>
+                <div class="mt-4 md:mt-0 flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="text-sm text-primary-300">Última atualização</p>
+                        <p class="font-semibold" id="current-time">Carregando...</p>
+                    </div>
+                    <div class="bg-primary-800 rounded-full w-12 h-12 flex items-center justify-center">
+                        <i class="fas fa-user text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6 flex flex-wrap gap-2">
+                <button class="px-4 py-2 rounded-lg bg-primary-700 hover:bg-primary-600 text-sm font-medium transition">Visão Geral</button>
+                <button class="px-4 py-2 rounded-lg bg-primary-800 hover:bg-primary-700 text-sm font-medium transition">Indicadores</button>
+                <button class="px-4 py-2 rounded-lg bg-primary-800 hover:bg-primary-700 text-sm font-medium transition">Relatórios</button>
+                <button class="px-4 py-2 rounded-lg bg-primary-800 hover:bg-primary-700 text-sm font-medium transition">Mapas</button>
+                <button class="px-4 py-2 rounded-lg bg-primary-800 hover:bg-primary-700 text-sm font-medium transition">Configurações</button>
+            </div>
+        </header>
+        
+        <!-- Resumo KPIs -->
+        <section class="mt-8">
+            <h2 class="text-xl font-bold mb-4">Visão Geral do Município</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- Execução Orçamentária -->
+                <div class="dashboard-card bg-primary-800 p-5">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-primary-300 text-sm font-medium">Execução Orçamentária</h3>
+                            <p class="text-2xl font-bold mt-1">72%</p>
+                            <div class="mt-2 flex items-center">
+                                <span class="status-indicator status-alert"></span>
+                                <span class="text-sm">Abaixo da meta (80%)</span>
+                            </div>
+                        </div>
+                        <div class="bg-primary-700 p-3 rounded-lg">
+                            <i class="fas fa-file-invoice-dollar text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-primary-700">
+                        <div class="flex justify-between text-sm">
+                            <span>Previsto: R$ 1.2 bi</span>
+                            <span>Executado: R$ 864 mi</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Satisfação da População -->
+                <div class="dashboard-card bg-primary-800 p-5">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-primary-300 text-sm font-medium">Satisfação da População</h3>
+                            <p class="text-2xl font-bold mt-1">7.2</p>
+                            <div class="mt-2 flex items-center">
+                                <span class="status-indicator status-ok"></span>
+                                <span class="text-sm">Dentro do esperado</span>
+                            </div>
+                        </div>
+                        <div class="bg-primary-700 p-3 rounded-lg">
+                            <i class="fas fa-smile text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-primary-700">
+                        <div class="text-sm">
+                            <span>Média dos últimos 3 meses</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Denúncias Atendidas -->
+                <div class="dashboard-card bg-primary-800 p-5">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-primary-300 text-sm font-medium">Denúncias Atendidas</h3>
+                            <p class="text-2xl font-bold mt-1">89%</p>
+                            <div class="mt-2 flex items-center">
+                                <span class="status-indicator status-ok"></span>
+                                <span class="text-sm">Acima da média</span>
+                            </div>
+                        </div>
+                        <div class="bg-primary-700 p-3 rounded-lg">
+                            <i class="fas fa-headset text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-primary-700">
+                        <div class="flex justify-between text-sm">
+                            <span>Recebidas: 1,243</span>
+                            <span>Resolvidas: 1,108</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Indicadores Críticos -->
+                <div class="dashboard-card bg-primary-800 p-5">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-primary-300 text-sm font-medium">Indicadores Críticos</h3>
+                            <p class="text-2xl font-bold mt-1">8</p>
+                            <div class="mt-2 flex items-center">
+                                <span class="status-indicator status-critical"></span>
+                                <span class="text-sm">Atenção necessária</span>
+                            </div>
+                        </div>
+                        <div class="bg-primary-700 p-3 rounded-lg">
+                            <i class="fas fa-exclamation-triangle text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-primary-700">
+                        <div class="text-sm">
+                            <span>Principais: Saúde e Infraestrutura</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Gráfico de Tendências -->
+        <section class="mt-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 dashboard-card bg-primary-800 p-5">
+                    <h3 class="text-lg font-semibold mb-4">Evolução de Indicadores (6 meses)</h3>
+                    <div class="chart-container">
+                        <canvas id="trendsChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card bg-primary-800 p-5">
+                    <h3 class="text-lg font-semibold mb-4">Distribuição por Área</h3>
+                    <div class="chart-container">
+                        <canvas id="distributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Áreas temáticas -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+            <!-- Governança e Gestão Pública -->
+            <section class="dashboard-card bg-primary-800 p-5">
+                <h2 class="text-xl font-bold section-title">🏛️ Governança e Gestão Pública</h2>
+                <div class="space-y-4">
+                    <div class="flex justify-between p-3 bg-primary-900 rounded-lg">
+                        <div>
+                            <h3 class="font-medium">Execução orçamentária</h3>
+                            <div class="flex items-center mt-1">
+                                <span class="status-indicator status-alert"></span>
+                                <span>72% de realização</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-semibold">-8%</div>
+                            <div class="text-sm text-primary-300">abaixo da meta</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between p-3 bg-primary-900 rounded-lg">
+                        <div>
+                            <h3 class="font-medium">Arrecadação de tributos</h3>
+                            <div class="flex items-center mt-1">
+                                <span class="status-indicator status-ok"></span>
+                                <span>R$ 18,2 milhões</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-semibold">+3.2%</div>
+                            <div class="text-sm text-primary-300">vs mês anterior</div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 bg-primary-900 rounded-lg">
+                        <h3 class="font-medium">Obras em andamento</h3>
+                        <div class="mt-2 space-y-2">
+                            <div class="flex justify-between">
+                                <div>
+                                    <span class="status-indicator status-ok"></span>
+                                    <span>16 em andamento</span>
+                                </div>
+                                <div class="text-sm bg-primary-700 px-2 py-1 rounded">No prazo</div>
+                            </div>
+                            <div class="flex justify-between">
+                                <div>
+                                    <span class="status-indicator status-alert"></span>
+                                    <span>7 atrasadas</span>
+                                </div>
+                                <div class="text-sm bg-amber-800 px-2 py-1 rounded">Atraso leve</div>
+                            </div>
+                            <div class="flex justify-between">
+                                <div>
+                                    <span class="status-indicator status-critical"></span>
+                                    <span>2 paradas</span>
+                                </div>
+                                <div class="text-sm bg-red-800 px-2 py-1 rounded">Paralisadas</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Segurança Pública -->
+            <section class="dashboard-card bg-primary-800 p-5">
+                <h2 class="text-xl font-bold section-title">👮‍♂️ Segurança Pública</h2>
+                <div class="space-y-4">
+                    <div class="flex justify-between p-3 bg-primary-900 rounded-lg">
+                        <div>
+                            <h3 class="font-medium">Ocorrências policiais</h3>
+                            <div class="text-sm mt-1">
+                                <span>Total: 387</span>
+                                <span class="ml-3 text-rose-500">+5.2% vs anterior</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-semibold">143 ocorrências</div>
+                            <div class="text-sm text-primary-300">últimos 7 dias</div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 bg-primary-900 rounded-lg">
+                        <h3 class="font-medium">Tipos de ocorrências</h3>
+                        <div class="mt-2 grid grid-cols-2 gap-2">
+                            <div class="flex items-center">
+                                <span class="status-indicator status-ok"></span>
+                                <span class="text-sm">Furtos: 127</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="status-indicator status-critical"></span>
+                                <span class="text-sm">Roubos: 89</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="status-indicator status-alert"></span>
+                                <span class="text-sm">Violência doméstica: 73</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="status-indicator status-ok"></span>
+                                <span class="text-sm">Outros: 98</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between p-3 bg-primary-900 rounded-lg">
+                        <div>
+                            <h3 class="font-medium">Monitoramento por câmeras</h3>
+                            <div class="flex items-center mt-1">
+                                <span class="status-indicator status-ok"></span>
+                                <span>87% ativas</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-semibold text-rose-500">13% inativas</div>
+                            <div class="text-sm text-primary-300">13 câmeras</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Saúde -->
+            <section class="dashboard-card bg-primary-800 p-5">
+                <h2 class="text-xl font-bold section-title">🏥 Saúde</h2>
+                <div class="space-y-4">
+                    <div class="flex justify-between p-3 bg-primary-900 rounded-lg">
+                        <div>
+                            <h3 class="font-medium">Atendimentos nas unidades</h3>
+                            <div class="flex items-center mt-1">
+                                <span class="status-indicator status-alert"></span>
+                                <span>6,284 atendimentos</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-semibold">41,3 min</div>
+                            <div class="text-sm text-primary-300">tempo médio espera</div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 bg-primary-900 rounded-lg">
+                        <h3 class="font-medium">Leitos disponíveis</h3>
+                        <div class="mt-3">
+                            <div class="flex justify-between mb-1">
+                                <span>Ocupação</span>
+                                <span>82%</span>
+                            </div>
+                            <div class="w-full bg-primary-700 rounded-full h-2">
+                                <div class="bg-rose-600 h-2 rounded-full" style="width: 82%"></div>
+                            </div>
+                            <div class="flex justify-between mt-1 text-sm">
+                                <span>Disponíveis: 56</span>
+                                <span>Ocupados: 230</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 bg-primary-900 rounded-lg">
+                        <h3 class="font-medium">Estoque de medicamentos</h3>
+                        <div class="mt-2">
+                            <div class="flex items-center justify-between">
+                                <span>Essenciais</span>
+                                <div>
+                                    <span class="text-xs bg-amber-800 px-2 py-1 rounded">Nível crítico</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between mt-1">
+                                <span>Emergenciais</span>
+                                <div>
+                                    <span class="text-xs bg-primary-700 px-2 py-1 rounded">Estável</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between mt-1">
+                                <span>Vacinas</span>
+                                <div>
+                                    <span class="text-xs bg-rose-800 px-2 py-1 rounded">Falta</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Educação -->
+            <section class="dashboard-card bg-primary-800 p-5">
+                <h2 class="text-xl font-bold section-title">📚 Educação</h2>
+                <div class="space-y-4">
+                    <div class="flex justify-between p-3 bg-primary-900 rounded-lg">
+                        <div>
+                            <h3 class="font-medium">IDEB</h3>
+                            <div class="flex items-center mt-1">
+                                <span class="status-indicator status-ok"></span>
+                                <span>6.2 pontos</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-semibold">+0.4</div>
+                            <div class="text-sm text-primary-300">vs último ano</div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 bg-primary-900 rounded-lg">
+                        <h3 class="font-medium">Infraestrutura escolar</h3>
+                        <div class="mt-2 grid grid-cols-2 gap-2">
+                            <div class="flex items-center">
+                                <span class="status-indicator status-ok"></span>
+                                <span class="text-sm">85% com merenda</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="status-indicator status-alert"></span>
+                                <span class="text-sm">62% com internet</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="status-indicator status-alert"></span>
+                                <span class="text-sm">68% estrutura OK</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="status-indicator status-critical"></span>
+                                <span class="text-sm">23% evasão</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 bg-primary-900 rounded-lg">
+                        <h3 class="font-medium">Média de alunos por sala</h3>
+                        <div class="mt-2 flex items-center justify-between">
+                            <div class="text-center">
+                                <div class="text-xl font-bold">28</div>
+                                <div class="text-sm text-primary-300">Fundamental</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-xl font-bold">32</div>
+                                <div class="text-sm text-primary-300">Médio</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-xl font-bold">18</div>
+                                <div class="text-sm text-primary-300">Creches</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Infraestrutura e Mobilidade -->
+            <section class="dashboard-card bg-primary-800 p-5">
+                <h2 class="text-xl font-bold section-title">🛣️ Infraestrutura e Mobilidade</h2>
+                <div class="space-y-4">
+                    <div class="p-3 bg-primary-900 rounded-lg">
+                        <h3 class="font-medium">Pavimentação urbana</h3>
+                        <div class="mt-3">
+                            <div class="flex justify-between mb-1">
+                                <span>Ruas pavimentadas</span>
+                                <span>68%</span>
+                            </div>
+                            <div class="w-full bg-primary-700 rounded-full h-2">
+                                <div class="bg-amber-500 h-2 rounded-full" style="width: 68%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 bg-primary-900 rounded-lg">
+                        <h3 class="font-medium">Obras municipais</h3>
+                        <div class="mt-2 grid grid-cols-3 gap-2">
+                            <div class="bg-emerald-900/50 p-2 rounded text-center">
+                                <div class="text-lg font-semibold">24</div>
+                                <div class="text-xs mt-1">Em andamento</div>
+                            </div>
+                            <div class="bg-amber-900/50 p-2 rounded text-center">
+                                <div class="text-lg font-semibold">9</div>
+                                <div class="text-xs mt-1">Atrasadas</div>
+                            </div>
+                            <div class="bg-rose-900/50 p-2 rounded text-center">
+                                <div class="text-lg font-semibold">3</div>
+                                <div class="text-xs mt-1">Paradas</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 bg-primary-900 rounded-lg">
+                        <h3 class="font-medium">Transporte público</h3>
+                        <div class="mt-2">
+                            <div class="flex justify-between">
+                                <span>Pontualidade</span>
+                                <span>74%</span>
+                            </div>
+                            <div class="flex justify-between mt-1">
+                                <span>Passageiros/dia</span>
+                                <span>28,412</span>
+                            </div>
+                            <div class="flex justify-between mt-1 text-rose-400">
+                                <span>Pontos críticos</span>
+                                <span>7 regiões</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Limpeza e Meio Ambiente -->
+            <section class="dashboard-card bg-primary-800 p-5">
+                <h2 class="text-xl font-bold section-title">🧹 Limpeza Urbana e Meio Ambiente</h2>
+                <div class="space-y-4">
+                    <div class="p-3 bg-primary-900 rounded-lg">
+                        <h3 class="font-medium">Coleta de lixo</h3>
+                        <div class="mt-3">
+                            <div class="flex justify-between mb-1">
+                                <span>Cobertura</span>
+                                <span>91%</span>
+                            </div>
+                            <div class="w-full bg-primary-700 rounded-full h-2">
+                                <div class="bg-emerald-500 h-2 rounded-full" style="width: 91%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 bg-primary-900 rounded-lg">
+                        <h3 class="font-medium">Áreas verdes</h3>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span>Manutenção</span>
+                            </div>
+                            <div>
+                                <span class="text-xs bg-emerald-800 px-2 py-1 rounded">78% adequadas</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between mt-2">
+                            <div>
+                                <span>Denúncias atendidas</span>
+                            </div>
+                            <div>
+                                <span class="text-xs bg-primary-700 px-2 py-1 rounded">64 resolvidas</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 bg-primary-900 rounded-lg">
+                        <h3 class="font-medium">Recursos hídricos</h3>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span>Qualidade da água</span>
+                            </div>
+                            <div>
+                                <span class="text-xs bg-amber-800 px-2 py-1 rounded">Regular</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between mt-2">
+                            <div>
+                                <span>Consumo/habitante</span>
+                            </div>
+                            <div>
+                                <span>154 litros/dia</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Assistência Social -->
+            <section class="dashboard-card bg-primary-800 p-5">
+                <h2 class="text-xl font-bold section-title">🧑‍🤝‍🧑 Assistência Social</h2>
+                <div class="space-y-4">
+                    <div class="p-3 bg-primary-900 rounded-lg">
+                        <div class="flex justify-between">
+                            <div>
+                                <h3 class="font-medium">Famílias vulneráveis</h3>
+                                <div class="flex items-center mt-1">
+                                    <span class="status-indicator status-critical"></span>
+                                    <span>4,128 famílias</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold text-rose-500">+12%</div>
+                                <div class="text-sm text-primary-300">vs ano anterior</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 bg-primary-900 rounded-lg">
+                        <h3 class="font-medium">Programas sociais</h3>
+                        <div class="mt-2 grid grid-cols-2 gap-2">
+                            <div class="flex items-center">
+                                <span class="status-indicator status-ok"></span>
+                                <span class="text-sm">22 ativos</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="status-indicator status-critical"></span>
+                                <span class="text-sm">87% demanda</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="status-indicator status-alert"></span>
+                                <span class="text-sm">Moradores de rua: 43</span>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="status-indicator status-alert"></span>
+                                <span class="text-sm">Creches: 78%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 bg-primary-900 rounded-lg">
+                        <div class="flex justify-between">
+                            <div>
+                                <h3 class="font-medium">Atendimentos sociais</h3>
+                                <div class="text-sm mt-1">2,143 no último mês</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold">59% mulheres</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Ouvidoria -->
+            <section class="dashboard-card bg-primary-800 p-5">
+                <h2 class="text-xl font-bold section-title">🧾 Ouvidoria / Participação Popular</h2>
+                <div class="space-y-4">
+                    <div class="p-3 bg-primary-900 rounded-lg">
+                        <div class="flex justify-between">
+                            <div>
+                                <h3 class="font-medium">Solicitações/reclamações</h3>
+                                <div class="flex items-center mt-1">
+                                    <span class="status-indicator status-alert"></span>
+                                    <span>1,243 no mês</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold">Média 7.2 dias</div>
+                                <div class="text-sm text-primary-300">resolução</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 bg-primary-900 rounded-lg">
+                        <h3 class="font-medium">Temas mais recorrentes</h3>
+                        <div class="mt-3 space-y-2">
+                            <div>
+                                <div class="flex justify-between text-sm">
+                                    <span>Iluminação pública</span>
+                                    <span>28%</span>
+                                </div>
+                                <div class="w-full bg-primary-700 rounded-full h-2 mt-1">
+                                    <div class="bg-amber-500 h-2 rounded-full" style="width: 28%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mt-2">
+                                    <span>Buraco nas ruas</span>
+                                    <span>22%</span>
+                                </div>
+                                <div class="w-full bg-primary-700 rounded-full h-2 mt-1">
+                                    <div class="bg-amber-500 h-2 rounded-full" style="width: 22%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mt-2">
+                                    <span>Coleta de lixo</span>
+                                    <span>18%</span>
+                                </div>
+                                <div class="w-full bg-primary-700 rounded-full h-2 mt-1">
+                                    <div class="bg-amber-500 h-2 rounded-full" style="width: 18%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 bg-primary-900 rounded-lg">
+                        <h3 class="font-medium">Resolução por secretaria</h3>
+                        <div class="mt-2">
+                            <div class="flex justify-between text-sm">
+                                <span>Infraestrutura</span>
+                                <span>84% resolvido</span>
+                            </div>
+                            <div class="flex justify-between text-sm mt-1">
+                                <span>Saúde</span>
+                                <span>67% resolvido</span>
+                            </div>
+                            <div class="flex justify-between text-sm mt-1 text-rose-400">
+                                <span>Educação</span>
+                                <span>43% resolvido</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    
+    <script>
+        // Atualiza o relógio
+        function updateClock() {
+            const now = new Date();
+            const options = { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit' 
+            };
+            document.getElementById('current-time').textContent = now.toLocaleDateString('pt-BR', options);
+        }
+        
+        // Atualiza a cada segundo
+        setInterval(updateClock, 1000);
+        updateClock();
+        
+        // Inicializa os gráficos
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gráfico de Tendências
+            const trendsCtx = document.getElementById('trendsChart').getContext('2d');
+            const trendsChart = new Chart(trendsCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+                    datasets: [
+                        {
+                            label: 'Satisfação',
+                            data: [6.2, 6.5, 6.7, 6.9, 7.1, 7.2],
+                            borderColor: '#0ea5e9',
+                            backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Orçamento',
+                            data: [65, 68, 70, 72, 71, 72],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'IDEB',
+                            data: [5.8, 5.9, 6.0, 6.1, 6.1, 6.2],
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.1)'
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.1)'
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Gráfico de Distribuição
+            const distCtx = document.getElementById('distributionChart').getContext('2d');
+            const distChart = new Chart(distCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Saúde', 'Educação', 'Infraestrutura', 'Segurança', 'Social', 'Meio Ambiente'],
+                    datasets: [{
+                        data: [28, 22, 20, 15, 10, 5],
+                        backgroundColor: [
+                            '#0ea5e9',
+                            '#8b5cf6',
+                            '#10b981',
+                            '#f59e0b',
+                            '#ec4899',
+                            '#06b6d4'
+                        ],
+                        borderColor: [
+                            '#0c4a6e',
+                            '#0c4a6e',
+                            '#0c4a6e',
+                            '#0c4a6e',
+                            '#0c4a6e',
+                            '#0c4a6e'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: '#e2e8f0'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
