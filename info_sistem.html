@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacker System Info Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cyberblack: '#030712',
+                        cybergreen: '#10b981',
+                        cyberblue: '#0ea5e9',
+                        cyberpurple: '#8b5cf6'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background: linear-gradient(to bottom, #030712, #0d2436);
+            min-height: 100vh;
+            color: #d1fae5;
+            overflow-x: hidden;
+        }
+        
+        .cyber-card {
+            background: rgba(17, 24, 39, 0.8);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(10, 191, 131, 0.1), 
+                        inset 0 0 10px rgba(10, 191, 131, 0.05);
+        }
+        
+        .cyber-card:hover {
+            border-color: rgba(139, 92, 246, 0.4);
+            box-shadow: 0 0 25px rgba(139, 92, 246, 0.2), 
+                        inset 0 0 15px rgba(139, 92, 246, 0.1);
+        }
+        
+        .cyber-header {
+            border-bottom: 1px solid rgba(56, 189, 248, 0.3);
+            background: rgba(15, 23, 42, 0.5);
+        }
+        
+        .info-label {
+            color: #7dd3fc;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+        
+        .info-value {
+            color: #d1fae5;
+            font-weight: bold;
+            word-break: break-all;
+        }
+        
+        .terminal-scroll {
+            max-height: 100px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #0ea5e9 #1e293b;
+        }
+        
+        .terminal-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .terminal-scroll::-webkit-scrollbar-thumb {
+            background-color: #0ea5e9;
+            border-radius: 4px;
+        }
+        
+        .cyber-button {
+            background: linear-gradient(45deg, #0ea5e9, #8b5cf6);
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            font-family: 'Share Tech Mono', monospace;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .cyber-button:hover {
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.6);
+            transform: translateY(-2px);
+        }
+        
+        .cyber-button:active {
+            transform: translateY(0);
+        }
+        
+        .cyber-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .cyber-button:hover::before {
+            left: 100%;
+        }
+        
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #0ea5e9, transparent);
+            animation: scan 5s infinite linear;
+            z-index: 1;
+            opacity: 0.3;
+        }
+        
+        @keyframes scan {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(100vh); }
+        }
+        
+        .glow {
+            text-shadow: 0 0 10px #0ea5e9, 0 0 20px #0ea5e9;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(14, 165, 233, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
+        }
+        
+        @media (max-width: 768px) {
+            .flex-col-mobile {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body class="relative overflow-x-hidden">
+    <div class="scan-line"></div>
+    
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-12 mt-6">
+            <h1 class="text-3xl md:text-4xl font-bold glow">
+                <i class="fas fa-terminal text-cybergreen mr-2"></i>CYBER INFO SYSTEM
+                <span class="text-cyberpurple">v1.0</span>
+            </h1>
+            <p class="text-cyberblue mt-2">ANALYZING YOUR SYSTEM & NETWORK DATA</p>
+            <div class="w-24 h-1 mx-auto bg-cybergreen mt-4"></div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Network Card -->
+            <div class="cyber-card">
+                <div class="cyber-header p-4">
+                    <h2 class="text-xl font-bold"><i class="fas fa-network-wired text-cyberblue mr-2"></i>Network Information</h2>
+                </div>
+                <div class="p-4">
+                    <div class="mb-3">
+                        <p class="info-label">Public IP Address</p>
+                        <p id="ip-address" class="info-value pulse bg-gray-800 p-2 rounded mt-1">Accessing network data...</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="info-label">Connection Type</p>
+                        <p id="connection-type" class="info-value">Detecting...</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="info-label">Connection Type</p>
+                        <p id="connection-type" class="info-value">Detecting...</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="info-label">Network Speed</p>
+                        <p id="network-speed" class="info-value">Calculating...</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="info-label">Network Type</p>
+                        <p id="network-type" class="info-value">Detecting...</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="info-label">Connection Status</p>
+                        <p id="connection-status" class="info-value">Detecting...</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="info-label">Local IP</p>
+                        <p id="local-ip" class="info-value">Detecting...</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="info-label">Storage Status</p>
+                        <p id="storage-status" class="info-value">Detecting...</p>
+                    </div>
+                    
+                    <div class="terminal-scroll bg-gray-800 p-3 rounded mt-4">
+                        <p class="text-cybergreen text-sm">&gt; Fetching network metadata...</p>
+                        <p class="text-cyberblue text-sm">&gt; Detecting connection protocol...</p>
+                        <p class="text-cyan-300 text-sm">&gt; Monitoring traffic streams...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- System Card -->
+            <div class="cyber-card">
+                <div class="cyber-header p-4">
+                    <h2 class="text-xl font-bold"><i class="fas fa-microchip text-cybergreen mr-2"></i>System Information</h2>
+                </div>
+                <div class="p-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="info-label">Operating System</p>
+                            <p id="os" class="info-value">Detecting...</p>
+                        </div>
+                        
+                        <div>
+                            <p class="info-label">Browser</p>
+                            <p id="browser" class="info-value">Detecting...</p>
+                        </div>
+                        
+                        <div>
+                            <p class="info-label">Screen Resolution</p>
+                            <p id="resolution" class="info-value">Detecting...</p>
+                        </div>
+                        
+                        <div>
+                            <p class="info-label">Device Pixel Ratio</p>
+                            <p id="pixel-ratio" class="info-value">Detecting...</p>
+                        </div>
+                        
+                        <div>
+                            <p class="info-label">Platform</p>
+                            <p id="platform" class="info-value">Detecting...</p>
+                        </div>
+                        
+                        <div>
+                            <p class="info-label">Device Type</p>
+                            <p id="device-type" class="info-value">Detecting...</p>
+                        </div>
+                        
+                        <div>
+                            <p class="info-label">Dark Mode</p>
+                            <p id="dark-mode" class="info-value">Detecting...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <p class="info-label">System Performance</p>
+                        <div class="mt-1">
+                            <div class="flex justify-between text-xs mb-1">
+                                <span>CPU Usage</span>
+                                <span id="cpu-usage">Calculating...</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div id="cpu-bar" class="bg-cybergreen h-2 rounded-full w-0"></div>
+                            </div>
+                            
+                            <div class="flex justify-between text-xs mb-1 mt-3">
+                                <span>Memory Usage</span>
+                                <span id="mem-usage">Calculating...</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div id="mem-bar" class="bg-cyberblue h-2 rounded-full w-0"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Fingerprint Card -->
+            <div class="cyber-card">
+                <div class="cyber-header p-4">
+                    <h2 class="text-xl font-bold"><i class="fas fa-fingerprint text-cyberpurple mr-2"></i>Browser Fingerprint</h2>
+                </div>
+                <div class="p-4">
+                    <div class="mb-3">
+                        <p class="info-label">User Agent</p>
+                        <p id="user-agent" class="info-value text-xs">Detecting...</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="info-label">Hardware Concurrency</p>
+                            <p id="cpu-cores" class="info-value">Detecting...</p>
+                        </div>
+                        
+                        <div>
+                            <p class="info-label">Device Memory</p>
+                            <p id="device-mem" class="info-value">Detecting...</p>
+                        </div>
+                        
+                        <div>
+                            <p class="info-label">Timezone</p>
+                            <p id="timezone" class="info-value">Detecting...</p>
+                        </div>
+                        
+                        <div>
+                            <p class="info-label">Language</p>
+                            <p id="language" class="info-value">Detecting...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <div class="bg-gray-800 p-3 rounded">
+                            <p class="text-cyberblue mb-2">Canvas Fingerprint</p>
+                            <div id="canvas-fingerprint" class="bg-gray-700 p-2 rounded text-xs truncate">Generating...</div>
+                        </div>
+                        <div class="bg-gray-800 p-3 rounded">
+                            <p class="text-cyberpurple mb-2">WebGL Fingerprint</p>
+                            <div id="webgl-fingerprint" class="bg-gray-700 p-2 rounded text-xs truncate">Generating...</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 bg-gray-800 p-3 rounded">
+                        <p class="text-cybergreen mb-2">Installed Fonts</p>
+                        <div id="fonts" class="bg-gray-700 p-2 rounded text-xs truncate">Detecting...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Terminal View -->
+        <div class="cyber-card mt-8">
+            <div class="cyber-header p-4 flex justify-between items-center">
+                <h2 class="text-xl font-bold"><i class="fas fa-terminal text-cybergreen mr-2"></i>System Terminal</h2>
+                <button id="refresh-btn" class="cyber-button text-sm">
+                    <i class="fas fa-sync-alt mr-2"></i>Refresh Data
+                </button>
+            </div>
+            <div id="terminal" class="terminal-scroll bg-gray-900 p-4 h-40">
+                <p class="text-green-400">&gt; Initializing Cyber System Info...</p>
+                <p class="text-blue-400">&gt; Loading security protocols...</p>
+                <p class="text-cyan-400">&gt; Accessing system resources...</p>
+                <p class="text-cyan-400">&gt; Establishing secure connection to server...</p>
+                <p class="text-green-400">&gt; System ready. Gathering information...</p>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex flex-col-mobile justify-center space-y-4 md:space-y-0 md:space-x-6 mt-8 mb-10">
+            <button class="cyber-button flex-1">
+                <i class="fas fa-lock mr-2"></i> Activate Security Protocols
+            </button>
+            <button class="cyber-button flex-1" style="background: linear-gradient(45deg, #8b5cf6, #ec4899);">
+                <i class="fas fa-shield-alt mr-2"></i> Enable Firewall
+            </button>
+            <button class="cyber-button flex-1" style="background: linear-gradient(45deg, #f97316, #f43f5e);">
+                <i class="fas fa-redo mr-2"></i> Force System Scan
+            </button>
+        </div>
+    </div>
+    
+    <footer class="text-center py-6 text-gray-500 text-sm">
+        <p>Cyber System Info Dashboard v1.0 | Privacy Protected | Secure Connection Established</p>
+        <p class="mt-1">© 2023 Cyber Technologies. All systems nominal.</p>
+    </footer>
+
+    <script>
+        // System information collection
+        function getSystemInfo() {
+            // Get platform and architecture
+            document.getElementById('platform').textContent = navigator.platform;
+            
+            // Detect device type
+            const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            document.getElementById('device-type').textContent = isMobile ? 'Mobile' : 'Desktop';
+            
+            // Check dark mode
+            const darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.getElementById('dark-mode').textContent = darkMode ? 'Enabled' : 'Disabled';
+            
+            // Get OS and Browser info
+            const userAgent = navigator.userAgent;
+            document.getElementById('user-agent').textContent = userAgent;
+            
+            let os = "Unknown";
+            if (userAgent.indexOf("Win") != -1) os = "Windows";
+            if (userAgent.indexOf("Mac") != -1) os = "Mac OS";
+            if (userAgent.indexOf("X11") != -1) os = "UNIX";
+            if (userAgent.indexOf("Linux") != -1) os = "Linux";
+            if (userAgent.indexOf("Android") != -1) os = "Android";
+            if (userAgent.indexOf("like Mac") != -1) os = "iOS";
+            document.getElementById('os').textContent = os;
+            
+            let browser = "Unknown";
+            if (userAgent.indexOf("Edg") != -1) browser = "Microsoft Edge";
+            else if (userAgent.indexOf("OPR") != -1 || userAgent.indexOf("Opera") != -1) browser = "Opera";
+            else if (userAgent.indexOf("Chrome") != -1) browser = "Google Chrome";
+            else if (userAgent.indexOf("Firefox") != -1) browser = "Mozilla Firefox";
+            else if (userAgent.indexOf("Safari") != -1) browser = "Safari";
+            document.getElementById('browser').textContent = browser;
+            
+            // Screen info
+            document.getElementById('resolution').textContent = `${screen.width}×${screen.height}`;
+            document.getElementById('pixel-ratio').textContent = window.devicePixelRatio;
+            
+            // Fingerprinting data
+            document.getElementById('cpu-cores').textContent = navigator.hardwareConcurrency || "N/A";
+            document.getElementById('device-mem').textContent = navigator.deviceMemory ? navigator.deviceMemory + " GB" : "N/A";
+            document.getElementById('timezone').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            document.getElementById('language').textContent = navigator.language || navigator.userLanguage;
+            
+            // Simulate CPU and memory usage
+            setInterval(() => {
+                const cpuUsage = Math.floor(Math.random() * 30) + 30;
+                const memUsage = Math.floor(Math.random() * 40) + 30;
+                
+                document.getElementById('cpu-usage').textContent = `${cpuUsage}%`;
+                document.getElementById('cpu-bar').style.width = `${cpuUsage}%`;
+                
+                document.getElementById('mem-usage').textContent = `${memUsage}%`;
+                document.getElementById('mem-bar').style.width = `${memUsage}%`;
+            }, 2000);
+            
+            // Generate canvas fingerprint
+            generateCanvasFingerprint();
+            
+            // Get network info and update terminal
+            getNetworkInfo();
+        }
+        
+        // Enhanced fingerprinting functions
+        function generateCanvasFingerprint() {
+            // Get WebGL info
+            const webglInfo = getWebGLInfo();
+            if (webglInfo) {
+                document.getElementById('webgl-fingerprint').textContent = 
+                    `${webglInfo.vendor} | ${webglInfo.renderer}`;
+            }
+            
+            // Font detection (simplified)
+            const testFonts = [
+                'Arial', 'Courier New', 'Georgia', 'Times New Roman', 
+                'Comic Sans MS', 'Verdana', 'Helvetica'
+            ];
+            const availableFonts = testFonts.filter(font => {
+                const span = document.createElement('span');
+                span.style.fontFamily = font;
+                span.style.position = 'absolute';
+                span.style.left = '-5000px';
+                span.innerHTML = 'test';
+                document.body.appendChild(span);
+                const width = span.offsetWidth;
+                document.body.removeChild(span);
+                return width > 0;
+            });
+            document.getElementById('fonts').textContent = 
+                `${availableFonts.length} fonts detected (${availableFonts.slice(0, 3).join(', ')}...)`;
+            
+            // Original canvas fingerprint
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Draw a simple pattern that varies across systems
+            ctx.textBaseline = "top";
+            ctx.font = "16px 'Arial'";
+            ctx.textBaseline = "alphabetic";
+            ctx.fillStyle = "#8b5cf6";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#0ea5e9";
+            ctx.fillText("CyberFingerprint", 8, 8);
+            ctx.fillStyle = "#d1fae5";
+            ctx.fillText("H4CK3R", 8, 40);
+            
+            // Get the data URL and generate a hash
+            const dataUrl = canvas.toDataURL();
+            let hash = 0;
+            for (let i = 0; i < dataUrl.length; i++) {
+                const char = dataUrl.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            
+            // Truncate hash and display as hex
+            const fingerprint = (hash >>> 0).toString(16).toUpperCase();
+            document.getElementById('canvas-fingerprint').textContent = fingerprint;
+        }
+        
+        // Get WebRTC local IP
+        async function getLocalIP() {
+            return new Promise((resolve) => {
+                const pc = new RTCPeerConnection({iceServers: []});
+                pc.createDataChannel('');
+                pc.createOffer().then(offer => pc.setLocalDescription(offer));
+                
+                pc.onicecandidate = (ice) => {
+                    if (!ice.candidate) return;
+                    const ip = /([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7})/.exec(ice.candidate.candidate)[1];
+                    resolve(ip);
+                    pc.onicecandidate = () => {};
+                };
+            });
+        }
+
+        // Get WebGL info
+        function getWebGLInfo() {
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            if (!gl) return null;
+            
+            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+            if (debugInfo) {
+                return {
+                    vendor: gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL),
+                    renderer: gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)
+                };
+            }
+            return null;
+        }
+
+        // Network information collection
+        async function getNetworkInfo() {
+            // Update terminal
+            const terminal = document.getElementById('terminal');
+            terminal.innerHTML += '<p class="text-green-400">&gt; Retrieving network information...</p>';
+            terminal.scrollTop = terminal.scrollHeight;
+            
+            try {
+                // Get public IP
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                document.getElementById('ip-address').textContent = ipData.ip;
+                document.getElementById('ip-address').classList.remove('pulse');
+                
+                terminal.innerHTML += '<p class="text-green-400">&gt; Public IP retrieved: ' + ipData.ip + '</p>';
+            } catch (error) {
+                document.getElementById('ip-address').textContent = "Failed to retrieve";
+                terminal.innerHTML += '<p class="text-red-400">&gt; Failed to retrieve IP address</p>';
+            }
+            
+            // Connection status
+            document.getElementById('connection-status').textContent = navigator.onLine ? 'Online' : 'Offline';
+            
+            // Local IP via WebRTC
+            try {
+                const localIP = await getLocalIP();
+                document.getElementById('local-ip').textContent = localIP;
+                terminal.innerHTML += `<p class="text-blue-400">&gt; Local IP detected: ${localIP}</p>`;
+            } catch (e) {
+                document.getElementById('local-ip').textContent = 'Not available';
+                terminal.innerHTML += `<p class="text-red-400">&gt; Local IP detection failed</p>`;
+            }
+            
+            // Storage status
+            const storageStatus = [];
+            if ('localStorage' in window) storageStatus.push('LocalStorage');
+            if ('sessionStorage' in window) storageStatus.push('SessionStorage');
+            if ('indexedDB' in window) storageStatus.push('IndexedDB');
+            if ('serviceWorker' in navigator) storageStatus.push('ServiceWorker');
+            document.getElementById('storage-status').textContent = storageStatus.join(', ');
+            
+            // Get network connection info
+            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            if (connection) {
+                const type = connection.effectiveType || "N/A";
+                const speed = Math.round(connection.downlink * 100) / 100 || "N/A";
+                const netType = connection.type || "Unknown";
+                
+                document.getElementById('connection-type').textContent = type.toUpperCase();
+                document.getElementById('network-speed').textContent = speed + " Mb/s";
+                document.getElementById('network-type').textContent = netType;
+                
+                terminal.innerHTML += '<p class="text-blue-400">&gt; Connection type: ' + type.toUpperCase() + '</p>';
+                terminal.innerHTML += '<p class="text-blue-400">&gt; Network speed: ~' + speed + ' Mb/s</p>';
+                terminal.innerHTML += '<p class="text-blue-400">&gt; Network medium: ' + netType + '</p>';
+            } else {
+                terminal.innerHTML += '<p class="text-red-400">&gt; Network connection info not available</p>';
+            }
+            
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+        
+        // Initialize terminal data
+        function initializeTerminal() {
+            const terminal = document.getElementById('terminal');
+            const scripts = [
+                "> System Info Dashboard initialized",
+                "> Loading encryption modules...",
+                "> Establishing connection to API endpoints...",
+                "> Security protocols enabled...",
+                "> Ready to retrieve system information..."
+            ];
+            
+            let index = 0;
+            const interval = setInterval(() => {
+                if (index < scripts.length) {
+                    terminal.innerHTML += `<p class="${index % 2 === 0 ? 'text-green-400' : 'text-blue-400'}">${scripts[index]}</p>`;
+                    index++;
+                    terminal.scrollTop = terminal.scrollHeight;
+                } else {
+                    clearInterval(interval);
+                }
+            }, 800);
+        }
+        
+        // Refresh button
+        document.getElementById('refresh-btn').addEventListener('click', function() {
+            const terminal = document.getElementById('terminal');
+            terminal.innerHTML += '<p class="text-yellow-400">&gt; Refreshing all system data...</p>';
+            terminal.scrollTop = terminal.scrollHeight;
+            
+            document.getElementById('ip-address').textContent = 'Accessing network data...';
+            document.getElementById('ip-address').classList.add('pulse');
+            
+            setTimeout(() => {
+                getSystemInfo();
+                terminal.innerHTML += '<p class="text-green-400">&gt; System data refreshed successfully</p>';
+                terminal.scrollTop = terminal.scrollHeight;
+            }, 1000);
+        });
+        
+        // Initialize all
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTerminal();
+            setTimeout(() => {
+                getSystemInfo();
+            }, 2500);
+        });
+    </script>
+</body>
+</html>
