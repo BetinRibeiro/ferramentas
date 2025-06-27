@@ -1,0 +1,108 @@
+Você pode criar uma calculadora de margem de lucro ajustada com entrada usando HTML, CSS e JavaScript. A lógica será:
+
+🧮 Entradas:
+
+Valor de compra
+
+Valor de venda
+
+Margem de lucro desejada (ex: 5 = 5x o custo)
+
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Calculadora de Margem com Entrada</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+      background: #f2f2f2;
+    }
+    h2 {
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #007bff;
+      color: white;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h2>Calculadora de Lucro com Entrada</h2>
+  
+  <label for="compra">Valor de Compra</label>
+  <input type="number" id="compra" placeholder="Ex: 100" step="0.01">
+
+  <label for="venda">Valor de Venda</label>
+  <input type="number" id="venda" placeholder="Ex: 500" step="0.01">
+
+  <label for="margem">Margem de Lucro (ex: 5 para 5x)</label>
+  <input type="number" id="margem" placeholder="Ex: 5" step="0.01">
+
+  <label for="entrada">Valor de Entrada</label>
+  <input type="number" id="entrada" placeholder="Ex: 150" step="0.01">
+
+  <button onclick="calcular()">Calcular Valor Faltante</button>
+
+  <p id="resultado" style="margin-top: 20px; font-weight: bold;"></p>
+
+  <script>
+    function calcular() {
+      let compra = parseFloat(document.getElementById("compra").value);
+      let venda = parseFloat(document.getElementById("venda").value);
+      let margem = parseFloat(document.getElementById("margem").value);
+      let entrada = parseFloat(document.getElementById("entrada").value);
+
+      let campos = [compra, venda, margem, entrada];
+      let vazios = campos.filter(v => isNaN(v)).length;
+
+      if (vazios !== 1) {
+        document.getElementById("resultado").textContent = "Preencha exatamente 3 campos.";
+        return;
+      }
+
+      // Calcular o valor faltante
+      let resultado = "";
+      if (isNaN(compra)) {
+        compra = venda / margem;
+        resultado = `Valor de Compra calculado: R$ ${compra.toFixed(2)}`;
+      } else if (isNaN(venda)) {
+        venda = compra * margem;
+        resultado = `Valor de Venda calculado: R$ ${venda.toFixed(2)}`;
+      } else if (isNaN(margem)) {
+        margem = venda / compra;
+        resultado = `Margem de Lucro calculada: ${margem.toFixed(2)}x`;
+      } else if (isNaN(entrada)) {
+        entrada = venda - (compra * margem);
+        resultado = `Entrada necessária para atingir margem: R$ ${entrada.toFixed(2)}`;
+      }
+
+      document.getElementById("resultado").textContent = resultado;
+    }
+  </script>
+</body>
+</html>
+
+
