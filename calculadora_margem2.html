@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Margem de Lucro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .input-group {
+            transition: all 0.3s ease;
+        }
+        .input-group:focus-within {
+            transform: translateY(-2px);
+        }
+        .btn-calculate {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        .btn-calculate:active {
+            transform: translateY(0);
+        }
+        .result-card {
+            transition: all 0.5s ease;
+            max-height: 0;
+            overflow: hidden;
+        }
+        .result-card.show {
+            max-height: 500px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-2xl bg-white rounded-xl shadow-lg overflow-hidden">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-500 p-6 text-white">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold">Calculadora Financeira</h1>
+                    <p class="text-blue-100">Calcule margem de lucro, preços e entradas</p>
+                </div>
+                <div class="bg-white bg-opacity-20 p-3 rounded-full">
+                    <i class="fas fa-calculator text-2xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <div class="p-6">
+            <div class="space-y-4">
+                <!-- Preço de Venda -->
+                <div class="input-group">
+                    <label for="preco_venda" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-tag mr-2 text-blue-500"></i>Preço de Venda (R$)
+                    </label>
+                    <div class="relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="text-gray-500 sm:text-sm">R$</span>
+                        </div>
+                        <input type="number" id="preco_venda" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-12 pr-12 py-3 sm:text-sm border-gray-300 rounded-md" placeholder="0.00">
+                    </div>
+                </div>
+
+                <!-- Preço de Compra -->
+                <div class="input-group">
+                    <label for="preco_compra" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-shopping-cart mr-2 text-blue-500"></i>Preço de Compra (R$)
+                    </label>
+                    <div class="relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="text-gray-500 sm:text-sm">R$</span>
+                        </div>
+                        <input type="number" id="preco_compra" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-12 pr-12 py-3 sm:text-sm border-gray-300 rounded-md" placeholder="0.00">
+                    </div>
+                </div>
+
+                <!-- Entrada -->
+                <div class="input-group">
+                    <label for="entrada" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-hand-holding-usd mr-2 text-blue-500"></i>Entrada (R$)
+                    </label>
+                    <div class="relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="text-gray-500 sm:text-sm">R$</span>
+                        </div>
+                        <input type="number" id="entrada" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-12 pr-12 py-3 sm:text-sm border-gray-300 rounded-md" placeholder="0.00">
+                    </div>
+                </div>
+
+                <!-- Margem de Lucro -->
+                <div class="input-group">
+                    <label for="margem_lucro" class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-percentage mr-2 text-blue-500"></i>Margem de Lucro (%)
+                    </label>
+                    <div class="relative rounded-md shadow-sm">
+                        <input type="number" id="margem_lucro" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-12 py-3 sm:text-sm border-gray-300 rounded-md" placeholder="0">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <span class="text-gray-500 sm:text-sm">%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructions -->
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-info-circle text-blue-500 mt-1"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-blue-800">Como usar</h3>
+                            <div class="mt-2 text-sm text-blue-700">
+                                <p>Preencha 3 campos e deixe 1 em branco para calcular o valor faltante.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calculate Button -->
+                <button onclick="calcular()" class="btn-calculate w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i class="fas fa-calculator mr-2"></i> Calcular
+                </button>
+            </div>
+
+            <!-- Results -->
+            <div id="result-card" class="result-card mt-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900 mb-2 flex items-center">
+                    <i class="fas fa-chart-line text-blue-500 mr-2"></i> Resultado
+                </h3>
+                <div id="resultado" class="text-lg font-semibold text-gray-800 mb-4"></div>
+                
+                <div class="bg-white p-4 rounded border border-gray-200">
+                    <h4 class="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                        <i class="fas fa-code text-blue-500 mr-2"></i> Detalhes do cálculo
+                    </h4>
+                    <div id="descricao" class="text-sm text-gray-600 font-mono bg-gray-50 p-3 rounded overflow-x-auto"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+            <div class="text-center text-sm text-gray-500">
+                <p>Preencha 3 campos para calcular o quarto</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const arred = (v) => parseFloat(v.toFixed(2));
+
+        function calcular() {
+            const vendaStr = document.getElementById("preco_venda").value;
+            const compraStr = document.getElementById("preco_compra").value;
+            const entradaStr = document.getElementById("entrada").value;
+            const margemStr = document.getElementById("margem_lucro").value;
+
+            // Contagem de vazios
+            const campos = {
+                venda: vendaStr,
+                compra: compraStr,
+                entrada: entradaStr,
+                margem: margemStr
+            };
+
+            const vazios = Object.entries(campos).filter(([_, valor]) => valor.trim() === "");
+
+            if (vazios.length !== 1) {
+                // Show error message in a nice way
+                const resultCard = document.getElementById("result-card");
+                resultCard.classList.remove("show");
+                
+                setTimeout(() => {
+                    document.getElementById("resultado").innerHTML = `
+                        <div class="bg-red-50 border-l-4 border-red-400 p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-exclamation-circle text-red-400"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-red-700">
+                                        Preencha exatamente 3 campos e deixe 1 em branco para calcular.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById("descricao").innerHTML = "";
+                    resultCard.classList.add("show");
+                }, 10);
+                
+                return;
+            }
+
+            // Converte os preenchidos para número
+            const venda = parseFloat(vendaStr);
+            const compra = parseFloat(compraStr);
+            const entrada = parseFloat(entradaStr);
+            const margem = parseFloat(margemStr);
+            const faltando = vazios[0][0];
+
+            let resultado = 0;
+            let descricao = "";
+
+            if (faltando === "margem") {
+                resultado = ((venda - entrada) / (compra - entrada)) * 100;
+                descricao = `margem = ((venda - entrada) / (compra - entrada)) * 100<br>
+                margem = ((${venda} - ${entrada}) / (${compra} - ${entrada})) * 100<br>
+                margem = ${arred(resultado)}%`;
+                document.getElementById("resultado").innerHTML = `
+                    <div class="bg-green-50 border-l-4 border-green-400 p-4">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-green-700">
+                                    Margem de lucro calculada: <strong class="text-lg">${arred(resultado)}%</strong>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            else if (faltando === "venda") {
+                resultado = ((margem / 100) * (compra - entrada)) + entrada;
+                descricao = `venda = ((margem / 100) * (compra - entrada)) + entrada<br>
+                venda = ((${margem} / 100) * (${compra} - ${entrada})) + ${entrada}<br>
+                venda = R$ ${arred(resultado)}`;
+                document.getElementById("resultado").innerHTML = `
+                    <div class="bg-green-50 border-l-4 border-green-400 p-4">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-green-700">
+                                    Preço de venda calculado: <strong class="text-lg">R$ ${arred(resultado)}</strong>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            else if (faltando === "compra") {
+                resultado = ((venda - entrada) * 100 / margem) + entrada;
+                descricao = `compra = ((venda - entrada) * 100 / margem) + entrada<br>
+                compra = ((${venda} - ${entrada}) * 100 / ${margem}) + ${entrada}<br>
+                compra = R$ ${arred(resultado)}`;
+                document.getElementById("resultado").innerHTML = `
+                    <div class="bg-green-50 border-l-4 border-green-400 p-4">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-green-700">
+                                    Preço de compra calculado: <strong class="text-lg">R$ ${arred(resultado)}</strong>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            else if (faltando === "entrada") {
+                resultado = (venda - (margem / 100) * compra) / (1 - (margem / 100));
+                descricao = `entrada = (venda - (margem / 100 * compra)) / (1 - (margem / 100))<br>
+                entrada = (${venda} - (${margem} / 100 * ${compra})) / (1 - (${margem} / 100))<br>
+                entrada = R$ ${arred(resultado)}`;
+                document.getElementById("resultado").innerHTML = `
+                    <div class="bg-green-50 border-l-4 border-green-400 p-4">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-green-700">
+                                    Entrada calculada: <strong class="text-lg">R$ ${arred(resultado)}</strong>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            document.getElementById("descricao").innerHTML = descricao;
+            
+            // Show result with animation
+            const resultCard = document.getElementById("result-card");
+            resultCard.classList.remove("show");
+            setTimeout(() => {
+                resultCard.classList.add("show");
+            }, 10);
+        }
+
+        // Add animation when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                document.querySelector('div.bg-white').classList.add('animate-fade-in');
+            }, 100);
+        });
+    </script>
+</body>
+</html>
