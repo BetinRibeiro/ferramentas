@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Margem de Lucro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .input-container {
+            transition: all 0.3s ease;
+        }
+        .input-container:focus-within {
+            transform: translateY(-2px);
+        }
+        .shake {
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-white rounded-xl shadow-xl overflow-hidden">
+        <div class="bg-indigo-600 p-6 text-white">
+            <h1 class="text-2xl font-bold flex items-center">
+                <i class="fas fa-calculator mr-3"></i>
+                Calculadora de Margem
+            </h1>
+            <p class="text-indigo-100 mt-1">Preencha 3 valores para calcular o 4º</p>
+        </div>
+        
+        <div class="p-6">
+            <div class="space-y-4">
+                <div class="input-container bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Preço de Compra (R$)</label>
+                    <div class="flex items-center">
+                        <input type="number" id="purchase" class="flex-1 border-none bg-transparent focus:ring-0 text-lg font-medium" placeholder="0.00">
+                        <button class="clear-btn text-gray-400 hover:text-indigo-600" data-target="purchase">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="input-container bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Preço de Venda (R$)</label>
+                    <div class="flex items-center">
+                        <input type="number" id="sale" class="flex-1 border-none bg-transparent focus:ring-0 text-lg font-medium" placeholder="0.00">
+                        <button class="clear-btn text-gray-400 hover:text-indigo-600" data-target="sale">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="input-container bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Entrada (R$)</label>
+                    <div class="flex items-center">
+                        <input type="number" id="discount" class="flex-1 border-none bg-transparent focus:ring-0 text-lg font-medium" placeholder="0.00">
+                        <button class="clear-btn text-gray-400 hover:text-indigo-600" data-target="discount">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="input-container bg-indigo-50 rounded-lg p-4 border border-indigo-100">
+                    <label class="block text-sm font-medium text-indigo-700 mb-1">Margem de Lucro (%)</label>
+                    <div class="flex items-center">
+                        <input type="number" id="margin" class="flex-1 border-none bg-transparent focus:ring-0 text-lg font-medium text-indigo-700" placeholder="0.00">
+                        <button class="clear-btn text-indigo-400 hover:text-indigo-700" data-target="margin">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6 flex space-x-3">
+                <button id="calculate" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-4 rounded-lg font-medium transition flex items-center justify-center">
+                    <i class="fas fa-calculator mr-2"></i> Calcular
+                </button>
+                <button id="reset" class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium transition flex items-center justify-center">
+                    <i class="fas fa-redo mr-2"></i> Limpar
+                </button>
+            </div>
+        </div>
+        
+        <div id="result" class="bg-green-50 border-t border-green-100 p-4 hidden">
+            <div class="flex items-center text-green-700">
+                <i class="fas fa-check-circle text-xl mr-2"></i>
+                <p class="font-medium" id="result-text"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const purchaseInput = document.getElementById('purchase');
+            const saleInput = document.getElementById('sale');
+            const discountInput = document.getElementById('discount');
+            const marginInput = document.getElementById('margin');
+            const calculateBtn = document.getElementById('calculate');
+            const resetBtn = document.getElementById('reset');
+            const resultDiv = document.getElementById('result');
+            const resultText = document.getElementById('result-text');
+            const clearBtns = document.querySelectorAll('.clear-btn');
+            
+            // Clear individual fields
+            clearBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const target = this.getAttribute('data-target');
+                    document.getElementById(target).value = '';
+                });
+            });
+            
+            // Reset all fields
+            resetBtn.addEventListener('click', function() {
+                purchaseInput.value = '';
+                saleInput.value = '';
+                discountInput.value = '';
+                marginInput.value = '';
+                resultDiv.classList.add('hidden');
+            });
+            
+            // Calculate the missing value
+            calculateBtn.addEventListener('click', function() {
+                const purchase = parseFloat(purchaseInput.value) || 0;
+                const sale = parseFloat(saleInput.value) || 0;
+                const discount = parseFloat(discountInput.value) || 0;
+                const margin = parseFloat(marginInput.value) || 0;
+                
+                // Count how many fields are empty
+                const emptyFields = [
+                    purchaseInput.value === '',
+                    saleInput.value === '',
+                    discountInput.value === '',
+                    marginInput.value === ''
+                ].filter(Boolean).length;
+                
+                if (emptyFields !== 1) {
+                    shakeForm();
+                    resultDiv.classList.remove('hidden');
+                    resultDiv.className = 'bg-red-50 border-t border-red-100 p-4';
+                    resultText.className = 'font-medium text-red-700';
+                    resultText.innerHTML = '<i class="fas fa-exclamation-circle text-xl mr-2"></i> Preencha exatamente 3 campos para calcular o 4º';
+                    return;
+                }
+                
+                let calculatedValue;
+                let calculationType;
+                
+                if (purchaseInput.value === '') {
+                    // Calculate purchase price
+                    calculatedValue = ((sale - discount) / (margin / 100) + discount).toFixed(2);
+                    purchaseInput.value = calculatedValue;
+                    calculationType = 'Preço de Compra';
+                } else if (saleInput.value === '') {
+                    // Calculate sale price
+                    calculatedValue = ((purchase - discount) * (margin / 100) + discount).toFixed(2);
+                    saleInput.value = calculatedValue;
+                    calculationType = 'Preço de Venda';
+                } else if (discountInput.value === '') {
+                    // Calculate discount
+                    calculatedValue = ((sale - purchase * (1 + margin / 100)) / (1 - margin / 100)).toFixed(2);
+                    discountInput.value = calculatedValue;
+                    calculationType = 'Entrada';
+                } else {
+                    // Calculate margin
+                    calculatedValue = (((sale - discount) / (purchase - discount)) * 100).toFixed(2);
+                    marginInput.value = calculatedValue;
+                    calculationType = 'Margem de Lucro';
+                }
+                
+                // Show result
+                resultDiv.classList.remove('hidden');
+                resultDiv.className = 'bg-green-50 border-t border-green-100 p-4';
+                resultText.className = 'font-medium text-green-700';
+                resultText.innerHTML = `<i class="fas fa-check-circle text-xl mr-2"></i> ${calculationType} calculado: ${calculatedValue}`;
+            });
+            
+            // Shake animation for errors
+            function shakeForm() {
+                const inputs = document.querySelectorAll('.input-container');
+                inputs.forEach(input => {
+                    input.classList.add('shake');
+                    setTimeout(() => {
+                        input.classList.remove('shake');
+                    }, 500);
+                });
+            }
+            
+            // Allow only numbers and decimal point
+            const inputs = document.querySelectorAll('input[type="number"]');
+            inputs.forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === '.' && this.value.includes('.')) {
+                        e.preventDefault();
+                    }
+                    if (isNaN(e.key) && e.key !== '.' && e.key !== 'Backspace' && e.key !== 'Delete') {
+                        e.preventDefault();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
