@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foto com GPS Offline</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        @media (max-width: 640px) {
+            .photo-container {
+                width: 100%;
+                height: 70vh;
+            }
+        }
+        
+        @media (min-width: 641px) {
+            .photo-container {
+                width: 80%;
+                height: 80vh;
+                margin: 0 auto;
+            }
+        }
+        
+        .location-badge {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: monospace;
+        }
+        
+        #canvas {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Foto com GPS Offline</h1>
+            <p class="text-gray-600">Tire fotos com localização mesmo sem internet</p>
+            <div id="installButtonContainer" class="mt-4 hidden">
+                <button id="installButton" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
+                    Instalar App
+                </button>
+            </div>
+        </header>
+
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+            <div class="photo-container relative flex items-center justify-center bg-gray-200">
+                <video id="video" class="w-full h-full object-cover hidden"></video>
+                <canvas id="canvas" class="hidden"></canvas>
+                <div id="photoPlaceholder" class="text-center p-8">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <p class="text-gray-500">Nenhuma foto tirada ainda</p>
+                </div>
+                <div id="locationBadge" class="location-badge hidden"></div>
+            </div>
+
+            <div class="p-4 bg-gray-50 flex flex-wrap justify-center gap-4">
+                <button id="startCamera" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Abrir Câmera
+                </button>
+                <button id="takePhoto" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 flex items-center hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Tirar Foto
+                </button>
+                <button id="downloadPhoto" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 flex items-center hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Baixar Foto
+                </button>
+                <button id="resetCamera" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 flex items-center hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Reiniciar
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Últimas Fotos</h2>
+            <div id="photoGallery" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- Fotos serão adicionadas aqui -->
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Status do GPS</h2>
+            <div class="flex items-center mb-4">
+                <div id="gpsStatus" class="w-4 h-4 rounded-full bg-gray-400 mr-2"></div>
+                <span id="gpsStatusText" class="text-gray-700">Aguardando ativação...</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-gray-700 mb-2">Latitude</h3>
+                    <p id="latitude" class="font-mono text-gray-900">--</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-gray-700 mb-2">Longitude</h3>
+                    <p id="longitude" class="font-mono text-gray-900">--</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-gray-700 mb-2">Precisão</h3>
+                    <p id="accuracy" class="font-mono text-gray-900">-- metros</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-gray-700 mb-2">Última Atualização</h3>
+                    <p id="lastUpdate" class="font-mono text-gray-900">--</p>
+                </div>
+            </div>
+            <button id="startGPS" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
+                Ativar GPS
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+
+        // Install Prompt
+        let deferredPrompt;
+        const installButton = document.getElementById('installButton');
+        const installButtonContainer = document.getElementById('installButtonContainer');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installButtonContainer.classList.remove('hidden');
+            
+            installButton.addEventListener('click', () => {
+                installButtonContainer.classList.add('hidden');
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                    } else {
+                        console.log('User dismissed the install prompt');
+                    }
+                    deferredPrompt = null;
+                });
+            });
+        });
+
+        // App State
+        const state = {
+            video: null,
+            canvas: null,
+            photo: null,
+            currentLocation: null,
+            watchId: null,
+            photos: JSON.parse(localStorage.getItem('photos')) || []
+        };
+
+        // DOM Elements
+        const videoElement = document.getElementById('video');
+        const canvasElement = document.getElementById('canvas');
+        const photoPlaceholder = document.getElementById('photoPlaceholder');
+        const locationBadge = document.getElementById('locationBadge');
+        const startCameraBtn = document.getElementById('startCamera');
+        const takePhotoBtn = document.getElementById('takePhoto');
+        const downloadPhotoBtn = document.getElementById('downloadPhoto');
+        const resetCameraBtn = document.getElementById('resetCamera');
+        const photoGallery = document.getElementById('photoGallery');
+        const gpsStatus = document.getElementById('gpsStatus');
+        const gpsStatusText = document.getElementById('gpsStatusText');
+        const latitudeElement = document.getElementById('latitude');
+        const longitudeElement = document.getElementById('longitude');
+        const accuracyElement = document.getElementById('accuracy');
+        const lastUpdateElement = document.getElementById('lastUpdate');
+        const startGPSBtn = document.getElementById('startGPS');
+
+        // Initialize
+        function init() {
+            renderPhotoGallery();
+            
+            startCameraBtn.addEventListener('click', startCamera);
+            takePhotoBtn.addEventListener('click', takePhoto);
+            downloadPhotoBtn.addEventListener('click', downloadPhoto);
+            resetCameraBtn.addEventListener('click', resetCamera);
+            startGPSBtn.addEventListener('click', startGPS);
+        }
+
+        // Camera Functions
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' },
+                    audio: false
+                });
+                
+                videoElement.srcObject = stream;
+                videoElement.classList.remove('hidden');
+                photoPlaceholder.classList.add('hidden');
+                startCameraBtn.classList.add('hidden');
+                takePhotoBtn.classList.remove('hidden');
+                resetCameraBtn.classList.remove('hidden');
+                
+                state.video = videoElement;
+                state.canvas = canvasElement;
+            } catch (err) {
+                console.error('Error accessing camera:', err);
+                alert('Não foi possível acessar a câmera. Por favor, verifique as permissões.');
+            }
+        }
+
+        function takePhoto() {
+            const context = canvasElement.getContext('2d');
+            canvasElement.width = videoElement.videoWidth;
+            canvasElement.height = videoElement.videoHeight;
+            
+            context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+            
+            // Add location data to photo if available
+            if (state.currentLocation) {
+                addLocationToCanvas();
+            }
+            
+            canvasElement.classList.remove('hidden');
+            videoElement.classList.add('hidden');
+            takePhotoBtn.classList.add('hidden');
+            downloadPhotoBtn.classList.remove('hidden');
+            
+            state.photo = canvasElement.toDataURL('image/jpeg');
+        }
+
+        function addLocationToCanvas() {
+            const context = canvasElement.getContext('2d');
+            const lat = state.currentLocation.latitude.toFixed(6);
+            const lng = state.currentLocation.longitude.toFixed(6);
+            const accuracy = state.currentLocation.accuracy.toFixed(0);
+            const timestamp = new Date(state.currentLocation.timestamp).toLocaleString();
+            
+            const locationText = `Lat: ${lat}\nLng: ${lng}\nPrecisão: ${accuracy}m\n${timestamp}`;
+            
+            // Draw background
+            context.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            const textWidth = context.measureText(locationText.split('\n')[0]).width + 24;
+            const textHeight = 80; // Approximate height for 4 lines
+            context.fillRect(10, canvasElement.height - textHeight - 10, textWidth, textHeight);
+            
+            // Draw text
+            context.font = '14px monospace';
+            context.fillStyle = 'white';
+            const lines = locationText.split('\n');
+            lines.forEach((line, i) => {
+                context.fillText(line, 20, canvasElement.height - textHeight + 20 + (i * 18));
+            });
+            
+            // Update location badge
+            locationBadge.textContent = `${lat}, ${lng}`;
+            locationBadge.classList.remove('hidden');
+        }
+
+        function downloadPhoto() {
+            if (!state.photo) return;
+            
+            const link = document.createElement('a');
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            let filename = `foto-gps-${timestamp}.jpg`;
+            
+            if (state.currentLocation) {
+                const lat = state.currentLocation.latitude.toFixed(6);
+                const lng = state.currentLocation.longitude.toFixed(6);
+                filename = `foto-gps-${lat}_${lng}-${timestamp}.jpg`;
+            }
+            
+            link.download = filename;
+            link.href = state.photo;
+            link.click();
+            
+            // Save to gallery
+            savePhotoToGallery(state.photo, state.currentLocation);
+        }
+
+        function resetCamera() {
+            if (state.video && state.video.srcObject) {
+                state.video.srcObject.getTracks().forEach(track => track.stop());
+            }
+            
+            state.video = null;
+            state.photo = null;
+            
+            videoElement.classList.add('hidden');
+            canvasElement.classList.add('hidden');
+            photoPlaceholder.classList.remove('hidden');
+            startCameraBtn.classList.remove('hidden');
+            takePhotoBtn.classList.add('hidden');
+            downloadPhotoBtn.classList.add('hidden');
+            resetCameraBtn.classList.add('hidden');
+            locationBadge.classList.add('hidden');
+        }
+
+        // GPS Functions
+        function startGPS() {
+            if (state.watchId) {
+                stopGPS();
+                return;
+            }
+            
+            gpsStatus.classList.remove('bg-gray-400', 'bg-green-500', 'bg-red-500');
+            gpsStatus.classList.add('bg-yellow-500', 'pulse');
+            gpsStatusText.textContent = 'Buscando sinal...';
+            startGPSBtn.textContent = 'Parar GPS';
+            
+            state.watchId = navigator.geolocation.watchPosition(
+                position => {
+                    updateGPSStatus(position);
+                },
+                error => {
+                    handleGPSError(error);
+                },
+                {
+                    enableHighAccuracy: true,
+                    maximumAge: 30000,
+                    timeout: 27000
+                }
+            );
+        }
+
+        function stopGPS() {
+            if (state.watchId) {
+                navigator.geolocation.clearWatch(state.watchId);
+                state.watchId = null;
+            }
+            
+            gpsStatus.classList.remove('bg-yellow-500', 'pulse');
+            gpsStatus.classList.add('bg-gray-400');
+            gpsStatusText.textContent = 'GPS desativado';
+            startGPSBtn.textContent = 'Ativar GPS';
+            
+            latitudeElement.textContent = '--';
+            longitudeElement.textContent = '--';
+            accuracyElement.textContent = '-- metros';
+            lastUpdateElement.textContent = '--';
+        }
+
+        function updateGPSStatus(position) {
+            state.currentLocation = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                accuracy: position.coords.accuracy,
+                altitude: position.coords.altitude,
+                altitudeAccuracy: position.coords.altitudeAccuracy,
+                heading: position.coords.heading,
+                speed: position.coords.speed,
+                timestamp: position.timestamp
+            };
+            
+            gpsStatus.classList.remove('bg-yellow-500', 'pulse');
+            gpsStatus.classList.add('bg-green-500');
+            gpsStatusText.textContent = 'GPS ativo';
+            
+            latitudeElement.textContent = position.coords.latitude.toFixed(6);
+            longitudeElement.textContent = position.coords.longitude.toFixed(6);
+            accuracyElement.textContent = `${position.coords.accuracy.toFixed(0)} metros`;
+            lastUpdateElement.textContent = new Date(position.timestamp).toLocaleString();
+        }
+
+        function handleGPSError(error) {
+            console.error('GPS Error:', error);
+            
+            gpsStatus.classList.remove('bg-yellow-500', 'pulse');
+            gpsStatus.classList.add('bg-red-500');
+            
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    gpsStatusText.textContent = 'Permissão negada';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    gpsStatusText.textContent = 'Localização indisponível';
+                    break;
+                case error.TIMEOUT:
+                    gpsStatusText.textContent = 'Tempo esgotado';
+                    break;
+                case error.UNKNOWN_ERROR:
+                    gpsStatusText.textContent = 'Erro desconhecido';
+                    break;
+            }
+            
+            stopGPS();
+        }
+
+        // Photo Gallery Functions
+        function savePhotoToGallery(photoData, locationData) {
+            const photo = {
+                id: Date.now(),
+                data: photoData,
+                location: locationData,
+                timestamp: new Date().toISOString()
+            };
+            
+            state.photos.unshift(photo);
+            localStorage.setItem('photos', JSON.stringify(state.photos));
+            renderPhotoGallery();
+        }
+
+        function renderPhotoGallery() {
+            photoGallery.innerHTML = '';
+            
+            if (state.photos.length === 0) {
+                photoGallery.innerHTML = '<p class="text-gray-500 col-span-full text-center">Nenhuma foto salva ainda</p>';
+                return;
+            }
+            
+            state.photos.forEach(photo => {
+                const photoElement = document.createElement('div');
+                photoElement.className = 'bg-gray-200 rounded-lg overflow-hidden relative';
+                
+                const img = document.createElement('img');
+                img.src = photo.data;
+                img.className = 'w-full h-40 object-cover';
+                img.alt = 'Foto com GPS';
+                
+                const infoOverlay = document.createElement('div');
+                infoOverlay.className = 'absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-xs';
+                
+                if (photo.location) {
+                    infoOverlay.textContent = `${photo.location.latitude.toFixed(4)}, ${photo.location.longitude.toFixed(4)}`;
+                } else {
+                    infoOverlay.textContent = 'Sem dados de localização';
+                }
+                
+                const downloadBtn = document.createElement('button');
+                downloadBtn.className = 'absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full p-1';
+                downloadBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                `;
+                downloadBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const link = document.createElement('a');
+                    link.download = `foto-gps-${photo.id}.jpg`;
+                    link.href = photo.data;
+                    link.click();
+                });
+                
+                photoElement.appendChild(img);
+                photoElement.appendChild(infoOverlay);
+                photoElement.appendChild(downloadBtn);
+                
+                photoElement.addEventListener('click', () => {
+                    // Show full photo when clicked
+                    state.photo = photo.data;
+                    state.currentLocation = photo.location;
+                    
+                    const img = new Image();
+                    img.onload = function() {
+                        canvasElement.width = img.width;
+                        canvasElement.height = img.height;
+                        const context = canvasElement.getContext('2d');
+                        context.drawImage(img, 0, 0);
+                        
+                        if (photo.location) {
+                            addLocationToCanvas();
+                        }
+                        
+                        canvasElement.classList.remove('hidden');
+                        photoPlaceholder.classList.add('hidden');
+                        startCameraBtn.classList.add('hidden');
+                        downloadPhotoBtn.classList.remove('hidden');
+                        resetCameraBtn.classList.remove('hidden');
+                    };
+                    img.src = photo.data;
+                });
+                
+                photoGallery.appendChild(photoElement);
+            });
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
