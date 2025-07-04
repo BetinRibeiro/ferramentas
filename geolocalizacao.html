@@ -194,6 +194,11 @@
 
         // DOM Elements
         const videoElement = document.getElementById('video');
+        videoElement.addEventListener('error', (e) => {
+            console.error('Video error:', e);
+            alert('Erro ao carregar o fluxo de vídeo. Por favor, tente novamente.');
+            resetCamera();
+        });
         const canvasElement = document.getElementById('canvas');
         const photoPlaceholder = document.getElementById('photoPlaceholder');
         const locationBadge = document.getElementById('locationBadge');
@@ -224,23 +229,43 @@
         // Camera Functions
         async function startCamera() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'environment' },
+                const constraints = {
+                    video: {
+                        facingMode: 'environment',
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    },
                     audio: false
-                });
+                };
+
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
                 
                 videoElement.srcObject = stream;
-                videoElement.classList.remove('hidden');
-                photoPlaceholder.classList.add('hidden');
-                startCameraBtn.classList.add('hidden');
-                takePhotoBtn.classList.remove('hidden');
-                resetCameraBtn.classList.remove('hidden');
-                
-                state.video = videoElement;
-                state.canvas = canvasElement;
+                videoElement.onloadedmetadata = () => {
+                    videoElement.play();
+                    videoElement.classList.remove('hidden');
+                    photoPlaceholder.classList.add('hidden');
+                    startCameraBtn.classList.add('hidden');
+                    takePhotoBtn.classList.remove('hidden');
+                    resetCameraBtn.classList.remove('hidden');
+                    
+                    state.video = videoElement;
+                    state.canvas = canvasElement;
+                };
             } catch (err) {
                 console.error('Error accessing camera:', err);
-                alert('Não foi possível acessar a câmera. Por favor, verifique as permissões.');
+                let errorMessage = 'Não foi possível acessar a câmera.';
+                
+                if (err.name === 'NotAllowedError') {
+                    errorMessage += ' Permissão negada pelo usuário.';
+                } else if (err.name === 'NotFoundError') {
+                    errorMessage += ' Nenhuma câmera encontrada.';
+                } else if (err.name === 'NotReadableError') {
+                    errorMessage += ' A câmera já está em uso por outro aplicativo.';
+                }
+                
+                alert(errorMessage);
+                resetCamera();
             }
         }
 
@@ -314,21 +339,29 @@
         }
 
         function resetCamera() {
-            if (state.video && state.video.srcObject) {
-                state.video.srcObject.getTracks().forEach(track => track.stop());
+            try {
+                if (state.video && state.video.srcObject) {
+                    const tracks = state.video.srcObject.getTracks();
+                    tracks.forEach(track => {
+                        track.stop();
+                    });
+                    state.video.srcObject = null;
+                }
+                
+                state.video = null;
+                state.photo = null;
+                
+                videoElement.classList.add('hidden');
+                canvasElement.classList.add('hidden');
+                photoPlaceholder.classList.remove('hidden');
+                startCameraBtn.classList.remove('hidden');
+                takePhotoBtn.classList.add('hidden');
+                downloadPhotoBtn.classList.add('hidden');
+                resetCameraBtn.classList.add('hidden');
+                locationBadge.classList.add('hidden');
+            } catch (err) {
+                console.error('Error resetting camera:', err);
             }
-            
-            state.video = null;
-            state.photo = null;
-            
-            videoElement.classList.add('hidden');
-            canvasElement.classList.add('hidden');
-            photoPlaceholder.classList.remove('hidden');
-            startCameraBtn.classList.remove('hidden');
-            takePhotoBtn.classList.add('hidden');
-            downloadPhotoBtn.classList.add('hidden');
-            resetCameraBtn.classList.add('hidden');
-            locationBadge.classList.add('hidden');
         }
 
         // GPS Functions
