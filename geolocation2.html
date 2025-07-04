@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4f46e5">
+    <title>Field Data Collector</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        @media (display-mode: standalone) {
+            .install-btn {
+                display: none !important;
+            }
+        }
+        
+        #map {
+            height: 200px;
+            width: 100%;
+            border-radius: 0.5rem;
+        }
+        
+        #preview {
+            max-height: 300px;
+            object-fit: contain;
+        }
+        
+        .photo-btn {
+            background-color: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+        }
+        
+        .status-badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 1rem;
+        }
+        
+        .slide-in {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-6 max-w-2xl">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-indigo-700">Field Data Collector</h1>
+                <p class="text-gray-500 text-sm">Capture photos with location and details</p>
+            </div>
+            <button id="installBtn" class="install-btn bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700 transition">
+                Install App
+            </button>
+        </header>
+        
+        <!-- Main Content -->
+        <main>
+            <!-- New Record Form -->
+            <div id="newRecordForm" class="bg-white rounded-xl shadow-md p-6 mb-6 slide-in">
+                <h2 class="text-lg font-semibold mb-4 text-gray-800">New Record</h2>
+                
+                <!-- Photo Section -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Photo</label>
+                    <div class="relative">
+                        <img id="preview" class="w-full bg-gray-100 rounded-lg mb-2 hidden">
+                        <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden">
+                        <button id="takePhotoBtn" class="photo-btn w-full py-12 rounded-lg border-2 border-dashed border-gray-300 text-gray-500 flex flex-col items-center justify-center hover:bg-gray-50 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span>Take Photo</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Location Section -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                    <div id="map" class="bg-gray-100 flex items-center justify-center">
+                        <p class="text-gray-500">Loading map...</p>
+                    </div>
+                    <div class="flex justify-between mt-2 text-xs text-gray-500">
+                        <span id="coordinates">Lat: -, Lng: -</span>
+                        <span id="accuracy">Accuracy: - meters</span>
+                    </div>
+                    <div class="flex justify-between mt-2 text-xs text-gray-500">
+                        <span id="timestamp">Date: -</span>
+                        <span id="address">Address: -</span>
+                    </div>
+                </div>
+                
+                <!-- Details Form -->
+                <div class="mb-4">
+                    <label for="clientName" class="block text-sm font-medium text-gray-700 mb-1">Client/Location Name</label>
+                    <input type="text" id="clientName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <select id="category" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="visit">Visit</option>
+                        <option value="collection">Collection</option>
+                        <option value="production">Production</option>
+                        <option value="delivery">Delivery</option>
+                        <option value="inspection">Inspection</option>
+                    </select>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                    <textarea id="notes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button id="saveBtn" class="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition">
+                        Save Record
+                    </button>
+                    <button id="clearBtn" class="bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition">
+                        Clear
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Records List -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold text-gray-800">Saved Records</h2>
+                    <div class="flex space-x-2">
+                        <button id="syncBtn" class="text-indigo-600 hover:text-indigo-800 transition" title="Sync when online">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        </button>
+                        <button id="exportBtn" class="text-indigo-600 hover:text-indigo-800 transition" title="Export data">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="recordsList" class="space-y-3 max-h-96 overflow-y-auto">
+                    <p class="text-gray-500 text-center py-4">No records yet. Start by creating one above.</p>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transform translate-y-10 opacity-0 transition-all duration-300 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span id="toastMessage">Record saved successfully!</span>
+        </div>
+        
+        <!-- Record Detail Modal -->
+        <div id="recordModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+            <div class="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800" id="modalTitle">Record Details</h3>
+                        <button id="closeModalBtn" class="text-gray-500 hover:text-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <img id="modalImage" src="" class="w-full rounded-lg mb-4">
+                    
+                    <div class="space-y-3">
+                        <div>
+                            <p class="text-sm text-gray-500">Client/Location</p>
+                            <p id="modalClient" class="font-medium"></p>
+                        </div>
+                        
+                        <div>
+                            <p class="text-sm text-gray-500">Category</p>
+                            <p id="modalCategory" class="font-medium"></p>
+                        </div>
+                        
+                        <div>
+                            <p class="text-sm text-gray-500">Location</p>
+                            <p id="modalLocation" class="font-medium"></p>
+                            <p id="modalAddress" class="text-sm text-gray-600"></p>
+                        </div>
+                        
+                        <div>
+                            <p class="text-sm text-gray-500">Date & Time</p>
+                            <p id="modalTimestamp" class="font-medium"></p>
+                        </div>
+                        
+                        <div>
+                            <p class="text-sm text-gray-500">Notes</p>
+                            <p id="modalNotes" class="font-medium"></p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex space-x-3">
+                        <button id="deleteRecordBtn" class="flex-1 bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition">
+                            Delete
+                        </button>
+                        <button id="shareRecordBtn" class="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition">
+                            Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(registration => {
+                    console.log('ServiceWorker registration successful');
+                }).catch(err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+
+        // Install Prompt
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'block';
+        });
+        
+        installBtn.addEventListener('click', () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                    } else {
+                        console.log('User dismissed the install prompt');
+                    }
+                    deferredPrompt = null;
+                    installBtn.style.display = 'none';
+                });
+            }
+        });
+        
+        // Check if app is running in standalone mode
+        window.addEventListener('appinstalled', () => {
+            installBtn.style.display = 'none';
+        });
+
+        // Database setup
+        let db;
+        const DB_NAME = 'FieldDataDB';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'records';
+        
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                
+                request.onerror = (event) => {
+                    console.error('Database error:', event.target.error);
+                    reject(event.target.error);
+                };
+                
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    resolve(db);
+                };
+                
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+                        store.createIndex('timestamp', 'timestamp', { unique: false });
+                    }
+                };
+            });
+        }
+        
+        // Initialize the app
+        async function initApp() {
+            try {
+                await openDB();
+                loadRecords();
+                setupEventListeners();
+                getLocation();
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showToast('Failed to initialize app', 'error');
+            }
+        }
+        
+        // DOM Elements
+        const takePhotoBtn = document.getElementById('takePhotoBtn');
+        const cameraInput = document.getElementById('cameraInput');
+        const preview = document.getElementById('preview');
+        const saveBtn = document.getElementById('saveBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const recordsList = document.getElementById('recordsList');
+        const syncBtn = document.getElementById('syncBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        const recordModal = document.getElementById('recordModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const deleteRecordBtn = document.getElementById('deleteRecordBtn');
+        const shareRecordBtn = document.getElementById('shareRecordBtn');
+        
+        // Form fields
+        const clientName = document.getElementById('clientName');
+        const category = document.getElementById('category');
+        const notes = document.getElementById('notes');
+        
+        // Location display elements
+        const coordinates = document.getElementById('coordinates');
+        const accuracy = document.getElementById('accuracy');
+        const timestamp = document.getElementById('timestamp');
+        const address = document.getElementById('address');
+        
+        // Modal elements
+        const modalTitle = document.getElementById('modalTitle');
+        const modalImage = document.getElementById('modalImage');
+        const modalClient = document.getElementById('modalClient');
+        const modalCategory = document.getElementById('modalCategory');
+        const modalLocation = document.getElementById('modalLocation');
+        const modalAddress = document.getElementById('modalAddress');
+        const modalTimestamp = document.getElementById('modalTimestamp');
+        const modalNotes = document.getElementById('modalNotes');
+        
+        // Current record data
+        let currentRecord = {
+            photo: null,
+            location: null,
+            timestamp: null,
+            address: null,
+            clientName: '',
+            category: 'visit',
+            notes: ''
+        };
+        
+        let selectedRecordId = null;
+        
+        // Event Listeners
+        function setupEventListeners() {
+            // Photo capture
+            takePhotoBtn.addEventListener('click', () => cameraInput.click());
+            cameraInput.addEventListener('change', handlePhotoCapture);
+            
+            // Form buttons
+            saveBtn.addEventListener('click', saveRecord);
+            clearBtn.addEventListener('click', clearForm);
+            
+            // Records list buttons
+            syncBtn.addEventListener('click', syncRecords);
+            exportBtn.addEventListener('click', exportRecords);
+            
+            // Modal buttons
+            closeModalBtn.addEventListener('click', () => recordModal.classList.add('hidden'));
+            deleteRecordBtn.addEventListener('click', deleteRecord);
+            shareRecordBtn.addEventListener('click', shareRecord);
+            
+            // Close modal when clicking outside
+            recordModal.addEventListener('click', (e) => {
+                if (e.target === recordModal) {
+                    recordModal.classList.add('hidden');
+                }
+            });
+        }
+        
+        // Photo Capture
+        function handlePhotoCapture(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    preview.src = event.target.result;
+                    preview.classList.remove('hidden');
+                    takePhotoBtn.classList.add('hidden');
+                    currentRecord.photo = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // Location Services
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const { latitude, longitude, accuracy } = position.coords;
+                        currentRecord.location = { latitude, longitude };
+                        currentRecord.timestamp = new Date(position.timestamp).toLocaleString();
+                        
+                        // Update UI
+                        coordinates.textContent = `Lat: ${latitude.toFixed(6)}, Lng: ${longitude.toFixed(6)}`;
+                        this.accuracy.textContent = `Accuracy: ${Math.round(accuracy)} meters`;
+                        timestamp.textContent = `Date: ${currentRecord.timestamp}`;
+                        
+                        // Reverse geocoding (simplified - in a real app you'd use a proper geocoding service)
+                        getAddress(latitude, longitude);
+                        
+                        // Initialize map (simplified - in a real app you'd use a proper map library)
+                        initMap(latitude, longitude);
+                    },
+                    (error) => {
+                        console.error('Geolocation error:', error);
+                        coordinates.textContent = 'Location: Permission denied';
+                        showToast('Could not get location. Using default coordinates.', 'warning');
+                        
+                        // Fallback to default location
+                        currentRecord.location = { latitude: 0, longitude: 0 };
+                        currentRecord.timestamp = new Date().toLocaleString();
+                        timestamp.textContent = `Date: ${currentRecord.timestamp}`;
+                        initMap(0, 0);
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            } else {
+                showToast('Geolocation is not supported by your browser', 'error');
+            }
+        }
+        
+        function getAddress(lat, lng) {
+            // In a real app, you would use a geocoding service like Google Maps API or OpenStreetMap
+            // This is a simplified version that just shows the coordinates
+            address.textContent = `Address: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            currentRecord.address = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        }
+        
+        function initMap(lat, lng) {
+            const mapElement = document.getElementById('map');
+            mapElement.innerHTML = `
+                <div class="w-full h-full flex items-center justify-center bg-indigo-50 rounded-lg">
+                    <div class="text-center p-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto text-indigo-500 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <p class="text-sm text-gray-700">Map location at</p>
+                        <p class="font-medium">${lat.toFixed(6)}, ${lng.toFixed(6)}</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Database Operations
+        async function saveRecord() {
+            if (!currentRecord.photo) {
+                showToast('Please take a photo first', 'warning');
+                return;
+            }
+            
+            if (!currentRecord.location) {
+                showToast('Getting location... please wait', 'warning');
+                return;
+            }
+            
+            currentRecord.clientName = clientName.value || 'Unnamed Location';
+            currentRecord.category = category.value;
+            currentRecord.notes = notes.value;
+            currentRecord.createdAt = new Date().toISOString();
+            
+            try {
+                const transaction = db.transaction(STORE_NAME, 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.add(currentRecord);
+                
+                request.onsuccess = () => {
+                    showToast('Record saved successfully!');
+                    clearForm();
+                    loadRecords();
+                };
+                
+                request.onerror = (event) => {
+                    console.error('Error saving record:', event.target.error);
+                    showToast('Failed to save record', 'error');
+                };
+            } catch (error) {
+                console.error('Error saving record:', error);
+                showToast('Failed to save record', 'error');
+            }
+        }
+        
+        async function loadRecords() {
+            try {
+                const transaction = db.transaction(STORE_NAME, 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const index = store.index('timestamp');
+                const request = index.getAll();
+                
+                request.onsuccess = () => {
+                    const records = request.result;
+                    displayRecords(records.reverse()); // Show newest first
+                };
+                
+                request.onerror = (event) => {
+                    console.error('Error loading records:', event.target.error);
+                    showToast('Failed to load records', 'error');
+                };
+            } catch (error) {
+                console.error('Error loading records:', error);
+                showToast('Failed to load records', 'error');
+            }
+        }
+        
+        function displayRecords(records) {
+            if (records.length === 0) {
+                recordsList.innerHTML = '<p class="text-gray-500 text-center py-4">No records yet. Start by creating one above.</p>';
+                return;
+            }
+            
+            recordsList.innerHTML = records.map(record => `
+                <div class="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition cursor-pointer" data-id="${record.id}">
+                    <div class="flex">
+                        <div class="flex-shrink-0 mr-3">
+                            <img src="${record.photo}" class="w-16 h-16 object-cover rounded-lg">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-medium text-gray-900 truncate">${record.clientName}</h3>
+                            <p class="text-sm text-gray-500">${record.timestamp}</p>
+                            <div class="mt-1">
+                                <span class="status-badge ${getCategoryClass(record.category)}">
+                                    ${getCategoryLabel(record.category)}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0 ml-2 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Add click event to each record
+            document.querySelectorAll('#recordsList > div').forEach(el => {
+                el.addEventListener('click', () => viewRecordDetails(el.dataset.id));
+            });
+        }
+        
+        async function viewRecordDetails(id) {
+            try {
+                const transaction = db.transaction(STORE_NAME, 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.get(Number(id));
+                
+                request.onsuccess = () => {
+                    const record = request.result;
+                    if (record) {
+                        selectedRecordId = record.id;
+                        
+                        // Populate modal
+                        modalTitle.textContent = record.clientName;
+                        modalImage.src = record.photo;
+                        modalClient.textContent = record.clientName;
+                        modalCategory.textContent = getCategoryLabel(record.category);
+                        modalLocation.textContent = `${record.location.latitude.toFixed(6)}, ${record.location.longitude.toFixed(6)}`;
+                        modalAddress.textContent = record.address || 'Address not available';
+                        modalTimestamp.textContent = record.timestamp;
+                        modalNotes.textContent = record.notes || 'No notes';
+                        
+                        // Show modal
+                        recordModal.classList.remove('hidden');
+                    }
+                };
+                
+                request.onerror = (event) => {
+                    console.error('Error loading record:', event.target.error);
+                    showToast('Failed to load record details', 'error');
+                };
+            } catch (error) {
+                console.error('Error loading record:', error);
+                showToast('Failed to load record details', 'error');
+            }
+        }
+        
+        async function deleteRecord() {
+            if (!selectedRecordId) return;
+            
+            try {
+                const transaction = db.transaction(STORE_NAME, 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.delete(selectedRecordId);
+                
+                request.onsuccess = () => {
+                    showToast('Record deleted');
+                    recordModal.classList.add('hidden');
+                    loadRecords();
+                };
+                
+                request.onerror = (event) => {
+                    console.error('Error deleting record:', event.target.error);
+                    showToast('Failed to delete record', 'error');
+                };
+            } catch (error) {
+                console.error('Error deleting record:', error);
+                showToast('Failed to delete record', 'error');
+            }
+        }
+        
+        async function syncRecords() {
+            // In a real app, this would sync with a backend server
+            showToast('Sync feature would connect to your server when online', 'info');
+        }
+        
+        async function exportRecords() {
+            try {
+                const transaction = db.transaction(STORE_NAME, 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.getAll();
+                
+                request.onsuccess = () => {
+                    const records = request.result;
+                    if (records.length === 0) {
+                        showToast('No records to export', 'warning');
+                        return;
+                    }
+                    
+                    // Prepare data for export
+                    const exportData = records.map(record => ({
+                        id: record.id,
+                        clientName: record.clientName,
+                        category: getCategoryLabel(record.category),
+                        latitude: record.location.latitude,
+                        longitude: record.location.longitude,
+                        address: record.address,
+                        timestamp: record.timestamp,
+                        notes: record.notes,
+                        photo: 'Base64 image data' // In a real app, you might export the image file
+                    }));
+                    
+                    // Create JSON file
+                    const dataStr = JSON.stringify(exportData, null, 2);
+                    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                    
+                    // Create download link
+                    const exportFileDefaultName = `field-data-${new Date().toISOString().slice(0,10)}.json`;
+                    const linkElement = document.createElement('a');
+                    linkElement.setAttribute('href', dataUri);
+                    linkElement.setAttribute('download', exportFileDefaultName);
+                    linkElement.click();
+                    
+                    showToast('Data exported successfully');
+                };
+                
+                request.onerror = (event) => {
+                    console.error('Error exporting records:', event.target.error);
+                    showToast('Failed to export records', 'error');
+                };
+            } catch (error) {
+                console.error('Error exporting records:', error);
+                showToast('Failed to export records', 'error');
+            }
+        }
+        
+        async function shareRecord() {
+            if (!selectedRecordId) return;
+            
+            try {
+                const transaction = db.transaction(STORE_NAME, 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.get(Number(selectedRecordId));
+                
+                request.onsuccess = () => {
+                    const record = request.result;
+                    if (record && navigator.share) {
+                        navigator.share({
+                            title: `Field Record: ${record.clientName}`,
+                            text: `Client: ${record.clientName}\nLocation: ${record.location.latitude.toFixed(6)}, ${record.location.longitude.toFixed(6)}\nDate: ${record.timestamp}\nNotes: ${record.notes || 'No notes'}`,
+                            url: window.location.href // In a real app, you might have a URL for the record
+                        }).catch(err => {
+                            console.error('Error sharing:', err);
+                            showToast('Sharing failed', 'error');
+                        });
+                    } else {
+                        showToast('Web Share API not supported', 'info');
+                    }
+                };
+            } catch (error) {
+                console.error('Error sharing record:', error);
+                showToast('Failed to share record', 'error');
+            }
+        }
+        
+        // Helper Functions
+        function clearForm() {
+            preview.src = '';
+            preview.classList.add('hidden');
+            takePhotoBtn.classList.remove('hidden');
+            cameraInput.value = '';
+            
+            clientName.value = '';
+            category.value = 'visit';
+            notes.value = '';
+            
+            currentRecord = {
+                photo: null,
+                location: currentRecord.location, // Keep location
+                timestamp: currentRecord.timestamp, // Keep timestamp
+                address: currentRecord.address, // Keep address
+                clientName: '',
+                category: 'visit',
+                notes: ''
+            };
+        }
+        
+        function showToast(message, type = 'success') {
+            toastMessage.textContent = message;
+            
+            // Set color based on type
+            if (type === 'error') {
+                toast.classList.remove('bg-green-500');
+                toast.classList.add('bg-red-500');
+            } else if (type === 'warning') {
+                toast.classList.remove('bg-green-500');
+                toast.classList.add('bg-yellow-500');
+            } else if (type === 'info') {
+                toast.classList.remove('bg-green-500');
+                toast.classList.add('bg-blue-500');
+            } else {
+                toast.classList.remove('bg-red-500', 'bg-yellow-500', 'bg-blue-500');
+                toast.classList.add('bg-green-500');
+            }
+            
+            // Show toast
+            toast.classList.remove('translate-y-10', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+            }, 3000);
+        }
+        
+        function getCategoryLabel(category) {
+            const labels = {
+                'visit': 'Visit',
+                'collection': 'Collection',
+                'production': 'Production',
+                'delivery': 'Delivery',
+                'inspection': 'Inspection'
+            };
+            return labels[category] || category;
+        }
+        
+        function getCategoryClass(category) {
+            const classes = {
+                'visit': 'bg-blue-100 text-blue-800',
+                'collection': 'bg-purple-100 text-purple-800',
+                'production': 'bg-green-100 text-green-800',
+                'delivery': 'bg-yellow-100 text-yellow-800',
+                'inspection': 'bg-red-100 text-red-800'
+            };
+            return classes[category] || 'bg-gray-100 text-gray-800';
+        }
+        
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+
+    <!-- Service Worker (would be in a separate file in a real app) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                const CACHE_NAME = 'field-data-collector-v1';
+                const urlsToCache = [
+                    '/',
+                    '/index.html',
+                    '/styles.css',
+                    '/app.js',
+                    '/manifest.json',
+                    'https://cdn.tailwindcss.com'
+                ];
+
+                self.addEventListener('install', (event) => {
+                    event.waitUntil(
+                        caches.open(CACHE_NAME)
+                            .then((cache) => {
+                                return cache.addAll(urlsToCache);
+                            })
+                    );
+                });
+
+                self.addEventListener('fetch', (event) => {
+                    event.respondWith(
+                        caches.match(event.request)
+                            .then((response) => {
+                                return response || fetch(event.request);
+                            })
+                    );
+                });
+            `;
+            
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            
+            navigator.serviceWorker.register(swUrl)
+                .then(registration => console.log('SW registered'))
+                .catch(err => console.log('SW registration failed: ', err));
+        }
+    </script>
+
+    <!-- Web App Manifest (would be in a separate file in a real app) -->
+    <script>
+        const manifest = {
+            "name": "Field Data Collector",
+            "short_name": "FieldData",
+            "description": "Capture photos with location and details",
+            "start_url": "/",
+            "display": "standalone",
+            "background_color": "#4f46e5",
+            "theme_color": "#4f46e5",
+            "icons": [
+                {
+                    "src": "icons/icon-72x72.png",
+                    "sizes": "72x72",
+                    "type": "image/png"
+                },
+                {
+                    "src": "icons/icon-96x96.png",
+                    "sizes": "96x96",
+                    "type": "image/png"
+                },
+                {
+                    "src": "icons/icon-128x128.png",
+                    "sizes": "128x128",
+                    "type": "image/png"
+                },
+                {
+                    "src": "icons/icon-144x144.png",
+                    "sizes": "144x144",
+                    "type": "image/png"
+                },
+                {
+                    "src": "icons/icon-152x152.png",
+                    "sizes": "152x152",
+                    "type": "image/png"
+                },
+                {
+                    "src": "icons/icon-192x192.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "icons/icon-384x384.png",
+                    "sizes": "384x384",
+                    "type": "image/png"
+                },
+                {
+                    "src": "icons/icon-512x512.png",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        };
+        
+        const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+        const manifestUrl = URL.createObjectURL(blob);
+        
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = manifestUrl;
+        document.head.appendChild(link);
+    </script>
+</body>
+</html>
