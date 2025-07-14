@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Contatos VCF para iPhone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#60a5fa',
+                        dark: '#1e293b',
+                        light: '#f8fafc'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .contact-card {
+            transition: all 0.3s ease;
+        }
+        .contact-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .vcf-preview {
+            font-family: 'Courier New', monospace;
+            white-space: pre;
+        }
+        .slide-fade-enter-active {
+            transition: all 0.3s ease-out;
+        }
+        .slide-fade-leave-active {
+            transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+        }
+        .slide-fade-enter-from,
+        .slide-fade-leave-to {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-3xl md:text-4xl font-bold text-dark mb-3">
+                <i class="fas fa-address-book text-primary mr-2"></i>
+                Gerador de Contatos VCF
+            </h1>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                Converta sua lista de contatos em formato texto para um arquivo VCF compatível com iPhone
+            </p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="md:flex">
+                <!-- Input Section -->
+                <div class="md:w-1/2 p-6 border-r border-gray-100">
+                    <h2 class="text-xl font-semibold text-dark mb-4 flex items-center">
+                        <i class="fas fa-keyboard text-secondary mr-2"></i>
+                        Insira seus contatos
+                    </h2>
+                    
+                    <div class="mb-4 bg-blue-50 rounded-lg p-4 border border-blue-100">
+                        <p class="text-sm text-blue-800 flex items-start">
+                            <i class="fas fa-info-circle mt-1 mr-2"></i>
+                            Formato esperado: <br>
+                            <span class="font-mono bg-blue-100 px-1 rounded">Contato:	ID	 NOME	Fone:	(XX) XXXX-XXXX	;</span>
+                        </p>
+                    </div>
+                    
+                    <textarea 
+                        id="contactInput" 
+                        class="w-full h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent mb-4 font-mono text-sm" 
+                        placeholder="Cole seus contatos aqui no formato especificado..."
+                    >Contato:	1201	 FABIO FERREIRA	Fone:	(33) 99952-0367	; Contato:	1201	 HERMES GONCALVES	Fone:	(33) 99966-3639	; Contato:	1201	 PAULO CESAR	Fone:	(33) 99847-1115	;</textarea>
+                    
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <button 
+                            id="generateBtn"
+                            class="flex-1 bg-primary hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-lg transition flex items-center justify-center"
+                        >
+                            <i class="fas fa-file-export mr-2"></i>
+                            Gerar VCF
+                        </button>
+                        
+                        <button 
+                            id="exampleBtn"
+                            class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-4 rounded-lg transition flex items-center justify-center"
+                        >
+                            <i class="fas fa-lightbulb mr-2"></i>
+                            Exemplo
+                        </button>
+                        
+                        <button 
+                            id="clearBtn"
+                            class="flex-1 bg-red-100 hover:bg-red-200 text-red-700 font-medium py-3 px-4 rounded-lg transition flex items-center justify-center"
+                        >
+                            <i class="fas fa-trash-alt mr-2"></i>
+                            Limpar
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Output Section -->
+                <div class="md:w-1/2 p-6 bg-gray-50">
+                    <h2 class="text-xl font-semibold text-dark mb-4 flex items-center">
+                        <i class="fas fa-mobile-alt text-secondary mr-2"></i>
+                        Resultado para iPhone
+                    </h2>
+                    
+                    <div class="mb-4 bg-yellow-50 rounded-lg p-4 border border-yellow-100">
+                        <p class="text-sm text-yellow-800 flex items-start">
+                            <i class="fas fa-exclamation-circle mt-1 mr-2"></i>
+                            Após gerar o arquivo, envie por email para si mesmo e abra no iPhone para importar os contatos
+                        </p>
+                    </div>
+                    
+                    <div id="resultContainer" class="hidden">
+                        <div class="mb-4">
+                            <h3 class="font-medium text-gray-700 mb-2">Contatos detectados:</h3>
+                            <div id="contactList" class="space-y-3 max-h-48 overflow-y-auto pr-2"></div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h3 class="font-medium text-gray-700 mb-2">Prévia do VCF:</h3>
+                            <div id="vcfPreview" class="vcf-preview text-xs bg-gray-100 p-3 rounded-lg overflow-x-auto max-h-32"></div>
+                        </div>
+                        
+                        <button 
+                            id="downloadBtn"
+                            class="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-4 rounded-lg transition flex items-center justify-center"
+                        >
+                            <i class="fas fa-download mr-2"></i>
+                            Baixar Arquivo VCF
+                        </button>
+                    </div>
+                    
+                    <div id="emptyState" class="text-center py-12">
+                        <div class="inline-block bg-gray-200 rounded-full p-4 mb-4">
+                            <i class="fas fa-phone text-gray-500 text-3xl"></i>
+                        </div>
+                        <h3 class="font-medium text-gray-700 mb-1">Nenhum contato gerado</h3>
+                        <p class="text-gray-500 text-sm">Insira seus contatos e clique em "Gerar VCF"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Instructions -->
+        <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-dark mb-4 flex items-center">
+                <i class="fas fa-graduation-cap text-secondary mr-2"></i>
+                Como usar no iPhone
+            </h2>
+            
+            <div class="grid md:grid-cols-4 gap-4">
+                <div class="flex flex-col items-center text-center p-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-3">
+                        <span class="text-primary font-bold">1</span>
+                    </div>
+                    <p class="font-medium">Baixe o arquivo VCF</p>
+                    <p class="text-sm text-gray-600 mt-1">Clique no botão "Baixar Arquivo VCF" acima</p>
+                </div>
+                
+                <div class="flex flex-col items-center text-center p-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-3">
+                        <span class="text-primary font-bold">2</span>
+                    </div>
+                    <p class="font-medium">Envie para seu email</p>
+                    <p class="text-sm text-gray-600 mt-1">Envie o arquivo por email para você mesmo</p>
+                </div>
+                
+                <div class="flex flex-col items-center text-center p-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-3">
+                        <span class="text-primary font-bold">3</span>
+                    </div>
+                    <p class="font-medium">Abra no iPhone</p>
+                    <p class="text-sm text-gray-600 mt-1">Abra o email no iPhone e toque no anexo VCF</p>
+                </div>
+                
+                <div class="flex flex-col items-center text-center p-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-3">
+                        <span class="text-primary font-bold">4</span>
+                    </div>
+                    <p class="font-medium">Importe contatos</p>
+                    <p class="text-sm text-gray-600 mt-1">Toque em "Adicionar todos os contatos"</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="mt-12 text-center text-gray-500 text-sm">
+            <p>© 2023 Gerador de Contatos VCF - Compatível com iPhone e outros dispositivos</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const contactInput = document.getElementById('contactInput');
+            const generateBtn = document.getElementById('generateBtn');
+            const exampleBtn = document.getElementById('exampleBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const resultContainer = document.getElementById('resultContainer');
+            const emptyState = document.getElementById('emptyState');
+            const contactList = document.getElementById('contactList');
+            const vcfPreview = document.getElementById('vcfPreview');
+            
+            // Sample data
+            const exampleData = `Contato:	1201	 FABIO FERREIRA	Fone:	(33) 99952-0367	; Contato:	1201	 HERMES GONCALVES	Fone:	(33) 99966-3639	; Contato:	1201	 PAULO CESAR	Fone:	(33) 99847-1115	; Contato:	1201	 WANDERSON PONAHT	Fone:	(33) 99987-0319	; Contato:	1201	 WALTEIR JOSE	Fone:	(33) 99987-0339	; Contato:	1201	 EDVAL DA	Fone:	(33) 99916-2715	; Contato:	1201	 GEAN PLANTIKOW	Fone:	(27) 99917-4198	; Contato:	1201	 JAIR CAROLINO	Fone:	(98) 98156-4522	;`;
+            
+            // Parse contacts from text
+            function parseContacts(text) {
+                const contacts = [];
+                const entries = text.split(';').filter(entry => entry.trim() !== '');
+                
+                for (const entry of entries) {
+                    const parts = entry.split('\t').filter(part => part.trim() !== '');
+                    if (parts.length >= 5) {
+                        const name = parts[1].trim()+" - "+parts[2].trim();
+                        const phone = parts[4].trim();
+                        contacts.push({
+                            name,
+                            phone
+                        });
+                    }
+                }
+                
+                return contacts;
+            }
+            
+            // Generate VCF content
+            function generateVCF(contacts) {
+                let vcf = '';
+                
+                contacts.forEach((contact, index) => {
+                    vcf += `BEGIN:VCARD
+VERSION:3.0
+N:;${contact.name};;;
+FN:${contact.name}
+TEL;TYPE=CELL:${contact.phone}
+END:VCARD\n\n`;
+                });
+                
+                return vcf;
+            }
+            
+            // Display contacts
+            function displayContacts(contacts) {
+                contactList.innerHTML = '';
+                
+                contacts.forEach(contact => {
+                    const contactEl = document.createElement('div');
+                    contactEl.className = 'contact-card bg-white p-3 rounded-lg border border-gray-200 flex items-center';
+                    contactEl.innerHTML = `
+                        <div class="bg-gray-200 border-2 border-dashed rounded-xl w-10 h-10 flex items-center justify-center mr-3">
+                            <i class="fas fa-user text-gray-500"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium">${contact.name}</div>
+                            <div class="text-sm text-gray-600">${contact.phone}</div>
+                        </div>
+                    `;
+                    contactList.appendChild(contactEl);
+                });
+            }
+            
+            // Show results
+            function showResults(contacts, vcfContent) {
+                emptyState.classList.add('hidden');
+                resultContainer.classList.remove('hidden');
+                displayContacts(contacts);
+                vcfPreview.textContent = vcfContent.substring(0, 300) + (vcfContent.length > 300 ? '...' : '');
+            }
+            
+            // Download VCF file
+            function downloadVCF(vcfContent) {
+                const blob = new Blob([vcfContent], { type: 'text/vcard' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'contatos-iphone.vcf';
+                document.body.appendChild(a);
+                a.click();
+                
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            }
+            
+            // Event Listeners
+            generateBtn.addEventListener('click', () => {
+                const text = contactInput.value.trim();
+                if (!text) {
+                    alert('Por favor, insira os contatos no formato especificado');
+                    return;
+                }
+                
+                const contacts = parseContacts(text);
+                if (contacts.length === 0) {
+                    alert('Nenhum contato válido encontrado. Verifique o formato dos dados.');
+                    return;
+                }
+                
+                const vcfContent = generateVCF(contacts);
+                showResults(contacts, vcfContent);
+                
+                // Update download button
+                downloadBtn.onclick = () => downloadVCF(vcfContent);
+            });
+            
+            exampleBtn.addEventListener('click', () => {
+                contactInput.value = exampleData;
+            });
+            
+            clearBtn.addEventListener('click', () => {
+                contactInput.value = '';
+                resultContainer.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+            });
+        });
+    </script>
+</body>
+</html>
