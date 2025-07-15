@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador Financeiro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            .print-section {
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+            }
+        }
+        
+        .transaction-income {
+            border-left: 4px solid #10b981;
+        }
+        
+        .transaction-expense {
+            border-left: 4px solid #ef4444;
+        }
+        
+        .transaction-deposit {
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .transaction-withdrawal {
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+            <!-- Header -->
+            <div class="bg-indigo-600 px-6 py-4 text-white">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-2xl font-bold">
+                        <i class="fas fa-wallet mr-2"></i> Gerenciador Cobranças
+                    </h1>
+                    <div class="text-sm bg-indigo-700 px-3 py-1 rounded-full">
+                        <i class="fas fa-wifi-slash mr-1"></i> 
+                    </div>
+                </div>
+                <p class="text-indigo-100 mt-1">Controle completo do seu caixa localmente</p>
+            </div>
+            
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 p-6 border-b">
+                <div class="bg-green-50 p-4 rounded-lg border border-green-100">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm text-green-600 font-medium">Recebimentos</p>
+                            <h3 class="text-2xl font-bold text-green-800 mt-1" id="total-income">R$ 0,00</h3>
+                        </div>
+                        <div class="bg-green-100 p-2 rounded-full text-green-600">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-red-50 p-4 rounded-lg border border-red-100">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm text-red-600 font-medium">Despesas</p>
+                            <h3 class="text-2xl font-bold text-red-800 mt-1" id="total-expense">R$ 0,00</h3>
+                        </div>
+                        <div class="bg-red-100 p-2 rounded-full text-red-600">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm text-blue-600 font-medium">Depósitos</p>
+                            <h3 class="text-2xl font-bold text-blue-800 mt-1" id="total-deposit">R$ 0,00</h3>
+                        </div>
+                        <div class="bg-blue-100 p-2 rounded-full text-blue-600">
+                            <i class="fas fa-piggy-bank"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-100">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm text-yellow-600 font-medium">Retiradas</p>
+                            <h3 class="text-2xl font-bold text-yellow-800 mt-1" id="total-withdrawal">R$ 0,00</h3>
+                        </div>
+                        <div class="bg-yellow-100 p-2 rounded-full text-yellow-600">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-purple-50 p-4 rounded-lg border border-purple-100">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm text-purple-600 font-medium">Saldo Atual</p>
+                            <h3 class="text-2xl font-bold text-purple-800 mt-1" id="current-balance">R$ 0,00</h3>
+                        </div>
+                        <div class="bg-purple-100 p-2 rounded-full text-purple-600">
+                            <i class="fas fa-balance-scale"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="p-6">
+                <div class="flex flex-col lg:flex-row gap-6">
+                    <!-- Transaction Form -->
+                    <div class="lg:w-1/3">
+                        <div class="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                            <h2 class="text-xl font-semibold mb-4 text-gray-800">
+                                <i class="fas fa-plus-circle mr-2 text-indigo-600"></i> Nova Transação
+                            </h2>
+                            
+                            <form id="transaction-form" class="space-y-4">
+                                <div>
+                                    <label for="transaction-type" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                                    <select id="transaction-type" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="income">Recebimento</option>
+                                        <option value="expense">Despesa</option>
+                                        <option value="deposit">Depósito</option>
+                                        <option value="withdrawal">Retirada</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label for="transaction-amount" class="block text-sm font-medium text-gray-700 mb-1">Valor (R$)</label>
+                                    <input type="number" step="0.01" id="transaction-amount" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="0,00" required>
+                                </div>
+                                
+                                <div>
+                                    <label for="transaction-date" class="block text-sm font-medium text-gray-700 mb-1">Data</label>
+                                    <input type="date" id="transaction-date" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
+                                </div>
+                                
+                                <div>
+                                    <label for="transaction-description" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                                    <textarea id="transaction-description" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Detalhes da transação"></textarea>
+                                </div>
+                                
+                                <div id="commission-field" class="hidden">
+                                    <label for="transaction-commission" class="block text-sm font-medium text-gray-700 mb-1">Comissão (%)</label>
+                                    <input type="number" step="0.1" id="transaction-commission" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="0,0">
+                                </div>
+                                
+                                <div class="flex space-x-3">
+                                    <button type="submit" class="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">
+                                        <i class="fas fa-save mr-2"></i> Salvar
+                                    </button>
+                                    <button type="button" id="clear-form" class="bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">
+                                        <i class="fas fa-times mr-2"></i> Limpar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Import/Export Section -->
+                        <div class="mt-6 bg-gray-50 p-5 rounded-lg border border-gray-200">
+                            <h2 class="text-xl font-semibold mb-4 text-gray-800">
+                                <i class="fas fa-exchange-alt mr-2 text-indigo-600"></i> Importar/Exportar
+                            </h2>
+                            
+                            <div class="space-y-3">
+                                <div class="flex space-x-3">
+                                    <button id="export-csv" class="flex-1 bg-green-100 text-green-700 py-2 px-4 rounded-md hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition text-sm">
+                                        <i class="fas fa-file-csv mr-2"></i> Exportar CSV
+                                    </button>
+                                    <button id="export-txt" class="flex-1 bg-blue-100 text-blue-700 py-2 px-4 rounded-md hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition text-sm">
+                                        <i class="fas fa-file-alt mr-2"></i> Exportar TXT
+                                    </button>
+                                </div>
+                                
+                                <div class="flex space-x-3">
+                                    <label for="import-file" class="flex-1 bg-purple-100 text-purple-700 py-2 px-4 rounded-md hover:bg-purple-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition text-sm text-center cursor-pointer">
+                                        <i class="fas fa-file-import mr-2"></i> Importar
+                                        <input type="file" id="import-file" class="hidden" accept=".csv,.txt">
+                                    </label>
+                                    <button id="print-report" class="flex-1 bg-yellow-100 text-yellow-700 py-2 px-4 rounded-md hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition text-sm">
+                                        <i class="fas fa-print mr-2"></i> Imprimir
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Transactions List -->
+                    <div class="lg:w-2/3">
+                        <div class="bg-white rounded-lg border border-gray-200">
+                            <div class="p-4 border-b border-gray-200">
+                                <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                                    <h2 class="text-xl font-semibold text-gray-800 mb-2 md:mb-0">
+                                        <i class="fas fa-list-ul mr-2 text-indigo-600"></i> Transações
+                                    </h2>
+                                    
+                                    <div class="flex space-x-2">
+                                        <select id="filter-type" class="px-3 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                            <option value="all">Todos os tipos</option>
+                                            <option value="income">Recebimentos</option>
+                                            <option value="expense">Despesas</option>
+                                            <option value="deposit">Depósitos</option>
+                                            <option value="withdrawal">Retiradas</option>
+                                        </select>
+                                        
+                                        <select id="filter-period" class="px-3 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                            <option value="all">Todo período</option>
+                                            <option value="today">Hoje</option>
+                                            <option value="week">Esta semana</option>
+                                            <option value="month">Este mês</option>
+                                            <option value="year">Este ano</option>
+                                            <option value="custom">Personalizado</option>
+                                        </select>
+                                        
+                                        <div id="custom-date-range" class="hidden flex space-x-1">
+                                            <input type="date" id="filter-start-date" class="px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                            <span class="self-center">a</span>
+                                            <input type="date" id="filter-end-date" class="px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="transactions-list" class="bg-white divide-y divide-gray-200">
+                                        <!-- Transactions will be loaded here -->
+                                        <tr>
+                                            <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">Nenhuma transação cadastrada</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="p-4 border-t border-gray-200 flex justify-between items-center">
+                                <div class="text-sm text-gray-500">
+                                    <span id="transactions-count">0</span> transações encontradas
+                                </div>
+                                <div class="text-sm text-gray-500">
+                                    Saldo filtrado: <span id="filtered-balance" class="font-medium">R$ 0,00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Print Report Section (Hidden) -->
+    <div id="print-section" class="hidden print-section p-8">
+        <div class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">Relatório Financeiro</h1>
+            <p class="text-gray-600">Gerado em <span id="report-date"></span></p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">Resumo Financeiro</h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Recebimentos:</span>
+                        <span class="font-medium" id="print-income">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Despesas:</span>
+                        <span class="font-medium" id="print-expense">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Depósitos:</span>
+                        <span class="font-medium" id="print-deposit">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Retiradas:</span>
+                        <span class="font-medium" id="print-withdrawal">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between border-t border-gray-200 pt-2 mt-2">
+                        <span class="text-gray-800 font-semibold">Saldo Atual:</span>
+                        <span class="font-bold text-lg" id="print-balance">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">Filtros Aplicados</h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Tipo:</span>
+                        <span class="font-medium" id="print-filter-type">Todos</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Período:</span>
+                        <span class="font-medium" id="print-filter-period">Todo período</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Total de Transações:</span>
+                        <span class="font-medium" id="print-transactions-count">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <h3 class="text-lg font-semibold text-gray-800 mb-3">Transações</h3>
+        <table class="min-w-full border border-gray-200">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="py-2 px-4 border text-left">Data</th>
+                    <th class="py-2 px-4 border text-left">Tipo</th>
+                    <th class="py-2 px-4 border text-left">Descrição</th>
+                    <th class="py-2 px-4 border text-left">Valor</th>
+                </tr>
+            </thead>
+            <tbody id="print-transactions-list">
+                <!-- Transactions for print will be loaded here -->
+                <tr>
+                    <td colspan="4" class="py-2 px-4 border text-center text-gray-500">Nenhuma transação encontrada</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Edit Transaction Modal -->
+    <div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 slide-in">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800">
+                    <i class="fas fa-edit mr-2 text-indigo-600"></i> Editar Transação
+                </h3>
+            </div>
+            
+            <form id="edit-transaction-form" class="p-6 space-y-4">
+                <input type="hidden" id="edit-transaction-id">
+                
+                <div>
+                    <label for="edit-transaction-type" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                    <select id="edit-transaction-type" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="income">Recebimento</option>
+                        <option value="expense">Despesa</option>
+                        <option value="deposit">Depósito</option>
+                        <option value="withdrawal">Retirada</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="edit-transaction-amount" class="block text-sm font-medium text-gray-700 mb-1">Valor (R$)</label>
+                    <input type="number" step="0.01" id="edit-transaction-amount" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="0,00" required>
+                </div>
+                
+                <div>
+                    <label for="edit-transaction-date" class="block text-sm font-medium text-gray-700 mb-1">Data</label>
+                    <input type="date" id="edit-transaction-date" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
+                </div>
+                
+                <div>
+                    <label for="edit-transaction-description" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                    <textarea id="edit-transaction-description" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Detalhes da transação"></textarea>
+                </div>
+                
+                <div id="edit-commission-field" class="hidden">
+                    <label for="edit-transaction-commission" class="block text-sm font-medium text-gray-700 mb-1">Comissão (%)</label>
+                    <input type="number" step="0.1" id="edit-transaction-commission" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="0,0">
+                </div>
+                
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button type="button" id="cancel-edit" class="bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">
+                        Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 slide-in">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800">
+                    <i class="fas fa-exclamation-triangle mr-2 text-yellow-500"></i> Confirmar Exclusão
+                </h3>
+            </div>
+            
+            <div class="p-6">
+                <p class="text-gray-700 mb-6">Tem certeza que deseja excluir esta transação? Esta ação não pode ser desfeita.</p>
+                
+                <div class="flex justify-end space-x-3">
+                    <button type="button" id="cancel-delete" class="bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">
+                        Cancelar
+                    </button>
+                    <button type="button" id="confirm-delete" class="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition">
+                        Excluir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize IndexedDB
+        let db;
+        const DB_NAME = "FinanceManagerDB";
+        const DB_VERSION = 1;
+        const STORE_NAME = "transactions";
+        
+        // Open or create IndexedDB
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        
+        request.onerror = function(event) {
+            console.error("Database error:", event.target.error);
+        };
+        
+        request.onsuccess = function(event) {
+            db = event.target.result;
+            loadTransactions();
+        };
+        
+        request.onupgradeneeded = function(event) {
+            const db = event.target.result;
+            const store = db.createObjectStore(STORE_NAME, { keyPath: "id", autoIncrement: true });
+            
+            // Create indexes for querying
+            store.createIndex("type", "type", { unique: false });
+            store.createIndex("date", "date", { unique: false });
+        };
+        
+        // Set today's date as default
+        document.addEventListener("DOMContentLoaded", function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('transaction-date').value = today;
+            document.getElementById('edit-transaction-date').value = today;
+            
+            // Show/hide commission field based on transaction type
+            document.getElementById('transaction-type').addEventListener('change', function() {
+                toggleCommissionField(this.value);
+            });
+            
+            document.getElementById('edit-transaction-type').addEventListener('change', function() {
+                toggleEditCommissionField(this.value);
+            });
+            
+            // Filter period change
+            document.getElementById('filter-period').addEventListener('change', function() {
+                if (this.value === 'custom') {
+                    document.getElementById('custom-date-range').classList.remove('hidden');
+                } else {
+                    document.getElementById('custom-date-range').classList.add('hidden');
+                    loadTransactions();
+                }
+            });
+            
+            // Apply custom date filter
+            document.getElementById('filter-start-date').addEventListener('change', loadTransactions);
+            document.getElementById('filter-end-date').addEventListener('change', loadTransactions);
+            
+            // Filter type change
+            document.getElementById('filter-type').addEventListener('change', loadTransactions);
+            
+            // Form submission
+            document.getElementById('transaction-form').addEventListener('submit', addTransaction);
+            
+            // Clear form
+            document.getElementById('clear-form').addEventListener('click', resetForm);
+            
+            // Edit form submission
+            document.getElementById('edit-transaction-form').addEventListener('submit', saveEditedTransaction);
+            
+            // Cancel edit
+            document.getElementById('cancel-edit').addEventListener('click', closeEditModal);
+            
+            // Export buttons
+            document.getElementById('export-csv').addEventListener('click', exportToCSV);
+            document.getElementById('export-txt').addEventListener('click', exportToTXT);
+            
+            // Import file
+            document.getElementById('import-file').addEventListener('change', importFromFile);
+            
+            // Print report
+            document.getElementById('print-report').addEventListener('click', preparePrintReport);
+            
+            // Close modals when clicking outside
+            document.getElementById('edit-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeEditModal();
+                }
+            });
+            
+            document.getElementById('confirm-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeConfirmModal();
+                }
+            });
+        });
+        
+        // Toggle commission field visibility
+        function toggleCommissionField(type) {
+            const commissionField = document.getElementById('commission-field');
+            if (type === 'income') {
+                commissionField.classList.remove('hidden');
+            } else {
+                commissionField.classList.add('hidden');
+                document.getElementById('transaction-commission').value = '';
+            }
+        }
+        
+        function toggleEditCommissionField(type) {
+            const commissionField = document.getElementById('edit-commission-field');
+            if (type === 'income') {
+                commissionField.classList.remove('hidden');
+            } else {
+                commissionField.classList.add('hidden');
+                document.getElementById('edit-transaction-commission').value = '';
+            }
+        }
+        
+        // Reset form to default
+        function resetForm() {
+            document.getElementById('transaction-form').reset();
+            document.getElementById('transaction-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('commission-field').classList.add('hidden');
+            document.getElementById('transaction-commission').value = '';
+        }
+        
+        // Add a new transaction
+        function addTransaction(e) {
+            e.preventDefault();
+            
+            const type = document.getElementById('transaction-type').value;
+            const amount = parseFloat(document.getElementById('transaction-amount').value);
+            const date = document.getElementById('transaction-date').value;
+            const description = document.getElementById('transaction-description').value;
+            const commission = type === 'income' ? parseFloat(document.getElementById('transaction-commission').value) || 0 : 0;
+            
+            if (!amount || isNaN(amount)) {
+                alert('Por favor, insira um valor válido.');
+                return;
+            }
+            
+            const transaction = {
+                type,
+                amount,
+                date,
+                description,
+                commission,
+                createdAt: new Date().getTime()
+            };
+            
+            const transactionStore = db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME);
+            const request = transactionStore.add(transaction);
+            
+            request.onsuccess = function() {
+                resetForm();
+                loadTransactions();
+            };
+            
+            request.onerror = function(event) {
+                console.error("Error adding transaction:", event.target.error);
+                alert('Ocorreu um erro ao adicionar a transação.');
+            };
+        }
+        
+        // Load transactions with filters
+        function loadTransactions() {
+            const typeFilter = document.getElementById('filter-type').value;
+            const periodFilter = document.getElementById('filter-period').value;
+            
+            let startDate, endDate;
+            
+            if (periodFilter === 'custom') {
+                startDate = document.getElementById('filter-start-date').value;
+                endDate = document.getElementById('filter-end-date').value;
+                
+                if (!startDate || !endDate) {
+                    return;
+                }
+            } else {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                switch (periodFilter) {
+                    case 'today':
+                        startDate = today.toISOString().split('T')[0];
+                        endDate = startDate;
+                        break;
+                    case 'week':
+                        const day = today.getDay();
+                        const diff = today.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is Sunday
+                        const monday = new Date(today.setDate(diff));
+                        startDate = monday.toISOString().split('T')[0];
+                        endDate = new Date().toISOString().split('T')[0];
+                        break;
+                    case 'month':
+                        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+                        startDate = firstDay.toISOString().split('T')[0];
+                        endDate = new Date().toISOString().split('T')[0];
+                        break;
+                    case 'year':
+                        const firstDayYear = new Date(today.getFullYear(), 0, 1);
+                        startDate = firstDayYear.toISOString().split('T')[0];
+                        endDate = new Date().toISOString().split('T')[0];
+                        break;
+                    default: // 'all'
+                        startDate = null;
+                        endDate = null;
+                }
+            }
+            
+            const transactionStore = db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME);
+            let request;
+            
+            if (typeFilter === 'all' && !startDate && !endDate) {
+                request = transactionStore.getAll();
+            } else {
+                let index;
+                let range;
+                
+                if (typeFilter !== 'all' && startDate && endDate) {
+                    index = transactionStore.index('type_date');
+                    range = IDBKeyRange.bound([typeFilter, startDate], [typeFilter, endDate]);
+                } else if (typeFilter !== 'all') {
+                    index = transactionStore.index('type');
+                    range = typeFilter;
+                } else if (startDate && endDate) {
+                    index = transactionStore.index('date');
+                    range = IDBKeyRange.bound(startDate, endDate);
+                }
+                
+                request = index.getAll(range);
+            }
+            
+            request.onsuccess = function(event) {
+                const transactions = event.target.result;
+                displayTransactions(transactions);
+                updateSummary(transactions);
+            };
+            
+            request.onerror = function(event) {
+                console.error("Error loading transactions:", event.target.error);
+            };
+        }
+        
+        // Display transactions in the table
+        function displayTransactions(transactions) {
+            const tbody = document.getElementById('transactions-list');
+            tbody.innerHTML = '';
+            
+            if (transactions.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">Nenhuma transação encontrada</td>';
+                tbody.appendChild(row);
+                document.getElementById('transactions-count').textContent = '0';
+                document.getElementById('filtered-balance').textContent = 'R$ 0,00';
+                return;
+            }
+            
+            // Sort by date (newest first)
+            transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            let filteredBalance = 0;
+            
+            transactions.forEach(transaction => {
+                const row = document.createElement('tr');
+                row.className = 'fade-in';
+                
+                // Calculate transaction impact on balance
+                let amountDisplay;
+                let impact;
+                
+                switch (transaction.type) {
+                    case 'income':
+                        row.classList.add('transaction-income');
+                        amountDisplay = `+ R$ ${transaction.amount.toFixed(2)}`;
+                        impact = transaction.amount;
+                        if (transaction.commission) {
+                            amountDisplay += ` <span class="text-xs text-gray-500">(comissão: ${transaction.commission}%)</span>`;
+                        }
+                        break;
+                    case 'expense':
+                        row.classList.add('transaction-expense');
+                        amountDisplay = `- R$ ${transaction.amount.toFixed(2)}`;
+                        impact = -transaction.amount;
+                        break;
+                    case 'deposit':
+                        row.classList.add('transaction-deposit');
+                        amountDisplay = `+ R$ ${transaction.amount.toFixed(2)}`;
+                        impact = transaction.amount;
+                        break;
+                    case 'withdrawal':
+                        row.classList.add('transaction-withdrawal');
+                        amountDisplay = `- R$ ${transaction.amount.toFixed(2)}`;
+                        impact = -transaction.amount;
+                        break;
+                }
+                
+                filteredBalance += impact;
+                
+                // Format date
+                const date = new Date(transaction.date);
+                const formattedDate = date.toLocaleDateString('pt-BR');
+                
+                // Format type
+                const typeNames = {
+                    'income': 'Recebimento',
+                    'expense': 'Despesa',
+                    'deposit': 'Depósito',
+                    'withdrawal': 'Retirada'
+                };
+                const typeDisplay = typeNames[transaction.type];
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formattedDate}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${typeDisplay}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">${transaction.description || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${amountDisplay}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button class="text-indigo-600 hover:text-indigo-900 mr-3 edit-btn" data-id="${transaction.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="text-red-600 hover:text-red-900 delete-btn" data-id="${transaction.id}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            // Update count and filtered balance
+            document.getElementById('transactions-count').textContent = transactions.length;
+            document.getElementById('filtered-balance').textContent = `R$ ${filteredBalance.toFixed(2)}`;
+            
+            // Add event listeners to edit and delete buttons
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    openEditModal(parseInt(this.getAttribute('data-id')));
+                });
+            });
+            
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    openConfirmModal(parseInt(this.getAttribute('data-id')));
+                });
+            });
+        }
+        
+        // Update summary cards
+        function updateSummary(transactions) {
+            let totalIncome = 0;
+            let totalExpense = 0;
+            let totalDeposit = 0;
+            let totalWithdrawal = 0;
+            let balance = 0;
+            
+            transactions.forEach(transaction => {
+                switch (transaction.type) {
+                    case 'income':
+                        totalIncome += transaction.amount;
+                        balance += transaction.amount;
+                        break;
+                    case 'expense':
+                        totalExpense += transaction.amount;
+                        balance -= transaction.amount;
+                        break;
+                    case 'deposit':
+                        totalDeposit += transaction.amount;
+                        balance += transaction.amount;
+                        break;
+                    case 'withdrawal':
+                        totalWithdrawal += transaction.amount;
+                        balance -= transaction.amount;
+                        break;
+                }
+            });
+            
+            document.getElementById('total-income').textContent = `R$ ${totalIncome.toFixed(2)}`;
+            document.getElementById('total-expense').textContent = `R$ ${totalExpense.toFixed(2)}`;
+            document.getElementById('total-deposit').textContent = `R$ ${totalDeposit.toFixed(2)}`;
+            document.getElementById('total-withdrawal').textContent = `R$ ${totalWithdrawal.toFixed(2)}`;
+            document.getElementById('current-balance').textContent = `R$ ${balance.toFixed(2)}`;
+        }
+        
+        // Open edit modal with transaction data
+        function openEditModal(id) {
+            const transactionStore = db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME);
+            const request = transactionStore.get(id);
+            
+            request.onsuccess = function(event) {
+                const transaction = event.target.result;
+                if (transaction) {
+                    document.getElementById('edit-transaction-id').value = transaction.id;
+                    document.getElementById('edit-transaction-type').value = transaction.type;
+                    document.getElementById('edit-transaction-amount').value = transaction.amount;
+                    document.getElementById('edit-transaction-date').value = transaction.date;
+                    document.getElementById('edit-transaction-description').value = transaction.description || '';
+                    
+                    if (transaction.type === 'income') {
+                        document.getElementById('edit-commission-field').classList.remove('hidden');
+                        document.getElementById('edit-transaction-commission').value = transaction.commission || '';
+                    } else {
+                        document.getElementById('edit-commission-field').classList.add('hidden');
+                        document.getElementById('edit-transaction-commission').value = '';
+                    }
+                    
+                    document.getElementById('edit-modal').classList.remove('hidden');
+                }
+            };
+            
+            request.onerror = function(event) {
+                console.error("Error getting transaction:", event.target.error);
+            };
+        }
+        
+        // Close edit modal
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.add('hidden');
+        }
+        
+        // Save edited transaction
+        function saveEditedTransaction(e) {
+            e.preventDefault();
+            
+            const id = parseInt(document.getElementById('edit-transaction-id').value);
+            const type = document.getElementById('edit-transaction-type').value;
+            const amount = parseFloat(document.getElementById('edit-transaction-amount').value);
+            const date = document.getElementById('edit-transaction-date').value;
+            const description = document.getElementById('edit-transaction-description').value;
+            const commission = type === 'income' ? parseFloat(document.getElementById('edit-transaction-commission').value) || 0 : 0;
+            
+            if (!amount || isNaN(amount)) {
+                alert('Por favor, insira um valor válido.');
+                return;
+            }
+            
+            const transaction = {
+                id,
+                type,
+                amount,
+                date,
+                description,
+                commission,
+                createdAt: new Date().getTime()
+            };
+            
+            const transactionStore = db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME);
+            const request = transactionStore.put(transaction);
+            
+            request.onsuccess = function() {
+                closeEditModal();
+                loadTransactions();
+            };
+            
+            request.onerror = function(event) {
+                console.error("Error updating transaction:", event.target.error);
+                alert('Ocorreu um erro ao atualizar a transação.');
+            };
+        }
+        
+        // Open confirmation modal for deletion
+        function openConfirmModal(id) {
+            document.getElementById('confirm-modal').classList.remove('hidden');
+            document.getElementById('confirm-delete').setAttribute('data-id', id);
+        }
+        
+        // Close confirmation modal
+        function closeConfirmModal() {
+            document.getElementById('confirm-modal').classList.add('hidden');
+            document.getElementById('confirm-delete').removeAttribute('data-id');
+        }
+        
+        // Delete transaction
+        document.getElementById('confirm-delete').addEventListener('click', function() {
+            const id = parseInt(this.getAttribute('data-id'));
+            
+            const transactionStore = db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME);
+            const request = transactionStore.delete(id);
+            
+            request.onsuccess = function() {
+                closeConfirmModal();
+                loadTransactions();
+            };
+            
+            request.onerror = function(event) {
+                console.error("Error deleting transaction:", event.target.error);
+                alert('Ocorreu um erro ao excluir a transação.');
+            };
+        });
+        
+        // Cancel delete
+        document.getElementById('cancel-delete').addEventListener('click', closeConfirmModal);
+        
+        // Export to CSV
+        function exportToCSV() {
+            const transactionStore = db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME);
+            const request = transactionStore.getAll();
+            
+            request.onsuccess = function(event) {
+                const transactions = event.target.result;
+                
+                if (transactions.length === 0) {
+                    alert('Nenhuma transação para exportar.');
+                    return;
+                }
+                
+                // CSV header
+                let csv = 'Tipo,Valor,Data,Descrição,Comissão\n';
+                
+                // Add transactions
+                transactions.forEach(transaction => {
+                    const typeNames = {
+                        'income': 'Recebimento',
+                        'expense': 'Despesa',
+                        'deposit': 'Depósito',
+                        'withdrawal': 'Retirada'
+                    };
+                    
+                    const type = typeNames[transaction.type];
+                    const amount = transaction.amount.toFixed(2);
+                    const date = transaction.date;
+                    const description = transaction.description ? `"${transaction.description.replace(/"/g, '""')}"` : '';
+                    const commission = transaction.commission || '';
+                    
+                    csv += `${type},${amount},${date},${description},${commission}\n`;
+                });
+                
+                // Create download link
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `transacoes_${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+            
+            request.onerror = function(event) {
+                console.error("Error exporting transactions:", event.target.error);
+                alert('Ocorreu um erro ao exportar as transações.');
+            };
+        }
+        
+        // Export to TXT
+        function exportToTXT() {
+            const transactionStore = db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME);
+            const request = transactionStore.getAll();
+            
+            request.onsuccess = function(event) {
+                const transactions = event.target.result;
+                
+                if (transactions.length === 0) {
+                    alert('Nenhuma transação para exportar.');
+                    return;
+                }
+                
+                // TXT content
+                let txt = 'Relatório de Transações\n\n';
+                txt += `Gerado em: ${new Date().toLocaleString('pt-BR')}\n\n`;
+                
+                // Add transactions
+                transactions.forEach((transaction, index) => {
+                    const typeNames = {
+                        'income': 'Recebimento',
+                        'expense': 'Despesa',
+                        'deposit': 'Depósito',
+                        'withdrawal': 'Retirada'
+                    };
+                    
+                    const type = typeNames[transaction.type];
+                    const amount = transaction.amount.toFixed(2);
+                    const date = new Date(transaction.date).toLocaleDateString('pt-BR');
+                    const description = transaction.description || 'Sem descrição';
+                    const commission = transaction.commission ? ` (Comissão: ${transaction.commission}%)` : '';
+                    
+                    txt += `Transação ${index + 1}:\n`;
+                    txt += `Tipo: ${type}\n`;
+                    txt += `Valor: R$ ${amount}\n`;
+                    txt += `Data: ${date}\n`;
+                    txt += `Descrição: ${description}${commission}\n\n`;
+                });
+                
+                // Create download link
+                const blob = new Blob([txt], { type: 'text/plain;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `transacoes_${new Date().toISOString().split('T')[0]}.txt`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+            
+            request.onerror = function(event) {
+                console.error("Error exporting transactions:", event.target.error);
+                alert('Ocorreu um erro ao exportar as transações.');
+            };
+        }
+        
+        // Import from file
+        function importFromFile(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const content = e.target.result;
+                let transactions = [];
+                
+                if (file.name.endsWith('.csv')) {
+                    // Parse CSV
+                    const lines = content.split('\n');
+                    const headers = lines[0].split(',');
+                    
+                    for (let i = 1; i < lines.length; i++) {
+                        if (lines[i].trim() === '') continue;
+                        
+                        const values = lines[i].split(',');
+                        const transaction = {};
+                        
+                        for (let j = 0; j < headers.length; j++) {
+                            const header = headers[j].trim().toLowerCase();
+                            let value = values[j] ? values[j].trim() : '';
+                            
+                            // Remove quotes from description
+                            if (header === 'descrição' || header === 'descricao') {
+                                value = value.replace(/^"(.*)"$/, '$1').replace(/""/g, '"');
+                            }
+                            
+                            switch (header) {
+                                case 'tipo':
+                                    const typeMap = {
+                                        'recebimento': 'income',
+                                        'despesa': 'expense',
+                                        'depósito': 'deposit',
+                                        'deposito': 'deposit',
+                                        'retirada': 'withdrawal'
+                                    };
+                                    transaction.type = typeMap[value.toLowerCase()] || value;
+                                    break;
+                                case 'valor':
+                                    transaction.amount = parseFloat(value.replace('R$', '').trim());
+                                    break;
+                                case 'data':
+                                    transaction.date = value;
+                                    break;
+                                case 'descrição':
+                                case 'descricao':
+                                    transaction.description = value;
+                                    break;
+                                case 'comissão':
+                                case 'comissao':
+                                    transaction.commission = parseFloat(value);
+                                    break;
+                            }
+                        }
+                        
+                        if (transaction.type && !isNaN(transaction.amount)) {
+                            transactions.push(transaction);
+                        }
+                    }
+                } else if (file.name.endsWith('.txt')) {
+                    // Parse TXT (simple format)
+                    const lines = content.split('\n');
+                    let currentTransaction = null;
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('Transação') || line.startsWith('Transacao')) {
+                            if (currentTransaction) {
+                                transactions.push(currentTransaction);
+                            }
+                            currentTransaction = {};
+                        } else if (line.startsWith('Tipo:')) {
+                            const type = line.replace('Tipo:', '').trim();
+                            const typeMap = {
+                                'recebimento': 'income',
+                                'despesa': 'expense',
+                                'depósito': 'deposit',
+                                'deposito': 'deposit',
+                                'retirada': 'withdrawal'
+                            };
+                            currentTransaction.type = typeMap[type.toLowerCase()] || type;
+                        } else if (line.startsWith('Valor:')) {
+                            const amount = line.replace('Valor:', '').replace('R$', '').trim();
+                            currentTransaction.amount = parseFloat(amount);
+                        } else if (line.startsWith('Data:')) {
+                            const dateStr = line.replace('Data:', '').trim();
+                            // Convert from Brazilian date format to YYYY-MM-DD
+                            const [day, month, year] = dateStr.split('/');
+                            currentTransaction.date = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                        } else if (line.startsWith('Descrição:') || line.startsWith('Descricao:')) {
+                            const desc = line.replace(/Descri[çc]ão:/, '').trim();
+                            const commissionMatch = desc.match(/\(Comissão: (\d+\.?\d*)%\)/);
+                            
+                            if (commissionMatch) {
+                                currentTransaction.description = desc.replace(/\(Comissão: \d+\.?\d*%\)/, '').trim();
+                                currentTransaction.commission = parseFloat(commissionMatch[1]);
+                            } else {
+                                currentTransaction.description = desc;
+                            }
+                        }
+                    }
+                    
+                    if (currentTransaction) {
+                        transactions.push(currentTransaction);
+                    }
+                }
+                
+                if (transactions.length > 0) {
+                    if (confirm(`Deseja importar ${transactions.length} transações?`)) {
+                        importTransactions(transactions);
+                    }
+                } else {
+                    alert('Nenhuma transação válida encontrada no arquivo.');
+                }
+            };
+            
+            reader.readAsText(file);
+            e.target.value = ''; // Reset file input
+        }
+        
+        // Import transactions to database
+        function importTransactions(transactions) {
+            const transactionStore = db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME);
+            
+            let importedCount = 0;
+            let errors = 0;
+            
+            transactions.forEach(transaction => {
+                // Add createdAt timestamp
+                transaction.createdAt = new Date().getTime();
+                
+                // If no commission for income, set to 0
+                if (transaction.type === 'income' && !transaction.commission) {
+                    transaction.commission = 0;
+                }
+                
+                const request = transactionStore.add(transaction);
+                
+                request.onsuccess = function() {
+                    importedCount++;
+                    if (importedCount + errors === transactions.length) {
+                        alert(`Importação concluída: ${importedCount} transações importadas, ${errors} falhas.`);
+                        loadTransactions();
+                    }
+                };
+                
+                request.onerror = function() {
+                    errors++;
+                    if (importedCount + errors === transactions.length) {
+                        alert(`Importação concluída: ${importedCount} transações importadas, ${errors} falhas.`);
+                        loadTransactions();
+                    }
+                };
+            });
+        }
+        
+        // Prepare print report
+        function preparePrintReport() {
+            const typeFilter = document.getElementById('filter-type').value;
+            const periodFilter = document.getElementById('filter-period').value;
+            
+            // Get filter names for display
+            const typeNames = {
+                'all': 'Todos',
+                'income': 'Recebimentos',
+                'expense': 'Despesas',
+                'deposit': 'Depósitos',
+                'withdrawal': 'Retiradas'
+            };
+            
+            const periodNames = {
+                'all': 'Todo período',
+                'today': 'Hoje',
+                'week': 'Esta semana',
+                'month': 'Este mês',
+                'year': 'Este ano',
+                'custom': 'Período personalizado'
+            };
+            
+            document.getElementById('print-filter-type').textContent = typeNames[typeFilter];
+            document.getElementById('print-filter-period').textContent = periodNames[periodFilter];
+            
+            // Set report date
+            const now = new Date();
+            document.getElementById('report-date').textContent = now.toLocaleString('pt-BR');
+            
+            // Get transactions from the table (already filtered)
+            const transactions = [];
+            const rows = document.getElementById('transactions-list').querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                if (row.cells.length === 5) { // Skip "no transactions" row
+                    const date = row.cells[0].textContent;
+                    const type = row.cells[1].textContent;
+                    const description = row.cells[2].textContent;
+                    const amountText = row.cells[3].textContent;
+                    
+                    // Extract amount value (remove +, - and R$)
+                    const amount = parseFloat(amountText.replace(/[^\d,.-]/g, '').replace(',', '.'));
+                    
+                    transactions.push({
+                        date,
+                        type,
+                        description,
+                        amount: isNaN(amount) ? 0 : amount
+                    });
+                }
+            });
+            
+            // Update print summary with filtered values
+            const totalIncome = parseFloat(document.getElementById('total-income').textContent.replace('R$', '').trim()) || 0;
+            const totalExpense = parseFloat(document.getElementById('total-expense').textContent.replace('R$', '').trim()) || 0;
+            const totalDeposit = parseFloat(document.getElementById('total-deposit').textContent.replace('R$', '').trim()) || 0;
+            const totalWithdrawal = parseFloat(document.getElementById('total-withdrawal').textContent.replace('R$', '').trim()) || 0;
+            const currentBalance = parseFloat(document.getElementById('current-balance').textContent.replace('R$', '').trim()) || 0;
+            
+            document.getElementById('print-income').textContent = `R$ ${totalIncome.toFixed(2)}`;
+            document.getElementById('print-expense').textContent = `R$ ${totalExpense.toFixed(2)}`;
+            document.getElementById('print-deposit').textContent = `R$ ${totalDeposit.toFixed(2)}`;
+            document.getElementById('print-withdrawal').textContent = `R$ ${totalWithdrawal.toFixed(2)}`;
+            document.getElementById('print-balance').textContent = `R$ ${currentBalance.toFixed(2)}`;
+            document.getElementById('print-transactions-count').textContent = transactions.length;
+            
+            // Populate print transactions table
+            const printTbody = document.getElementById('print-transactions-list');
+            printTbody.innerHTML = '';
+            
+            if (transactions.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="4" class="py-2 px-4 border text-center text-gray-500">Nenhuma transação encontrada</td>';
+                printTbody.appendChild(row);
+            } else {
+                transactions.forEach(transaction => {
+                    const row = document.createElement('tr');
+                    
+                    // Determine amount display based on transaction type
+                    let amountDisplay;
+                    if (transaction.type === 'Recebimento' || transaction.type === 'Depósito') {
+                        amountDisplay = `R$ ${transaction.amount.toFixed(2)}`;
+                    } else {
+                        amountDisplay = `- R$ ${transaction.amount.toFixed(2)}`;
+                    }
+                    
+                    row.innerHTML = `
+                        <td class="py-2 px-4 border">${transaction.date}</td>
+                        <td class="py-2 px-4 border">${transaction.type}</td>
+                        <td class="py-2 px-4 border">${transaction.description}</td>
+                        <td class="py-2 px-4 border">${amountDisplay}</td>
+                    `;
+                    
+                    printTbody.appendChild(row);
+                });
+            }
+            
+            // Show print section and print
+            const printSection = document.getElementById('print-section');
+            printSection.classList.remove('hidden');
+            
+            setTimeout(() => {
+                window.print();
+                printSection.classList.add('hidden');
+            }, 500);
+        }
+    </script>
+</body>
+</html>
