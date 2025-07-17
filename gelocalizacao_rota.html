@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPS Location Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 0.5rem;
+        }
+        .location-marker {
+            background-color: #3b82f6;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px #3b82f6;
+        }
+        .route-line {
+            stroke: #3b82f6;
+            stroke-width: 3;
+            stroke-dasharray: 5, 5;
+            fill: none;
+        }
+        .smooth-scroll {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans smooth-scroll">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-blue-600 mb-2">GPS Location Tracker</h1>
+            <p class="text-gray-600">Track, save, and analyze your routes with precision</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Main controls section -->
+            <div class="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
+                <div class="flex flex-col space-y-4">
+                    <div class="flex flex-wrap gap-3 justify-between items-center">
+                        <div>
+                            <h2 class="text-xl font-semibold text-gray-800">Location Tracking</h2>
+                            <p class="text-sm text-gray-500">Capture and manage your GPS coordinates</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="startTracking" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+                                <i class="fas fa-location-arrow"></i> Start Tracking
+                            </button>
+                            <button id="stopTracking" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors" disabled>
+                                <i class="fas fa-stop"></i> Stop
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="map" class="relative">
+                        <div class="absolute inset-0 flex items-center justify-center bg-gray-200 rounded-lg">
+                            <p class="text-gray-500">Map will appear here when tracking starts</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <p class="text-sm text-blue-800 font-medium">Latitude</p>
+                            <p id="latitude" class="text-xl font-mono">--.--</p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <p class="text-sm text-blue-800 font-medium">Longitude</p>
+                            <p id="longitude" class="text-xl font-mono">--.--</p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <p class="text-sm text-blue-800 font-medium">Accuracy</p>
+                            <p id="accuracy" class="text-xl font-mono">-- m</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-3 justify-between items-center pt-4">
+                        <div>
+                            <h2 class="text-xl font-semibold text-gray-800">Saved Locations</h2>
+                            <p class="text-sm text-gray-500">Manage your captured GPS points</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="clearLocations" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+                                <i class="fas fa-trash"></i> Clear All
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white rounded-lg overflow-hidden">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="py-2 px-4 text-left">#</th>
+                                    <th class="py-2 px-4 text-left">Latitude</th>
+                                    <th class="py-2 px-4 text-left">Longitude</th>
+                                    <th class="py-2 px-4 text-left">Timestamp</th>
+                                    <th class="py-2 px-4 text-left">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="locationsTable" class="divide-y divide-gray-200">
+                                <tr>
+                                    <td colspan="5" class="py-4 text-center text-gray-500">No locations saved yet</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data management section -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex flex-col space-y-6">
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-800">Route Adjustment</h2>
+                        <p class="text-sm text-gray-500">Optimize your saved route</p>
+                        <div class="mt-4 space-y-3">
+                            <button id="showRoute" class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                <i class="fas fa-route"></i> Show Route
+                            </button>
+                            <button id="optimizeRoute" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                <i class="fas fa-magic"></i> Optimize Route
+                            </button>
+                            <button id="clearRoute" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                <i class="fas fa-times"></i> Clear Route
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-800">Data Management</h2>
+                        <p class="text-sm text-gray-500">Import and export your location data</p>
+                        <div class="mt-4 space-y-3">
+                            <button id="exportData" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                <i class="fas fa-file-export"></i> Export as TXT
+                            </button>
+                            <div class="relative">
+                                <input type="file" id="importFile" accept=".txt" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                                <button class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                                    <i class="fas fa-file-import"></i> Import from TXT
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-info-circle text-yellow-500"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-yellow-800">Tips</h3>
+                                <div class="mt-2 text-sm text-yellow-700">
+                                    <ul class="list-disc pl-5 space-y-1">
+                                        <li>Click "Start Tracking" to begin capturing GPS data</li>
+                                        <li>Export saves all locations as a CSV-formatted text file</li>
+                                        <li>Import supports CSV-formatted text files</li>
+                                        <li>Route optimization rearranges points for shortest path</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="statusMessage" class="hidden p-4 rounded-lg text-center"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Database setup
+        let db;
+        const DB_NAME = 'GPSTrackerDB';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'locations';
+        
+        // Tracking variables
+        let watchId = null;
+        let currentPosMarker = null;
+        let routePolyline = null;
+        let map = null;
+        let markers = [];
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize database
+            await initDB();
+            
+            // Load saved locations
+            await loadLocations();
+            
+            // Set up event listeners
+            setupEventListeners();
+        });
+        
+        // Initialize IndexedDB
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                
+                request.onerror = (event) => {
+                    console.error('Database error:', event.target.error);
+                    reject('Failed to open database');
+                };
+                
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    resolve(db);
+                };
+                
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+                        store.createIndex('timestamp', 'timestamp', { unique: false });
+                    }
+                };
+            });
+        }
+        
+        // Set up all event listeners
+        function setupEventListeners() {
+            // Tracking buttons
+            document.getElementById('startTracking').addEventListener('click', startTracking);
+            document.getElementById('stopTracking').addEventListener('click', stopTracking);
+            
+            // Location management buttons
+            document.getElementById('clearLocations').addEventListener('click', clearLocations);
+            
+            // Route buttons
+            document.getElementById('showRoute').addEventListener('click', showRoute);
+            document.getElementById('optimizeRoute').addEventListener('click', optimizeRoute);
+            document.getElementById('clearRoute').addEventListener('click', clearRoute);
+            
+            // Data management buttons
+            document.getElementById('exportData').addEventListener('click', exportData);
+            document.getElementById('importFile').addEventListener('change', importData);
+        }
+        
+        // Start tracking location
+        function startTracking() {
+            if (watchId !== null) return;
+            
+            // Enable/disable buttons
+            document.getElementById('startTracking').disabled = true;
+            document.getElementById('stopTracking').disabled = false;
+            
+            // Initialize map if not already done
+            if (!map) {
+                initMap();
+            }
+            
+            // Start watching position
+            watchId = navigator.geolocation.watchPosition(
+                position => updatePosition(position),
+                error => handleGeolocationError(error),
+                {
+                    enableHighAccuracy: true,
+                    maximumAge: 10000,
+                    timeout: 5000
+                }
+            );
+            
+            showStatus('Tracking started', 'bg-blue-100 text-blue-800');
+        }
+        
+        // Stop tracking location
+        function stopTracking() {
+            if (watchId === null) return;
+            
+            navigator.geolocation.clearWatch(watchId);
+            watchId = null;
+            
+            // Enable/disable buttons
+            document.getElementById('startTracking').disabled = false;
+            document.getElementById('stopTracking').disabled = true;
+            
+            showStatus('Tracking stopped', 'bg-gray-100 text-gray-800');
+        }
+        
+        // Initialize the map
+        function initMap() {
+            // Remove placeholder
+            const mapElement = document.getElementById('map');
+            mapElement.innerHTML = '';
+            
+            // Create map centered on a default location (London)
+            map = new google.maps.Map(mapElement, {
+                center: { lat: 51.5074, lng: -0.1278 },
+                zoom: 12,
+                streetViewControl: false,
+                mapTypeControl: false,
+                fullscreenControl: true,
+                zoomControl: true
+            });
+        }
+        
+        // Update position display and save to database
+        async function updatePosition(position) {
+            const { latitude, longitude, accuracy } = position.coords;
+            
+            // Update display
+            document.getElementById('latitude').textContent = latitude.toFixed(6);
+            document.getElementById('longitude').textContent = longitude.toFixed(6);
+            document.getElementById('accuracy').textContent = `${Math.round(accuracy)} m`;
+            
+            // Update or create current position marker
+            if (currentPosMarker) {
+                currentPosMarker.setPosition({ lat: latitude, lng: longitude });
+            } else if (map) {
+                currentPosMarker = new google.maps.Marker({
+                    position: { lat: latitude, lng: longitude },
+                    map: map,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 8,
+                        fillColor: '#3b82f6',
+                        fillOpacity: 1,
+                        strokeColor: 'white',
+                        strokeWeight: 2
+                    }
+                });
+            }
+            
+            // Center map on current position
+            if (map) {
+                map.panTo({ lat: latitude, lng: longitude });
+            }
+            
+            // Save to database
+            const location = {
+                latitude,
+                longitude,
+                accuracy,
+                timestamp: new Date().toISOString()
+            };
+            
+            await saveLocation(location);
+            await loadLocations();
+        }
+        
+        // Handle geolocation errors
+        function handleGeolocationError(error) {
+            let message = '';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    message = 'Location access was denied. Please enable location services.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    message = 'Location information is unavailable.';
+                    break;
+                case error.TIMEOUT:
+                    message = 'The request to get location timed out.';
+                    break;
+                case error.UNKNOWN_ERROR:
+                    message = 'An unknown error occurred.';
+                    break;
+            }
+            
+            showStatus(message, 'bg-red-100 text-red-800');
+            stopTracking();
+        }
+        
+        // Save location to IndexedDB
+        function saveLocation(location) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                
+                const request = store.add(location);
+                
+                request.onsuccess = () => {
+                    resolve(request.result);
+                };
+                
+                request.onerror = (event) => {
+                    console.error('Error saving location:', event.target.error);
+                    reject(event.target.error);
+                };
+            });
+        }
+        
+        // Load all locations from IndexedDB
+        async function loadLocations() {
+            const locations = await getAllLocations();
+            const tableBody = document.getElementById('locationsTable');
+            
+            if (locations.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-gray-500">No locations saved yet</td></tr>';
+                return;
+            }
+            
+            tableBody.innerHTML = '';
+            
+            locations.forEach((loc, index) => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                
+                row.innerHTML = `
+                    <td class="py-2 px-4">${index + 1}</td>
+                    <td class="py-2 px-4 font-mono">${loc.latitude.toFixed(6)}</td>
+                    <td class="py-2 px-4 font-mono">${loc.longitude.toFixed(6)}</td>
+                    <td class="py-2 px-4 text-sm">${new Date(loc.timestamp).toLocaleString()}</td>
+                    <td class="py-2 px-4">
+                        <button class="delete-location text-red-600 hover:text-red-800" data-id="${loc.id}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-location').forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    const id = parseInt(e.currentTarget.getAttribute('data-id'));
+                    await deleteLocation(id);
+                    await loadLocations();
+                    
+                    // If we're showing the route, update it
+                    if (routePolyline) {
+                        showRoute();
+                    }
+                });
+            });
+        }
+        
+        // Get all locations from IndexedDB
+        function getAllLocations() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const index = store.index('timestamp');
+                
+                const request = index.getAll();
+                
+                request.onsuccess = () => {
+                    resolve(request.result);
+                };
+                
+                request.onerror = (event) => {
+                    console.error('Error getting locations:', event.target.error);
+                    reject(event.target.error);
+                };
+            });
+        }
+        
+        // Delete a location from IndexedDB
+        function deleteLocation(id) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                
+                const request = store.delete(id);
+                
+                request.onsuccess = () => {
+                    resolve();
+                };
+                
+                request.onerror = (event) => {
+                    console.error('Error deleting location:', event.target.error);
+                    reject(event.target.error);
+                };
+            });
+        }
+        
+        // Clear all locations from IndexedDB
+        async function clearLocations() {
+            if (!confirm('Are you sure you want to delete all saved locations?')) {
+                return;
+            }
+            
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                
+                const request = store.clear();
+                
+                request.onsuccess = async () => {
+                    await loadLocations();
+                    clearRoute();
+                    showStatus('All locations cleared', 'bg-green-100 text-green-800');
+                    resolve();
+                };
+                
+                request.onerror = (event) => {
+                    console.error('Error clearing locations:', event.target.error);
+                    showStatus('Error clearing locations', 'bg-red-100 text-red-800');
+                    reject(event.target.error);
+                };
+            });
+        }
+        
+        // Show route on map
+        async function showRoute() {
+            if (!map) {
+                showStatus('Please start tracking to initialize the map', 'bg-yellow-100 text-yellow-800');
+                return;
+            }
+            
+            const locations = await getAllLocations();
+            
+            if (locations.length < 2) {
+                showStatus('Need at least 2 points to show a route', 'bg-yellow-100 text-yellow-800');
+                return;
+            }
+            
+            // Clear existing route if any
+            if (routePolyline) {
+                routePolyline.setMap(null);
+            }
+            
+            // Clear existing markers if any
+            markers.forEach(marker => marker.setMap(null));
+            markers = [];
+            
+            // Create path array
+            const path = locations.map(loc => ({
+                lat: loc.latitude,
+                lng: loc.longitude
+            }));
+            
+            // Create polyline
+            routePolyline = new google.maps.Polyline({
+                path: path,
+                geodesic: true,
+                strokeColor: '#3b82f6',
+                strokeOpacity: 1.0,
+                strokeWeight: 3,
+                map: map
+            });
+            
+            // Add markers for each point
+            locations.forEach((loc, index) => {
+                const marker = new google.maps.Marker({
+                    position: { lat: loc.latitude, lng: loc.longitude },
+                    map: map,
+                    label: {
+                        text: (index + 1).toString(),
+                        color: 'white',
+                        fontSize: '12px',
+                        fontWeight: 'bold'
+                    },
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 10,
+                        fillColor: index === 0 ? '#10B981' : (index === locations.length - 1 ? '#EF4444' : '#3B82F6'),
+                        fillOpacity: 1,
+                        strokeColor: 'white',
+                        strokeWeight: 2
+                    }
+                });
+                
+                markers.push(marker);
+            });
+            
+            // Fit map to bounds of the route
+            const bounds = new google.maps.LatLngBounds();
+            path.forEach(point => bounds.extend(point));
+            map.fitBounds(bounds);
+            
+            showStatus('Route displayed', 'bg-blue-100 text-blue-800');
+        }
+        
+        // Optimize route (simple implementation - sorts by nearest neighbor)
+        async function optimizeRoute() {
+            const locations = await getAllLocations();
+            
+            if (locations.length < 3) {
+                showStatus('Need at least 3 points to optimize route', 'bg-yellow-100 text-yellow-800');
+                return;
+            }
+            
+            // Simple optimization: nearest neighbor algorithm
+            const optimized = [locations[0]];
+            let remaining = locations.slice(1);
+            
+            while (remaining.length > 0) {
+                const last = optimized[optimized.length - 1];
+                let nearestIndex = 0;
+                let nearestDistance = distanceBetween(last, remaining[0]);
+                
+                for (let i = 1; i < remaining.length; i++) {
+                    const dist = distanceBetween(last, remaining[i]);
+                    if (dist < nearestDistance) {
+                        nearestDistance = dist;
+                        nearestIndex = i;
+                    }
+                }
+                
+                optimized.push(remaining[nearestIndex]);
+                remaining.splice(nearestIndex, 1);
+            }
+            
+            // Clear existing data
+            await clearLocations();
+            
+            // Save optimized route
+            for (const loc of optimized) {
+                await saveLocation(loc);
+            }
+            
+            await loadLocations();
+            showRoute();
+            
+            showStatus('Route optimized', 'bg-green-100 text-green-800');
+        }
+        
+        // Calculate distance between two points in meters (Haversine formula)
+        function distanceBetween(a, b) {
+            const R = 6371000; // Earth radius in meters
+            const φ1 = a.latitude * Math.PI/180;
+            const φ2 = b.latitude * Math.PI/180;
+            const Δφ = (b.latitude - a.latitude) * Math.PI/180;
+            const Δλ = (b.longitude - a.longitude) * Math.PI/180;
+            
+            const x = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                      Math.cos(φ1) * Math.cos(φ2) *
+                      Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            const y = 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
+            
+            return R * y;
+        }
+        
+        // Clear the displayed route
+        function clearRoute() {
+            if (routePolyline) {
+                routePolyline.setMap(null);
+                routePolyline = null;
+            }
+            
+            markers.forEach(marker => marker.setMap(null));
+            markers = [];
+            
+            showStatus('Route cleared', 'bg-gray-100 text-gray-800');
+        }
+        
+        // Export data as CSV in a TXT file
+        async function exportData() {
+            const locations = await getAllLocations();
+            
+            if (locations.length === 0) {
+                showStatus('No data to export', 'bg-yellow-100 text-yellow-800');
+                return;
+            }
+            
+            // Create CSV content
+            let csvContent = "latitude,longitude,accuracy,timestamp\n";
+            
+            locations.forEach(loc => {
+                csvContent += `${loc.latitude},${loc.longitude},${loc.accuracy},"${loc.timestamp}"\n`;
+            });
+            
+            // Create download link
+            const blob = new Blob([csvContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `gps_locations_${new Date().toISOString().slice(0, 10)}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showStatus('Data exported', 'bg-green-100 text-green-800');
+        }
+        
+        // Import data from CSV file
+        async function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const content = e.target.result;
+                    const lines = content.split('\n');
+                    
+                    // Skip header if present
+                    const startIndex = lines[0].startsWith('latitude,longitude') ? 1 : 0;
+                    
+                    // Clear existing data
+                    await clearLocations();
+                    
+                    // Parse and save each line
+                    for (let i = startIndex; i < lines.length; i++) {
+                        if (lines[i].trim() === '') continue;
+                        
+                        const parts = lines[i].split(',');
+                        if (parts.length < 4) continue;
+                        
+                        const latitude = parseFloat(parts[0]);
+                        const longitude = parseFloat(parts[1]);
+                        const accuracy = parseFloat(parts[2]);
+                        let timestamp = parts[3].replace(/"/g, '');
+                        
+                        // If timestamp is not ISO format, convert it
+                        if (!timestamp.includes('T')) {
+                            timestamp = new Date(timestamp).toISOString();
+                        }
+                        
+                        await saveLocation({
+                            latitude,
+                            longitude,
+                            accuracy,
+                            timestamp
+                        });
+                    }
+                    
+                    await loadLocations();
+                    showStatus('Data imported successfully', 'bg-green-100 text-green-800');
+                } catch (error) {
+                    console.error('Error importing data:', error);
+                    showStatus('Error importing data. Please check file format.', 'bg-red-100 text-red-800');
+                }
+                
+                // Reset file input
+                event.target.value = '';
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        // Show status message
+        function showStatus(message, classes) {
+            const statusElement = document.getElementById('statusMessage');
+            statusElement.textContent = message;
+            statusElement.className = classes + ' p-4 rounded-lg text-center';
+            statusElement.classList.remove('hidden');
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                statusElement.classList.add('hidden');
+            }, 5000);
+        }
+    </script>
+    
+    <!-- Load Google Maps API -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD9BkSS008xvKbR-6WaD4VXeX0vVvq7nf0&callback=initMap"></script>
+</body>
+</html>
