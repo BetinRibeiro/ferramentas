@@ -163,6 +163,20 @@
                     <p>Nenhuma conta cadastrada</p>
                 </div>
             </div>
+            
+            <!-- Rodapé com totais -->
+            <div class="mt-6 pt-4 border-t border-gray-200">
+                <div class="flex justify-around text-center">
+                    <div>
+                        <div class="text-sm text-gray-600">Total Liquidado</div>
+                        <div class="text-xl font-bold text-green-600" id="totalPaid">R$ 0,00</div>
+                    </div>
+                    <div>
+                        <div class="text-sm text-gray-600">Total Não Liquidado</div>
+                        <div class="text-xl font-bold text-red-600" id="totalUnpaid">R$ 0,00</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Modal -->
@@ -303,9 +317,19 @@
             const totalAmount = Object.values(bills).reduce((sum, bill) => sum + bill.amount, 0);
             const averageAmount = totalBills > 0 ? totalAmount / totalBills : 0;
 
+            const totalPaid = Object.values(bills)
+                .filter(bill => bill.paid)
+                .reduce((sum, bill) => sum + bill.amount, 0);
+                
+            const totalUnpaid = Object.values(bills)
+                .filter(bill => !bill.paid)
+                .reduce((sum, bill) => sum + bill.amount, 0);
+
             document.getElementById('totalBills').textContent = totalBills;
             document.getElementById('totalAmount').textContent = `R$ ${totalAmount.toFixed(2)}`;
             document.getElementById('averageAmount').textContent = `R$ ${averageAmount.toFixed(2)}`;
+            document.getElementById('totalPaid').textContent = `R$ ${totalPaid.toFixed(2)}`;
+            document.getElementById('totalUnpaid').textContent = `R$ ${totalUnpaid.toFixed(2)}`;
             
             // Atualizar tabela de contas
             updateBillsTable();
