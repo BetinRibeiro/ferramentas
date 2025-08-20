@@ -31,6 +31,11 @@
             color: white;
             border-color: transparent;
         }
+
+        .calendar-day.has-bill.paid {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
         
         .bill-amount {
             font-size: 0.75rem;
@@ -261,10 +266,12 @@
             if (bills[day]) {
                 description.value = bills[day].description;
                 amount.value = bills[day].amount;
+                document.getElementById('paid').checked = bills[day].paid || false;
                 deleteBtn.classList.remove('hidden');
             } else {
                 description.value = '';
                 amount.value = '';
+                document.getElementById('paid').checked = false;
                 deleteBtn.classList.add('hidden');
             }
 
@@ -321,6 +328,14 @@
                 row.innerHTML = `
                     <td class="py-3 px-4 font-medium text-gray-800">${day}</td>
                     <td class="py-3 px-4 text-gray-700">${bill.description}</td>
+                    <td class="py-3 px-4 text-center">
+                        <button onclick="togglePaid(${day})" class="text-lg">
+                            ${bill.paid ? 
+                                '<i class="fas fa-check-circle text-green-500"></i>' : 
+                                '<i class="far fa-circle text-gray-400"></i>'
+                            }
+                        </button>
+                    </td>
                     <td class="py-3 px-4 text-right font-medium text-gray-800">R$ ${bill.amount.toFixed(2)}</td>
                     <td class="py-3 px-4 text-center">
                         <button onclick="openModal(${day})" 
@@ -361,9 +376,9 @@
         });
 
         function exportCSV() {
-            let csv = 'dia,descricao,valor\n';
+            let csv = 'dia,descricao,valor,pago\n';
             for (const [day, bill] of Object.entries(bills)) {
-                csv += `${day},"${bill.description}",${bill.amount}\n`;
+                csv += `${day},"${bill.description}",${bill.amount},${bill.paid || false}\n`;
             }
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
@@ -387,7 +402,8 @@
                     if (day && description && amount) {
                         newBills[day.trim()] = {
                             description: description.replace(/"/g, '').trim(),
-                            amount: parseFloat(amount.trim())
+                            amount: parseFloat(amount.trim()),
+                            paid: paid.trim() === 'true'
                         };
                     }
                 }
@@ -399,6 +415,12 @@
                 }
             };
             reader.readAsText(file, 'UTF-8');
+        }
+
+        function togglePaid(day) {
+            bills[day].paid = !bills[day].paid;
+            localStorage.setItem('bills', JSON.stringify(bills));
+            generateCalendar();
         }
 
         // Initialize
