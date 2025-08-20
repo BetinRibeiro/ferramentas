@@ -117,7 +117,7 @@
         </div>
 
         <!-- Calendar Grid -->
-        <div class="bg-white rounded-2xl shadow-xl p-6">
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
             <div class="grid grid-cols-7 gap-2 mb-4">
                 <div class="text-center font-semibold text-gray-600 py-2">Dom</div>
                 <div class="text-center font-semibold text-gray-600 py-2">Seg</div>
@@ -130,6 +130,33 @@
             
             <div class="grid grid-cols-7 gap-2" id="calendarGrid">
                 <!-- Calendar days will be generated here -->
+            </div>
+        </div>
+
+        <!-- Lista de Contas em Tabela -->
+        <div class="bg-white rounded-2xl shadow-xl p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-list mr-3 text-blue-600"></i>
+                Lista de Contas
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-gray-200">
+                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Dia</th>
+                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Descrição</th>
+                            <th class="text-right py-3 px-4 font-semibold text-gray-700">Valor</th>
+                            <th class="text-center py-3 px-4 font-semibold text-gray-700">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="billsTable">
+                        <!-- Table rows will be generated here -->
+                    </tbody>
+                </table>
+                <div id="emptyMessage" class="text-center py-8 text-gray-500 hidden">
+                    <i class="fas fa-inbox text-4xl mb-2 opacity-50"></i>
+                    <p>Nenhuma conta cadastrada</p>
+                </div>
             </div>
         </div>
 
@@ -267,6 +294,56 @@
             document.getElementById('totalBills').textContent = totalBills;
             document.getElementById('totalAmount').textContent = `R$ ${totalAmount.toFixed(2)}`;
             document.getElementById('averageAmount').textContent = `R$ ${averageAmount.toFixed(2)}`;
+            
+            // Atualizar tabela de contas
+            updateBillsTable();
+        }
+
+        function updateBillsTable() {
+            const tableBody = document.getElementById('billsTable');
+            const emptyMessage = document.getElementById('emptyMessage');
+            
+            tableBody.innerHTML = '';
+            
+            const billsArray = Object.entries(bills).sort((a, b) => a[0] - b[0]);
+            
+            if (billsArray.length === 0) {
+                emptyMessage.classList.remove('hidden');
+                return;
+            }
+            
+            emptyMessage.classList.add('hidden');
+            
+            billsArray.forEach(([day, bill]) => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-100 hover:bg-gray-50';
+                
+                row.innerHTML = `
+                    <td class="py-3 px-4 font-medium text-gray-800">${day}</td>
+                    <td class="py-3 px-4 text-gray-700">${bill.description}</td>
+                    <td class="py-3 px-4 text-right font-medium text-gray-800">R$ ${bill.amount.toFixed(2)}</td>
+                    <td class="py-3 px-4 text-center">
+                        <button onclick="openModal(${day})" 
+                                class="text-blue-600 hover:text-blue-800 transition p-1">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteBillFromTable(${day})" 
+                                class="text-red-600 hover:text-red-800 transition p-1 ml-2">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        function deleteBillFromTable(day) {
+            if (confirm('Tem certeza que deseja excluir esta conta?')) {
+                delete bills[day];
+                localStorage.setItem('bills', JSON.stringify(bills));
+                generateCalendar();
+            }
         }
 
         document.getElementById('billForm').addEventListener('submit', (e) => {
