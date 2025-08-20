@@ -85,7 +85,16 @@
                 <i class="fas fa-calendar-alt mr-3 text-blue-600"></i>
                 Calendário de Contas a Pagar
             </h1>
-            <p class="text-gray-600 text-lg">Previsão de contas fixas mensais</p>
+            <p class="text-gray-600 text-lg mb-4">Previsão de contas fixas mensais</p>
+            <div class="flex justify-center gap-4">
+                <button onclick="exportCSV()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                    <i class="fas fa-download mr-2"></i>Exportar CSV
+                </button>
+                <label class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition cursor-pointer">
+                    <i class="fas fa-upload mr-2"></i>Importar CSV
+                    <input type="file" id="importFile" accept=".csv" class="hidden" onchange="importCSV(event)">
+                </label>
+            </div>
         </header>
 
         <!-- Summary Cards -->
@@ -273,6 +282,47 @@
             generateCalendar();
             closeModal();
         });
+
+        function exportCSV() {
+            let csv = 'dia,descricao,valor\n';
+            for (const [day, bill] of Object.entries(bills)) {
+                csv += `${day},"${bill.description}",${bill.amount}\n`;
+            }
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'contas_mensais.csv';
+            link.click();
+        }
+
+        function importCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const lines = e.target.result.split('\n');
+                const newBills = {};
+                
+                // Skip header line
+                for (let i = 1; i < lines.length; i++) {
+                    const [day, description, amount] = lines[i].split(',');
+                    if (day && description && amount) {
+                        newBills[day.trim()] = {
+                            description: description.replace(/"/g, '').trim(),
+                            amount: parseFloat(amount.trim())
+                        };
+                    }
+                }
+                
+                if (confirm('Tem certeza que deseja importar e substituir todas as contas?')) {
+                    bills = newBills;
+                    localStorage.setItem('bills', JSON.stringify(bills));
+                    generateCalendar();
+                }
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
 
         // Initialize
         generateCalendar();
