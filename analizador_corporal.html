@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisador Corporal & Fitness</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💪</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        
+        .tab-active {
+            border-bottom: 3px solid #0ea5e9;
+            font-weight: 600;
+        }
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        
+        .custom-shadow {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .result-card {
+            transition: all 0.3s ease;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Cabeçalho -->
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <i class="fas fa-heartbeat text-primary-600 text-2xl mr-2"></i>
+                <h1 class="text-xl font-bold text-gray-800">Analisador Corporal & Fitness</h1>
+            </div>
+            <button id="exportBtn" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg flex items-center">
+                <i class="fas fa-file-export mr-2"></i> Exportar Dados
+            </button>
+        </div>
+    </header>
+
+    <!-- Navegação por abas -->
+    <div class="container mx-auto px-4 mt-6">
+        <div class="flex border-b overflow-x-auto">
+            <button class="tab-btn px-6 py-3 text-gray-600 font-medium tab-active" data-tab="imc">IMC</button>
+            <button class="tab-btn px-6 py-3 text-gray-600 font-medium" data-tab="rcq">RCQ</button>
+            <button class="tab-btn px-6 py-3 text-gray-600 font-medium" data-tab="bioimpedancia">Bioimpedância</button>
+            <button class="tab-btn px-6 py-3 text-gray-600 font-medium" data-tab="condicionamento">Condicionamento</button>
+            <button class="tab-btn px-6 py-3 text-gray-600 font-medium" data-tab="historico">Histórico</button>
+        </div>
+    </div>
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- Seção IMC -->
+        <div id="imc-section" class="tab-content fade-in">
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl p-6 custom-shadow">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-weight-scale text-primary-600 mr-2"></i> Cálculo de IMC
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Peso (kg)</label>
+                            <input type="number" id="peso" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="Ex: 70">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Altura (m)</label>
+                            <input type="number" id="altura" step="0.01" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="Ex: 1.75">
+                        </div>
+                        <button id="calcular-imc" class="w-full bg-primary-600 hover:bg-primary-700 text-white py-2.5 rounded-lg font-medium mt-2">
+                            Calcular IMC
+                        </button>
+                    </div>
+                </div>
+
+                <div id="resultado-imc" class="bg-white rounded-xl p-6 custom-shadow hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Resultado</h2>
+                    <div class="flex justify-center mb-6">
+                        <svg class="w-40 h-40" id="imc-ring">
+                            <circle class="text-gray-200" stroke-width="10" stroke="currentColor" fill="transparent" r="70" cx="80" cy="80" />
+                            <circle class="text-primary-600" stroke-width="10" stroke-linecap="round" stroke="currentColor" fill="transparent" r="70" cx="80" cy="80" id="imc-progress" />
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center mt-16 ml-16 w-40 h-40">
+                            <span id="imc-value" class="text-3xl font-bold text-gray-800">--</span>
+                            <span class="text-sm text-gray-500">IMC</span>
+                        </div>
+                    </div>
+                    <div id="imc-classificacao" class="text-center p-4 rounded-lg bg-gray-100">
+                        <p class="font-medium">Classificação: <span id="imc-categoria" class="font-semibold">-</span></p>
+                        <p class="text-sm mt-2 text-gray-600" id="imc-descricao">Preencha os dados para calcular seu IMC.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção RCQ -->
+        <div id="rcq-section" class="tab-content hidden fade-in">
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl p-6 custom-shadow">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-ruler-combined text-primary-600 mr-2"></i> Relação Cintura-Quadril (RCQ)
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Circunferência da Cintura (cm)</label>
+                            <input type="number" id="cintura" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="Ex: 80">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Circunferência do Quadril (cm)</label>
+                            <input type="number" id="quadril" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="Ex: 95">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Sexo</label>
+                            <select id="sexo-rcq" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                <option value="masculino">Masculino</option>
+                                <option value="feminino">Feminino</option>
+                            </select>
+                        </div>
+                        <button id="calcular-rcq" class="w-full bg-primary-600 hover:bg-primary-700 text-white py-2.5 rounded-lg font-medium mt-2">
+                            Calcular RCQ
+                        </button>
+                    </div>
+                </div>
+
+                <div id="resultado-rcq" class="bg-white rounded-xl p-6 custom-shadow hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Resultado RCQ</h2>
+                    <div class="flex justify-center mb-6">
+                        <div class="bg-primary-50 rounded-full w-40 h-40 flex items-center justify-center">
+                            <span id="rcq-value" class="text-4xl font-bold text-primary-700">--</span>
+                        </div>
+                    </div>
+                    <div id="rcq-classificacao" class="text-center p-4 rounded-lg">
+                        <p class="font-medium">Classificação: <span id="rcq-categoria" class="font-semibold">-</span></p>
+                        <p class="text-sm mt-2 text-gray-600" id="rcq-descricao">Preencha os dados para calcular seu RCQ.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção Bioimpedância -->
+        <div id="bioimpedancia-section" class="tab-content hidden fade-in">
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl p-6 custom-shadow">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-bolt-lightning text-primary-600 mr-2"></i> Análise de Bioimpedância
+                    </h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Peso (kg)</label>
+                            <input type="number" id="bio-peso" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="Ex: 70">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Altura (cm)</label>
+                            <input type="number" id="bio-altura" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="Ex: 175">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Idade</label>
+                            <input type="number" id="bio-idade" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="Ex: 30">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Sexo</label>
+                            <select id="bio-sexo" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                <option value="masculino">Masculino</option>
+                                <option value="feminino">Feminino</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nível de Atividade</label>
+                            <select id="bio-atividade" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                <option value="sedentario">Sedentário</option>
+                                <option value="leve">Levemente Ativo</option>
+                                <option value="moderado">Moderadamente Ativo</option>
+                                <option value="ativo">Ativo</option>
+                                <option value="muito-ativo">Muito Ativo</option>
+                            </select>
+                        </div>
+                        <button id="calcular-bio" class="w-full bg-primary-600 hover:bg-primary-700 text-white py-2.5 rounded-lg font-medium mt-2">
+                            Calcular Composição Corporal
+                        </button>
+                    </div>
+                </div>
+
+                <div id="resultado-bio" class="bg-white rounded-xl p-6 custom-shadow hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Resultados de Composição Corporal</h2>
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-primary-50 p-4 rounded-lg text-center">
+                            <p class="text-sm text-gray-600">Percentual de Gordura</p>
+                            <p id="percentual-gordura" class="text-2xl font-bold text-primary-700">--%</p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg text-center">
+                            <p class="text-sm text-gray-600">Massa Magra</p>
+                            <p id="massa-magra" class="text-2xl font-bold text-blue-700">-- kg</p>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg text-center">
+                            <p class="text-sm text-gray-600">Água Corporal</p>
+                            <p id="agua-corporal" class="text-2xl font-bold text-green-700">--%</p>
+                        </div>
+                        <div class="bg-purple-50 p-4 rounded-lg text-center">
+                            <p class="text-sm text-gray-600">Metabolismo Basal</p>
+                            <p id="metabolismo-basal" class="text-2xl font-bold text-purple-700">-- kcal</p>
+                        </div>
+                    </div>
+                    <div class="bg-gray-100 p-4 rounded-lg">
+                        <p class="text-sm text-gray-600" id="bio-descricao">Preencha os dados para calcular sua composição corporal.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção Condicionamento Físico -->
+        <div id="condicionamento-section" class="tab-content hidden fade-in">
+            <div class="bg-white rounded-xl p-6 custom-shadow mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-person-running text-primary-600 mr-2"></i> Avaliação de Condicionamento Físico
+                </h2>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-3">Teste de VO₂ Máx Estimado</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Idade</label>
+                                    <input type="number" id="vo2-idade" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="Ex: 30">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Frequência Cardíaca de Repouso (bpm)</label>
+                                    <input type="number" id="freq-repouso" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="Ex: 65">
+                                </div>
+                                <button id="calcular-vo2" class="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg font-medium">
+                                    Calcular VO₂ Máx
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-3">Teste de 1RM (Carga Máxima)</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Peso Levantado (kg)</label>
+                                    <input type="number" id="peso-levantado" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="Ex: 50">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Número de Repetições</label>
+                                    <input type="number" id="num-repeticoes" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="Ex: 8">
+                                </div>
+                                <button id="calcular-1rm" class="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-lg font-medium">
+                                    Calcular 1RM
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div id="resultado-condicionamento" class="hidden">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Resultados</h3>
+                            
+                            <div class="mb-6 result-card bg-white p-4 rounded-lg border border-gray-200">
+                                <h4 class="font-medium text-gray-700 mb-2">VO₂ Máx Estimado</h4>
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-3">
+                                        <span id="vo2-value" class="text-primary-700 font-bold">--</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm">Classificação: <span id="vo2-class" class="font-medium">-</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-6 result-card bg-white p-4 rounded-lg border border-gray-200">
+                                <h4 class="font-medium text-gray-700 mb-2">1RM Estimado</h4>
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                        <span id="rm-value" class="text-blue-700 font-bold">--</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm">Carga máxima para 1 repetição</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="result-card bg-white p-4 rounded-lg border border-gray-200">
+                                <h4 class="font-medium text-gray-700 mb-2">Frequência Cardíaca de Repouso</h4>
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                        <span id="freq-value" class="text-green-700 font-bold">--</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm">Classificação: <span id="freq-class" class="font-medium">-</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção Histórico -->
+        <div id="historico-section" class="tab-content hidden fade-in">
+            <div class="bg-white rounded-xl p-6 custom-shadow">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-history text-primary-600 mr-2"></i> Histórico de Medições
+                </h2>
+                
+                <div class="mb-6 flex space-x-4">
+                    <button id="importBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg flex items-center">
+                        <i class="fas fa-file-import mr-2"></i> Importar CSV
+                    </button>
+                    <input type="file" id="csvFile" accept=".csv" class="hidden">
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IMC</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RCQ</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">% Gordura</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">VO₂ Máx</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historico-body" class="bg-white divide-y divide-gray-200">
+                            <!-- Os dados do histórico serão inseridos aqui via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="empty-history" class="text-center py-12 text-gray-500">
+                    <i class="fas fa-inbox text-4xl mb-3"></i>
+                    <p>Nenhum dado histórico encontrado.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t mt-12 py-6">
+        <div class="container mx-auto px-4 text-center text-gray-600 text-sm">
+            <p>© 2023 Analisador Corporal & Fitness. Ferramenta para acompanhamento de saúde e condicionamento físico.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Inicialização e configuração
+        document.addEventListener('DOMContentLoaded', function() {
+            // Navegação por abas
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.getAttribute('data-tab');
+                    
+                    // Atualizar botões ativos
+                    tabButtons.forEach(btn => btn.classList.remove('tab-active'));
+                    button.classList.add('tab-active');
+                    
+                    // Mostrar conteúdo correspondente
+                    tabContents.forEach(content => content.classList.add('hidden'));
+                    document.getElementById(`${tabId}-section`).classList.remove('hidden');
+                });
+            });
+            
+            // Inicializar armazenamento se não existir
+            if (!localStorage.getItem('healthData')) {
+                localStorage.setItem('healthData', JSON.stringify([]));
+            }
+            
+            // Carregar histórico
+            loadHistory();
+            
+            // Calcular IMC
+            document.getElementById('calcular-imc').addEventListener('click', calcularIMC);
+            
+            // Calcular RCQ
+            document.getElementById('calcular-rcq').addEventListener('click', calcularRCQ);
+            
+            // Calcular Bioimpedância
+            document.getElementById('calcular-bio').addEventListener('click', calcularBioimpedancia);
+            
+            // Calcular VO2 Máx
+            document.getElementById('calcular-vo2').addEventListener('click', calcularVO2);
+            
+            // Calcular 1RM
+            document.getElementById('calcular-1rm').addEventListener('click', calcular1RM);
+            
+            // Exportar dados
+            document.getElementById('exportBtn').addEventListener('click', exportData);
+            
+            // Importar dados
+            document.getElementById('importBtn').addEventListener('click', () => {
+                document.getElementById('csvFile').click();
+            });
+            
+            document.getElementById('csvFile').addEventListener('change', importData);
+        });
+        
+        // Função para calcular IMC
+        function calcularIMC() {
+            const peso = parseFloat(document.getElementById('peso').value);
+            const altura = parseFloat(document.getElementById('altura').value);
+            
+            if (!peso || !altura) {
+                alert('Por favor, preencha todos os campos.');
+                return;
+            }
+            
+            const imc = peso / (altura * altura);
+            const resultadoDiv = document.getElementById('resultado-imc');
+            const imcValue = document.getElementById('imc-value');
+            const imcCategoria = document.getElementById('imc-categoria');
+            const imcDescricao = document.getElementById('imc-descricao');
+            const imcProgress = document.getElementById('imc-progress');
+            
+            // Calcular circunferência do progresso (0-40 scale)
+            const progressValue = Math.min(imc, 40) / 40 * 100;
+            const circumference = 2 * Math.PI * 70;
+            const offset = circumference - (progressValue / 100 * circumference);
+            
+            imcProgress.style.strokeDasharray = `${circumference} ${circumference}`;
+            imcProgress.style.strokeDashoffset = offset;
+            
+            // Classificar IMC
+            let categoria, descricao, color;
+            
+            if (imc < 18.5) {
+                categoria = 'Baixo peso';
+                descricao = 'Seu IMC indica baixo peso. Considere consultar um nutricionista.';
+                color = '#3B82F6'; // Azul
+            } else if (imc < 25) {
+                categoria = 'Peso normal';
+                descricao = 'Parabéns! Seu IMC está na faixa considerada saudável.';
+                color = '#10B981'; // Verde
+            } else if (imc < 30) {
+                categoria = 'Sobrepeso';
+                descricao = 'Seu IMC indica sobrepeso. Atenção à alimentação e pratique exercícios.';
+                color = '#F59E0B'; // Amarelo
+            } else {
+                categoria = 'Obesidade';
+                descricao = 'Seu IMC indica obesidade. Consulte um médico para orientação.';
+                color = '#EF4444'; // Vermelho
+            }
+            
+            imcProgress.style.stroke = color;
+            imcValue.textContent = imc.toFixed(1);
+            imcCategoria.textContent = categoria;
+            imcCategoria.style.color = color;
+            imcDescricao.textContent = descricao;
+            
+            resultadoDiv.classList.remove('hidden');
+            
+            // Salvar no histórico
+            saveToHistory({
+                type: 'imc',
+                value: imc.toFixed(1),
+                category: categoria,
+                date: new Date().toISOString()
+            });
+        }
+        
+        // Função para calcular RCQ
+        function calcularRCQ() {
+            const cintura = parseFloat(document.getElementById('cintura').value);
+            const quadril = parseFloat(document.getElementById('quadril').value);
+            const sexo = document.getElementById('sexo-rcq').value;
+            
+            if (!cintura || !quadril) {
+                alert('Por favor, preencha todos os campos.');
+                return;
+            }
+            
+            const rcq = cintura / quadril;
+            const resultadoDiv = document.getElementById('resultado-rcq');
+            const rcqValue = document.getElementById('rcq-value');
+            const rcqCategoria = document.getElementById('rcq-categoria');
+            const rcqDescricao = document.getElementById('rcq-descricao');
+            
+            // Classificar RCQ
+            let categoria, descricao, color;
+            
+            if (sexo === 'masculino') {
+                if (rcq < 0.90) {
+                    categoria = 'Baixo risco';
+                    descricao = 'Risco baixo de complicações cardiovasculares.';
+                    color = '#10B981'; // Verde
+                } else if (rcq < 0.99) {
+                    categoria = 'Risco moderado';
+                    descricao = 'Risco moderado de complicações cardiovasculares.';
+                    color = '#F59E0B'; // Amarelo
+                } else {
+                    categoria = 'Alto risco';
+                    descricao = 'Alto risco de complicações cardiovasculares. Consulte um médico.';
+                    color = '#EF4444'; // Vermelho
+                }
+            } else {
+                if (rcq < 0.80) {
+                    categoria = 'Baixo risco';
+                    descricao = 'Risco baixo de complicações cardiovasculares.';
+                    color = '#10B981'; // Verde
+                } else if (rcq < 0.84) {
+                    categoria = 'Risco moderado';
+                    descricao = 'Risco moderado de complicações cardiovasculares.';
+                    color = '#F59E0B'; // Amarelo
+                } else {
+                    categoria = 'Alto risco';
+                    descricao = 'Alto risco de complicações cardiovasculares. Consulte um médico.';
+                    color = '#EF4444'; // Vermelho
+                }
+            }
+            
+            rcqValue.textContent = rcq.toFixed(2);
+            rcqCategoria.textContent = categoria;
+            rcqCategoria.style.color = color;
+            rcqDescricao.textContent = descricao;
+            resultadoDiv.classList.remove('hidden');
+            
+            // Salvar no histórico
+            saveToHistory({
+                type: 'rcq',
+                value: rcq.toFixed(2),
+                category: categoria,
+                date: new Date().toISOString()
+            });
+        }
+        
+        // Função para calcular Bioimpedância
+        function calcularBioimpedancia() {
+            const peso = parseFloat(document.getElementById('bio-peso').value);
+            const altura = parseFloat(document.getElementById('bio-altura').value);
+            const idade = parseInt(document.getElementById('bio-idade').value);
+            const sexo = document.getElementById('bio-sexo').value;
+            
+            if (!peso || !altura || !idade) {
+                alert('Por favor, preencha todos os campos.');
+                return;
+            }
+            
+            // Cálculos simulados (em uma aplicação real, esses valores viriam de um dispositivo de bioimpedância)
+            const imc = peso / ((altura/100) * (altura/100));
+            
+            // Percentual de gordura estimado (fórmula simplificada)
+            let gordura;
+            if (sexo === 'masculino') {
+                gordura = (1.20 * imc) + (0.23 * idade) - 16.2;
+            } else {
+                gordura = (1.20 * imc) + (0.23 * idade) - 5.4;
+            }
+            gordura = Math.max(5, Math.min(gordura, 40)); // Limitar entre 5% e 40%
+            
+            // Massa magra
+            const massaMagra = peso * (1 - gordura/100);
+            
+            // Água corporal (estimativa baseada no percentual de gordura)
+            const aguaCorporal = (sexo === 'masculino') ? 60 - (gordura * 0.5) : 50 - (gordura * 0.4);
+            
+            // Metabolismo basal (fórmula de Mifflin-St Jeor)
+            let metabolismoBasal;
+            if (sexo === 'masculino') {
+                metabolismoBasal = 10 * peso + 6.25 * altura - 5 * idade + 5;
+            } else {
+                metabolismoBasal = 10 * peso + 6.25 * altura - 5 * idade - 161;
+            }
+            
+            // Ajustar com base no nível de atividade
+            const atividade = document.getElementById('bio-atividade').value;
+            const fatores = {
+                'sedentario': 1.2,
+                'leve': 1.375,
+                'moderado': 1.55,
+                'ativo': 1.725,
+                'muito-ativo': 1.9
+            };
+            
+            metabolismoBasal *= fatores[atividade];
+            
+            // Atualizar a UI
+            document.getElementById('percentual-gordura').textContent = gordura.toFixed(1) + '%';
+            document.getElementById('massa-magra').textContent = massaMagra.toFixed(1) + ' kg';
+            document.getElementById('agua-corporal').textContent = aguaCorporal.toFixed(1) + '%';
+            document.getElementById('metabolismo-basal').textContent = Math.round(metabolismoBasal) + ' kcal';
+            
+            let descricao;
+            if (gordura < 20 && sexo === 'masculino' || gordura < 30 && sexo === 'feminino') {
+                descricao = 'Percentual de gordura dentro da faixa saudável.';
+            } else {
+                descricao = 'Percentual de gordura acima do recomendado. Considere ajustar dieta e exercícios.';
+            }
+            
+            document.getElementById('bio-descricao').textContent = descricao;
+            document.getElementById('resultado-bio').classList.remove('hidden');
+            
+            // Salvar no histórico
+            saveToHistory({
+                type: 'bio',
+                fat: gordura.toFixed(1),
+                leanMass: massaMagra.toFixed(1),
+                water: aguaCorporal.toFixed(1),
+                metabolism: Math.round(metabolismoBasal),
+                date: new Date().toISOString()
+            });
+        }
+        
+        // Função para calcular VO2 Máx
+        function calcularVO2() {
+            const idade = parseInt(document.getElementById('vo2-idade').value);
+            const freqRepouso = parseInt(document.getElementById('freq-repouso').value);
+            
+            if (!idade || !freqRepouso) {
+                alert('Por favor, preencha todos os campos.');
+                return;
+            }
+            
+            // Fórmula simplificada para estimar VO2 Máx
+            const vo2Max = 15.3 * (208 - (0.7 * idade)) / freqRepouso;
+            
+            let classificacao, color;
+            if (vo2Max > 50) {
+                classificacao = 'Excelente';
+                color = '#10B981'; // Verde
+            } else if (vo2Max > 40) {
+                classificacao = 'Bom';
+                color = '#22C55E'; // Verde claro
+            } else if (vo2Max > 30) {
+                classificacao = 'Regular';
+                color = '#F59E0B'; // Amarelo
+            } else {
+                classificacao = 'Baixo';
+                color = '#EF4444'; // Vermelho
+            }
+            
+            document.getElementById('vo2-value').textContent = vo2Max.toFixed(1);
+            document.getElementById('vo2-class').textContent = classificacao;
+            document.getElementById('vo2-class').style.color = color;
+            document.getElementById('freq-value').textContent = freqRepouso;
+            
+            // Classificar frequência cardíaca em repouso
+            let freqClass;
+            if (freqRepouso < 60) {
+                freqClass = 'Excelente';
+                color = '#10B981'; // Verde
+            } else if (freqRepouso < 70) {
+                freqClass = 'Boa';
+                color = '#22C55E'; // Verde claro
+            } else if (freqRepouso < 80) {
+                freqClass = 'Normal';
+                color = '#F59E0B'; // Amarelo
+            } else {
+                freqClass = 'Alta';
+                color = '#EF4444'; // Vermelho
+            }
+            
+            document.getElementById('freq-class').textContent = freqClass;
+            document.getElementById('freq-class').style.color = color;
+            document.getElementById('resultado-condicionamento').classList.remove('hidden');
+            
+            // Salvar no histórico
+            saveToHistory({
+                type: 'fitness',
+                vo2max: vo2Max.toFixed(1),
+                restingHR: freqRepouso,
+                date: new Date().toISOString()
+            });
+        }
+        
+        // Função para calcular 1RM
+        function calcular1RM() {
+            const peso = parseFloat(document.getElementById('peso-levantado').value);
+            const repeticoes = parseInt(document.getElementById('num-repeticoes').value);
+            
+            if (!peso || !repeticoes) {
+                alert('Por favor, preencha todos os campos.');
+                return;
+            }
+            
+            // Fórmula de Epley para calcular 1RM
+            const rm = peso * (1 + (repeticoes / 30));
+            
+            document.getElementById('rm-value').textContent = rm.toFixed(1) + ' kg';
+            document.getElementById('resultado-condicionamento').classList.remove('hidden');
+            
+            // Salvar no histórico
+            saveToHistory({
+                type: 'strength',
+                oneRM: rm.toFixed(1),
+                weight: peso,
+                reps: repeticoes,
+                date: new Date().toISOString()
+            });
+        }
+        
+        // Função para salvar no histórico
+        function saveToHistory(data) {
+            const history = JSON.parse(localStorage.getItem('healthData') || '[]');
+            history.push(data);
+            localStorage.setItem('healthData', JSON.stringify(history));
+            
+            // Atualizar a exibição do histórico se estivermos na aba correta
+            if (document.getElementById('historico-section').classList.contains('hidden') === false) {
+                loadHistory();
+            }
+        }
+        
+        // Função para carregar histórico
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('healthData') || '[]');
+            const tableBody = document.getElementById('historico-body');
+            const emptyMessage = document.getElementById('empty-history');
+            
+            tableBody.innerHTML = '';
+            
+            if (history.length === 0) {
+                emptyMessage.classList.remove('hidden');
+                return;
+            }
+            
+            emptyMessage.classList.add('hidden');
+            
+            // Ordenar por data (mais recente primeiro)
+            history.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // Mostrar apenas os 10 mais recentes
+            const recentHistory = history.slice(0, 10);
+            
+            recentHistory.forEach(item => {
+                const row = document.createElement('tr');
+                
+                // Formatar data
+                const date = new Date(item.date);
+                const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth()+1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+                
+                let imcValue = '-';
+                let rcqValue = '-';
+                let fatValue = '-';
+                let vo2Value = '-';
+                
+                if (item.type === 'imc') {
+                    imcValue = item.value;
+                } else if (item.type === 'rcq') {
+                    rcqValue = item.value;
+                } else if (item.type === 'bio') {
+                    fatValue = item.fat + '%';
+                } else if (item.type === 'fitness') {
+                    vo2Value = item.vo2max;
+                }
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formattedDate}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${imcValue}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${rcqValue}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${fatValue}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${vo2Value}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Função para exportar dados
+        function exportData() {
+            const history = JSON.parse(localStorage.getItem('healthData') || '[]');
+            
+            if (history.length === 0) {
+                alert('Não há dados para exportar.');
+                return;
+            }
+            
+            // Converter para CSV
+            let csv = 'Tipo,Data,Valor,Detalhes\n';
+            
+            history.forEach(item => {
+                let details = '';
+                
+                if (item.type === 'imc') {
+                    details = `IMC: ${item.value}, Categoria: ${item.category}`;
+                } else if (item.type === 'rcq') {
+                    details = `RCQ: ${item.value}, Categoria: ${item.category}`;
+                } else if (item.type === 'bio') {
+                    details = `Gordura: ${item.fat}%, Massa Magra: ${item.leanMass}kg, Água: ${item.water}%, Metabolismo: ${item.metabolism}kcal`;
+                } else if (item.type === 'fitness') {
+                    details = `VO2 Máx: ${item.vo2max}, FC Repouso: ${item.restingHR}bpm`;
+                } else if (item.type === 'strength') {
+                    details = `1RM: ${item.oneRM}kg, Peso: ${item.weight}kg, Reps: ${item.reps}`;
+                }
+                
+                const date = new Date(item.date);
+                const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth()+1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+                
+                csv += `${item.type},${formattedDate},${item.value || ''},"${details}"\n`;
+            });
+            
+            // Criar e baixar o arquivo
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'dados_corporais.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // Função para importar dados
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const csv = e.target.result;
+                const lines = csv.split('\n');
+                const newData = [];
+                
+                // Pular o cabeçalho e processar cada linha
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue;
+                    
+                    const values = lines[i].split(',');
+                    if (values.length < 3) continue;
+                    
+                    // Processar data (formato DD/MM/YYYY)
+                    const dateParts = values[1].split('/');
+                    const date = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
+                    
+                    // Criar objeto com base no tipo
+                    const item = {
+                        type: values[0],
+                        date: date.toISOString()
+                    };
+                    
+                    // Processar detalhes baseado no tipo
+                    if (values[0] === 'imc') {
+                        item.value = parseFloat(values[2]);
+                        const details = values[3].replace(/"/g, '').split(', ');
+                        item.category = details[1] ? details[1].split(': ')[1] : '';
+                    } else if (values[0] === 'rcq') {
+                        item.value = parseFloat(values[2]);
+                        const details = values[3].replace(/"/g, '').split(', ');
+                        item.category = details[1] ? details[1].split(': ')[1] : '';
+                    }
+                    // Outros tipos podem ser implementados conforme necessário
+                    
+                    newData.push(item);
+                }
+                
+                // Adicionar ao histórico existente
+                const existingData = JSON.parse(localStorage.getItem('healthData') || '[]');
+                const updatedData = [...existingData, ...newData];
+                localStorage.setItem('healthData', JSON.stringify(updatedData));
+                
+                alert(`Dados importados com sucesso! ${newData.length} registros adicionados.`);
+                
+                // Recarregar histórico se estivermos na aba
+                if (document.getElementById('historico-section').classList.contains('hidden') === false) {
+                    loadHistory();
+                }
+                
+                // Limpar o input de arquivo
+                event.target.value = '';
+            };
+            
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html>
