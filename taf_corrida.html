@@ -255,8 +255,10 @@
 
             // Event Listeners
             startBtn.addEventListener('click', function() {
-                startTimer();
-                startGPS();
+                if (!isRunning) {
+                    startTimer();
+                    startGPS();
+                }
             });
             pauseBtn.addEventListener('click', pauseTimer);
             resetBtn.addEventListener('click', resetTimer);
@@ -268,8 +270,11 @@
                     isRunning = true;
                     startBtn.disabled = true;
                     pauseBtn.disabled = false;
+                    resetBtn.disabled = false;
                     startBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
                     startBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                    pauseBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                    pauseBtn.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
                     
                     const startTime = Date.now() - (elapsedTime * 1000);
                     
@@ -328,6 +333,7 @@
             }
             
             function addDistance() {
+                // Try to use GPS distance first
                 if (lastPosition && currentPosition) {
                     const distance = calculateDistance(
                         lastPosition.coords.latitude,
@@ -339,6 +345,14 @@
                     if (distance > 0) {
                         totalDistance += Math.round(distance);
                         lastPosition = currentPosition;
+                    }
+                }
+                // Fall back to manual input
+                else if (distanceInput.value) {
+                    totalDistance += parseInt(distanceInput.value);
+                }
+                
+                if (totalDistance > 0) {
                     distanceHistory.push(totalDistance);
                     timeHistory.push(elapsedTime);
                     lastDistanceUpdateTime = elapsedTime;
