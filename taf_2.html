@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de Corrida em Tempo Real</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏃</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'pace-green': '#10B981',
+                        'pace-red': '#EF4444',
+                        'pace-yellow': '#F59E0B',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s;
+        }
+        
+        .gauge {
+            position: relative;
+            border-radius: 50%;
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+        
+        .gauge-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            clip: rect(0, 200px, 200px, 100px);
+        }
+        
+        .gauge-cover {
+            position: absolute;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .pace-indicator {
+            transition: all 0.5s ease;
+        }
+        
+        .progress-ring {
+            transition: stroke-dashoffset 0.5s;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="w-full max-w-md mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
+        <!-- Cabeçalho -->
+        <div class="bg-blue-600 text-white p-5 text-center">
+            <h1 class="text-2xl font-bold">Monitor de Corrida</h1>
+            <p class="text-sm opacity-90">Meta: 2500m em 12 minutos (5:00 min/km)</p>
+        </div>
+        
+        <!-- Status de Conexão -->
+        <div id="gpsStatus" class="bg-yellow-100 text-yellow-800 p-2 text-center text-sm flex items-center justify-center">
+            <i class="fas fa-satellite mr-2"></i>
+            <span>Conectando ao GPS...</span>
+        </div>
+        
+        <!-- Display Principal -->
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-8">
+                <!-- Velocidade Instantânea -->
+                <div class="text-center w-1/3">
+                    <div class="text-gray-500 text-sm mb-1">Velocidade Atual</div>
+                    <div class="text-3xl font-bold" id="currentSpeed">0.0</div>
+                    <div class="text-xs text-gray-500">km/h</div>
+                </div>
+                
+                <!-- Medidor de Ritmo -->
+                <div class="relative w-1/3 flex justify-center">
+                    <div class="gauge w-32 h-32">
+                        <div class="gauge-fill bg-gray-200"></div>
+                        <div class="gauge-fill gauge-pace" id="paceFill"></div>
+                        <div class="gauge-cover w-24 h-24">
+                            <div class="text-xs text-gray-500">Ritmo</div>
+                            <div class="font-bold text-lg" id="currentPace">--:--</div>
+                            <div class="text-xs" id="paceStatus">min/km</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Velocidade Média -->
+                <div class="text-center w-1/3">
+                    <div class="text-gray-500 text-sm mb-1">Velocidade Média</div>
+                    <div class="text-3xl font-bold" id="avgSpeed">0.0</div>
+                    <div class="text-xs text-gray-500">km/h</div>
+                </div>
+            </div>
+            
+            <!-- Distância e Tempo -->
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-blue-50 p-4 rounded-lg text-center">
+                    <div class="text-blue-600 text-sm mb-1">Distância</div>
+                    <div class="text-2xl font-bold" id="distance">0.00</div>
+                    <div class="text-xs text-blue-600">metros</div>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-lg text-center">
+                    <div class="text-blue-600 text-sm mb-1">Tempo</div>
+                    <div class="text-2xl font-bold" id="time">12:00</div>
+                    <div class="text-xs text-blue-600">min:seg (restantes)</div>
+                </div>
+            </div>
+            
+            <!-- Progresso em relação à meta -->
+            <div class="mb-6">
+                <div class="flex justify-between text-sm text-gray-600 mb-1">
+                    <span>Progresso da Meta</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                <div class="text-xs text-gray-500 mt-1 text-center" id="remainingInfo">
+                    2500m restantes para completar a meta
+                </div>
+            </div>
+            
+            <!-- Indicador de Status -->
+            <div id="paceIndicator" class="p-3 rounded-lg text-center mb-4 pace-indicator bg-gray-100">
+                <i class="fas fa-info-circle mr-2"></i>
+                <span id="paceMessage">Inicie a corrida para acompanhar seu ritmo</span>
+            </div>
+            
+            <!-- Botões de Controle -->
+            <div class="flex space-x-4">
+                <button id="startBtn" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-medium transition">
+                    <i class="fas fa-play mr-2"></i>Iniciar
+                </button>
+                <button id="resetBtn" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 rounded-lg font-medium transition" disabled>
+                    <i class="fas fa-redo mr-2"></i>Reiniciar
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Variáveis globais
+        let watchId = null;
+        let startTime = null;
+        let currentTime = null;
+        let positions = [];
+        let totalDistance = 0;
+        let isRunning = false;
+        let timerInterval = null;
+        
+        // Elementos DOM
+        const gpsStatus = document.getElementById('gpsStatus');
+        const currentSpeedEl = document.getElementById('currentSpeed');
+        const avgSpeedEl = document.getElementById('avgSpeed');
+        const distanceEl = document.getElementById('distance');
+        const timeEl = document.getElementById('time');
+        const paceIndicator = document.getElementById('paceIndicator');
+        const paceMessage = document.getElementById('paceMessage');
+        const progressBar = document.getElementById('progressBar');
+        const progressPercent = document.getElementById('progressPercent');
+        const remainingInfo = document.getElementById('remainingInfo');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const currentPaceEl = document.getElementById('currentPace');
+        const paceStatusEl = document.getElementById('paceStatus');
+        const paceFill = document.getElementById('paceFill');
+        
+        // Constantes
+        const TARGET_DISTANCE = 2500; // metros
+        const TARGET_TIME = 12 * 60; // segundos
+        const TARGET_PACE = TARGET_TIME / (TARGET_DISTANCE / 1000); // segundos por km
+        const TARGET_SPEED = (TARGET_DISTANCE / 1000) / (TARGET_TIME / 3600); // km/h
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', init);
+        
+        function init() {
+            // Verificar suporte a geolocalização
+            if (!navigator.geolocation) {
+                updateGpsStatus('Geolocalização não é suportada neste navegador', 'error');
+                startBtn.disabled = true;
+                return;
+            }
+            
+            // Configurar event listeners para os botões
+            startBtn.addEventListener('click', toggleTracking);
+            resetBtn.addEventListener('click', resetTracking);
+            
+            // Tentar obter localização inicial para testar
+            navigator.geolocation.getCurrentPosition(
+                () => updateGpsStatus('GPS conectado. Pronto para iniciar.', 'success'),
+                () => updateGpsStatus('Não foi possível acessar o GPS. Verifique as permissões.', 'error'),
+                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+            );
+        }
+        
+        function toggleTracking() {
+            if (isRunning) {
+                stopTracking();
+                startBtn.innerHTML = '<i class="fas fa-play mr-2"></i>Continuar';
+                startBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+                startBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+            } else {
+                startTracking();
+                startBtn.innerHTML = '<i class="fas fa-pause mr-2"></i>Pausar';
+                startBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+                startBtn.classList.add('bg-red-500', 'hover:bg-red-600');
+                resetBtn.disabled = false;
+            }
+            isRunning = !isRunning;
+        }
+        
+        function startTracking() {
+            if (watchId !== null) return;
+            
+            // Iniciar temporizador
+            if (!startTime) {
+                startTime = new Date();
+            }
+            startTimer();
+            
+            // Configurar watchPosition para atualizações contínuas
+            watchId = navigator.geolocation.watchPosition(
+                updatePosition,
+                handlePositionError,
+                { 
+                    enableHighAccuracy: true, 
+                    timeout: 5000, 
+                    maximumAge: 0 
+                }
+            );
+            
+            updateGpsStatus('Monitoramento ativo. Corra!', 'active');
+        }
+        
+        function stopTracking() {
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            
+            // Parar temporizador
+            clearInterval(timerInterval);
+            
+            updateGpsStatus('Monitoramento pausado', 'paused');
+        }
+        
+        function resetTracking() {
+            stopTracking();
+            
+            // Reiniciar todas as variáveis
+            startTime = null;
+            currentTime = null;
+            positions = [];
+            totalDistance = 0;
+            isRunning = false;
+            
+            // Reiniciar a interface
+            currentSpeedEl.textContent = '0.0';
+            avgSpeedEl.textContent = '0.0';
+            distanceEl.textContent = '0.00';
+            timeEl.textContent = '12:00';
+            timeEl.classList.remove('text-red-500', 'text-yellow-500', 'text-red-600');
+            currentPaceEl.textContent = '--:--';
+            progressBar.style.width = '0%';
+            progressPercent.textContent = '0%';
+            remainingInfo.textContent = '2500m restantes para completar a meta';
+            paceFill.style.transform = 'rotate(0deg)';
+            paceStatusEl.textContent = 'min/km';
+            paceStatusEl.className = 'text-xs';
+            
+            paceIndicator.className = 'p-3 rounded-lg text-center mb-4 pace-indicator bg-gray-100';
+            paceMessage.innerHTML = '<i class="fas fa-info-circle mr-2"></i>Inicie a corrida para acompanhar seu ritmo';
+            
+            startBtn.innerHTML = '<i class="fas fa-play mr-2"></i>Iniciar';
+            startBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+            startBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+            resetBtn.disabled = true;
+            
+            updateGpsStatus('Pronto para iniciar', 'ready');
+        }
+        
+        function updatePosition(position) {
+            const { latitude, longitude, accuracy, speed } = position.coords;
+            
+            // Adicionar posição ao histórico
+            positions.push({
+                latitude,
+                longitude,
+                timestamp: position.timestamp,
+                accuracy,
+                speed: speed !== null ? speed : 0
+            });
+            
+            // Calcular distância percorrida
+            if (positions.length > 1) {
+                const lastPosition = positions[positions.length - 2];
+                const distance = calculateDistance(
+                    lastPosition.latitude, 
+                    lastPosition.longitude,
+                    latitude,
+                    longitude
+                );
+                
+                // Só adicionar se a distância for razoável (evitar ruído do GPS)
+                if (distance < 100) {
+                    totalDistance += distance;
+                }
+            }
+            
+            // Atualizar interface
+            updateUI(position.coords);
+        }
+        
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            // Fórmula de Haversine para calcular distância entre dois pontos
+            const R = 6371000; // Raio da Terra em metros
+            const dLat = deg2rad(lat2 - lat1);
+            const dLon = deg2rad(lon2 - lon1);
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2); 
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+            return R * c;
+        }
+        
+        function deg2rad(deg) {
+            return deg * (Math.PI/180);
+        }
+        
+        function updateUI(coords) {
+            // Velocidade atual (m/s para km/h)
+            const currentSpeed = coords.speed !== null ? coords.speed * 3.6 : 0;
+            currentSpeedEl.textContent = currentSpeed.toFixed(1);
+            
+            // Velocidade média (distância/tempo)
+            const elapsedTime = (new Date() - startTime) / 1000; // segundos
+            const avgSpeed = elapsedTime > 0 ? (totalDistance / 1000) / (elapsedTime / 3600) : 0;
+            avgSpeedEl.textContent = avgSpeed.toFixed(1);
+            
+            // Distância percorrida
+            distanceEl.textContent = totalDistance.toFixed(2);
+            
+            // Ritmo atual (min/km)
+            let currentPace = currentSpeed > 0 ? (1000 / currentSpeed) / 60 : 0;
+            const paceMinutes = Math.floor(currentPace);
+            const paceSeconds = Math.round((currentPace - paceMinutes) * 60);
+            currentPaceEl.textContent = `${paceMinutes}:${paceSeconds.toString().padStart(2, '0')}`;
+            
+            // Calcular diferença em relação ao ritmo alvo
+            const paceDiff = currentSpeed > 0 ? TARGET_PACE - (1000 / currentSpeed) : 0;
+            
+            // Atualizar medidor de ritmo (0-180 graus de rotação)
+            const paceRatio = Math.min(Math.max(currentSpeed / TARGET_SPEED, 0), 2); // Limitar entre 0 e 2
+            const rotation = Math.min(paceRatio * 90, 180); // Máximo de 180 graus
+            paceFill.style.transform = `rotate(${rotation}deg)`;
+            
+            // Cor do medidor e mensagem de status
+            if (currentSpeed === 0) {
+                paceFill.style.backgroundColor = '#9CA3AF';
+                paceStatusEl.textContent = 'min/km';
+                paceStatusEl.className = 'text-xs';
+            } else if (paceDiff >= 10) {
+                // Muito abaixo do ritmo
+                paceFill.style.backgroundColor = '#EF4444';
+                paceStatusEl.textContent = 'Muito lento';
+                paceStatusEl.className = 'text-xs text-pace-red font-bold';
+                paceIndicator.className = 'p-3 rounded-lg text-center mb-4 pace-indicator bg-red-100 text-red-800';
+                paceMessage.innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i>Acelere! Você está abaixo do ritmo';
+            } else if (paceDiff > 0) {
+                // Abaixo do ritmo
+                paceFill.style.backgroundColor = '#F59E0B';
+                paceStatusEl.textContent = 'Abaixo';
+                paceStatusEl.className = 'text-xs text-pace-yellow font-bold';
+                paceIndicator.className = 'p-3 rounded-lg text-center mb-4 pace-indicator bg-yellow-100 text-yellow-800';
+                paceMessage.innerHTML = '<i class="fas fa-info-circle mr-2"></i>Um pouco abaixo do ritmo ideal';
+            } else if (paceDiff >= -5) {
+                // No ritmo ideal
+                paceFill.style.backgroundColor = '#10B981';
+                paceStatusEl.textContent = 'No ritmo';
+                paceStatusEl.className = 'text-xs text-pace-green font-bold';
+                paceIndicator.className = 'p-3 rounded-lg text-center mb-4 pace-indicator bg-green-100 text-green-800';
+                paceMessage.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Perfeito! Mantenha este ritmo';
+            } else {
+                // Acima do ritmo
+                paceFill.style.backgroundColor = '#F59E0B';
+                paceStatusEl.textContent = 'Acima';
+                paceStatusEl.className = 'text-xs text-pace-yellow font-bold';
+                paceIndicator.className = 'p-3 rounded-lg text-center mb-4 pace-indicator bg-yellow-100 text-yellow-800';
+                paceMessage.innerHTML = '<i class="fas fa-info-circle mr-2"></i>Um pouco acima do ritmo ideal';
+            }
+            
+            // Progresso em relação à meta
+            const progress = Math.min(totalDistance / TARGET_DISTANCE, 1);
+            progressBar.style.width = `${progress * 100}%`;
+            progressPercent.textContent = `${Math.round(progress * 100)}%`;
+            
+            const remainingDistance = Math.max(TARGET_DISTANCE - totalDistance, 0);
+            remainingInfo.textContent = `${remainingDistance.toFixed(0)}m restantes para completar a meta`;
+        }
+        
+        function startTimer() {
+            clearInterval(timerInterval);
+            const start = startTime ? startTime.getTime() : new Date().getTime();
+            
+            timerInterval = setInterval(() => {
+                currentTime = new Date();
+                const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
+                const remainingSeconds = Math.max(TARGET_TIME - elapsedSeconds, 0);
+                
+                const minutes = Math.floor(remainingSeconds / 60).toString().padStart(2, '0');
+                const seconds = (remainingSeconds % 60).toString().padStart(2, '0');
+                timeEl.textContent = `${minutes}:${seconds}`;
+                
+                // Alertas quando o tempo estiver acabando
+                if (remainingSeconds <= 0) {
+                    timeEl.classList.add('text-red-600');
+                    paceIndicator.className = 'p-3 rounded-lg text-center mb-4 pace-indicator bg-red-100 text-red-800';
+                    paceMessage.innerHTML = '<i class="fas fa-flag-checkered mr-2"></i>Tempo esgotado! Meta não atingida';
+                } else if (remainingSeconds <= 30) {
+                    timeEl.classList.add('text-red-500');
+                } else if (remainingSeconds <= 60) {
+                    timeEl.classList.add('text-yellow-500');
+                } else {
+                    timeEl.classList.remove('text-red-500', 'text-yellow-500', 'text-red-600');
+                }
+            }, 1000);
+        }
+        
+        function handlePositionError(error) {
+            let message = '';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    message = 'Permissão de localização negada';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    message = 'Localização indisponível';
+                    break;
+                case error.TIMEOUT:
+                    message = 'Tempo de espera pela localização excedido';
+                    break;
+                default:
+                    message = 'Erro desconhecido';
+                    break;
+            }
+            updateGpsStatus(message, 'error');
+        }
+        
+        function updateGpsStatus(message, status) {
+            gpsStatus.querySelector('span').textContent = message;
+            
+            // Atualizar cores baseadas no status
+            gpsStatus.className = 'p-2 text-center text-sm flex items-center justify-center ';
+            switch(status) {
+                case 'success':
+                case 'ready':
+                    gpsStatus.classList.add('bg-green-100', 'text-green-800');
+                    break;
+                case 'active':
+                    gpsStatus.classList.add('bg-blue-100', 'text-blue-800');
+                    break;
+                case 'paused':
+                    gpsStatus.classList.add('bg-yellow-100', 'text-yellow-800');
+                    break;
+                case 'error':
+                    gpsStatus.classList.add('bg-red-100', 'text-red-800');
+                    break;
+                default:
+                    gpsStatus.classList.add('bg-yellow-100', 'text-yellow-800');
+                    break;
+            }
+        }
+    </script>
+</body>
+</html>
