@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de Corrida - 2500m em 12min</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.5s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl">
+            <!-- Header -->
+            <div class="bg-blue-600 text-white p-6">
+                <h1 class="text-2xl font-bold text-center">Monitor de Corrida</h1>
+                <p class="text-center mt-2">2500 metros em 12 minutos</p>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="p-6">
+                <!-- Progress Ring -->
+                <div class="flex justify-center mb-8">
+                    <div class="relative w-64 h-64">
+                        <svg class="w-full h-full" viewBox="0 0 100 100">
+                            <!-- Background circle -->
+                            <circle class="text-gray-200" stroke-width="8" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50" />
+                            <!-- Progress circle -->
+                            <circle class="progress-ring__circle text-blue-600" stroke-width="8" stroke-linecap="round" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50" />
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span id="time-display" class="text-3xl font-bold">12:00</span>
+                            <span id="distance-display" class="text-xl">0m</span>
+                            <span id="pace-display" class="text-sm text-gray-500">0:00 /km</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Controls -->
+                <div class="flex justify-center space-x-4 mb-6">
+                    <button id="start-btn" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full font-medium flex items-center">
+                        <i class="fas fa-play mr-2"></i> Iniciar
+                    </button>
+                    <button id="pause-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-full font-medium flex items-center" disabled>
+                        <i class="fas fa-pause mr-2"></i> Pausar
+                    </button>
+                    <button id="reset-btn" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full font-medium flex items-center">
+                        <i class="fas fa-redo mr-2"></i> Reiniciar
+                    </button>
+                </div>
+                
+                <!-- Milestones -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-3">Marcos</h3>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="milestone-card bg-blue-50 p-3 rounded-lg text-center" data-distance="500">
+                            <div class="text-sm text-blue-800">500m</div>
+                            <div class="text-xs text-gray-500">2:24</div>
+                            <div class="milestone-check hidden text-green-500"><i class="fas fa-check"></i></div>
+                        </div>
+                        <div class="milestone-card bg-blue-50 p-3 rounded-lg text-center" data-distance="1000">
+                            <div class="text-sm text-blue-800">1000m</div>
+                            <div class="text-xs text-gray-500">4:48</div>
+                            <div class="milestone-check hidden text-green-500"><i class="fas fa-check"></i></div>
+                        </div>
+                        <div class="milestone-card bg-blue-50 p-3 rounded-lg text-center" data-distance="1500">
+                            <div class="text-sm text-blue-800">1500m</div>
+                            <div class="text-xs text-gray-500">7:12</div>
+                            <div class="milestone-check hidden text-green-500"><i class="fas fa-check"></i></div>
+                        </div>
+                        <div class="milestone-card bg-blue-50 p-3 rounded-lg text-center" data-distance="2000">
+                            <div class="text-sm text-blue-800">2000m</div>
+                            <div class="text-xs text-gray-500">9:36</div>
+                            <div class="milestone-check hidden text-green-500"><i class="fas fa-check"></i></div>
+                        </div>
+                        <div class="milestone-card bg-blue-50 p-3 rounded-lg text-center" data-distance="2500">
+                            <div class="text-sm text-blue-800">2500m</div>
+                            <div class="text-xs text-gray-500">12:00</div>
+                            <div class="milestone-check hidden text-green-500"><i class="fas fa-check"></i></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Stats -->
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="bg-gray-50 p-3 rounded-lg text-center">
+                        <div class="text-sm text-gray-500">Ritmo Atual</div>
+                        <div id="current-pace" class="text-lg font-semibold">0:00</div>
+                        <div class="text-xs text-gray-500">/km</div>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-lg text-center">
+                        <div class="text-sm text-gray-500">Ritmo Médio</div>
+                        <div id="avg-pace" class="text-lg font-semibold">0:00</div>
+                        <div class="text-xs text-gray-500">/km</div>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-lg text-center">
+                        <div class="text-sm text-gray-500">Restante</div>
+                        <div id="remaining-distance" class="text-lg font-semibold">2500m</div>
+                        <div class="text-xs text-gray-500">para meta</div>
+                    </div>
+                </div>
+                
+                <!-- GPS Status -->
+                <div class="mb-4 p-3 bg-blue-50 rounded-lg">
+                    <div class="flex items-center">
+                        <i id="gps-icon" class="fas fa-location-crosshairs mr-2 text-gray-400"></i>
+                        <span id="gps-status" class="text-sm">GPS não conectado</span>
+                    </div>
+                </div>
+
+                <!-- Distance Input -->
+                <div class="mb-6">
+                    <label for="distance-input" class="block text-sm font-medium text-gray-700 mb-1">Adicionar Distância (metros)</label>
+                    <div class="flex">
+                        <input type="number" id="distance-input" class="flex-1 border border-gray-300 rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter meters">
+                        <button id="add-distance-btn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-r-lg flex items-center justify-center">
+                            <i class="fas fa-location-arrow mr-2"></i> Usar GPS
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="bg-gray-100 p-4 text-center text-sm text-gray-600">
+                Continue! Você está progredindo em direção à sua meta.
+=======
+                <div class="bg-gray-100 p-4 text-center text-sm text-gray-600">
+                    Continue! Você está progredindo em direção à sua meta.
+                </div>
+                <div class="bg-blue-50 p-4 text-sm">
+                    <h3 class="font-bold mb-2">Como Funciona:</h3>
+                    <p class="mb-2">1. <strong>Iniciar</strong>: Começa a contagem regressiva de 12 minutos</p>
+                    <p class="mb-2">2. <strong>Adicionar Distância</strong>: Insira os metros percorridos e clique em "Adicionar"</p>
+                    <p class="mb-2">3. <strong>Marcos</strong>: Verdes se alcançados no tempo certo, amarelos se atrasados</p>
+                    <p class="mb-2">4. <strong>Ritmo</strong>: Mostra seu ritmo atual e médio em minutos por km</p>
+                    <p class="mb-2">5. <strong>Meta</strong>: 2500m em 12 minutos (4:48/km)</p>
+                    <p>O círculo mostra seu progresso em relação ao tempo total.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const startBtn = document.getElementById('start-btn');
+            const pauseBtn = document.getElementById('pause-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const timeDisplay = document.getElementById('time-display');
+            const distanceDisplay = document.getElementById('distance-display');
+            const paceDisplay = document.getElementById('pace-display');
+            const currentPaceDisplay = document.getElementById('current-pace');
+            const avgPaceDisplay = document.getElementById('avg-pace');
+            const remainingDistanceDisplay = document.getElementById('remaining-distance');
+            const distanceInput = document.getElementById('distance-input');
+            const addDistanceBtn = document.getElementById('add-distance-btn');
+            const milestoneCards = document.querySelectorAll('.milestone-card');
+            const progressCircle = document.querySelector('.progress-ring__circle');
+            
+            // Variables
+            let totalDistance = 0;
+            let elapsedTime = 0;
+            let watchId = null;
+            let lastPosition = null;
+            let currentPosition = null;
+            let timerInterval;
+            let isRunning = false;
+            const goalDistance = 2500;
+            const goalTime = 12 * 60; // 12 minutes in seconds
+            let lastDistanceUpdateTime = 0;
+            let distanceHistory = [];
+            let timeHistory = [];
+            
+            // Set the progress circle circumference
+            const radius = 40;
+            const circumference = 2 * Math.PI * radius;
+            progressCircle.style.strokeDasharray = circumference;
+            progressCircle.style.strokeDashoffset = circumference;
+            
+            // GPS Functions
+            function startGPS() {
+                if (navigator.geolocation) {
+                    updateGPSStatus('Conectando...', 'text-blue-500', 'fa-location-crosshairs');
+                    
+                    watchId = navigator.geolocation.watchPosition(
+                        (position) => {
+                            currentPosition = position;
+                            if (!lastPosition) {
+                                lastPosition = position;
+                            }
+                            updateGPSStatus('GPS ativo', 'text-green-500', 'fa-location-dot');
+                        },
+                        (error) => {
+                            console.error('GPS Error:', error);
+                            updateGPSStatus('Erro no GPS', 'text-red-500', 'fa-location-slash');
+                        },
+                        { 
+                            enableHighAccuracy: true,
+                            maximumAge: 0,
+                            timeout: 5000
+                        }
+                    );
+                } else {
+                    updateGPSStatus('GPS não suportado', 'text-red-500', 'fa-location-slash');
+                }
+            }
+
+            function stopGPS() {
+                if (watchId) {
+                    navigator.geolocation.clearWatch(watchId);
+                    watchId = null;
+                }
+                updateGPSStatus('GPS desativado', 'text-gray-500', 'fa-location-crosshairs');
+            }
+
+            function updateGPSStatus(text, colorClass, iconClass) {
+                const statusElement = document.getElementById('gps-status');
+                const iconElement = document.getElementById('gps-icon');
+                
+                statusElement.textContent = text;
+                statusElement.className = `text-sm ${colorClass}`;
+                
+                // Reset all icon classes and add new ones
+                iconElement.className = `fas ${iconClass} mr-2 ${colorClass}`;
+            }
+
+            function calculateDistance(lat1, lon1, lat2, lon2) {
+                const R = 6371e3; // Earth radius in meters
+                const φ1 = lat1 * Math.PI/180;
+                const φ2 = lat2 * Math.PI/180;
+                const Δφ = (lat2-lat1) * Math.PI/180;
+                const Δλ = (lon2-lon1) * Math.PI/180;
+
+                const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                          Math.cos(φ1) * Math.cos(φ2) *
+                          Math.sin(Δλ/2) * Math.sin(Δλ/2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+                return R * c;
+            }
+
+            // Event Listeners
+            startBtn.addEventListener('click', function() {
+                startTimer();
+                startGPS();
+            });
+            pauseBtn.addEventListener('click', pauseTimer);
+            resetBtn.addEventListener('click', resetTimer);
+            addDistanceBtn.addEventListener('click', addDistance);
+            
+            // Functions
+            function startTimer() {
+                if (!isRunning) {
+                    isRunning = true;
+                    startBtn.disabled = true;
+                    pauseBtn.disabled = false;
+                    startBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+                    startBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                    
+                    const startTime = Date.now() - (elapsedTime * 1000);
+                    
+                    timerInterval = setInterval(() => {
+                        elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+                        updateTimeDisplay();
+                        updatePace();
+                        checkMilestones();
+                        
+                        // Update progress circle
+                        const progress = Math.min(elapsedTime / goalTime, 1);
+                        const offset = circumference - (progress * circumference);
+                        progressCircle.style.strokeDashoffset = offset;
+                        
+                        // Check if goal is reached
+                        if (totalDistance >= goalDistance) {
+                            finishGoal();
+                        }
+                    }, 1000);
+                }
+            }
+            
+            function pauseTimer() {
+                if (isRunning) {
+                    clearInterval(timerInterval);
+                    isRunning = false;
+                    startBtn.disabled = false;
+                    pauseBtn.disabled = true;
+                    startBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+                    startBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                }
+            }
+            
+            function resetTimer() {
+                clearInterval(timerInterval);
+                stopGPS();
+                isRunning = false;
+                totalDistance = 0;
+                elapsedTime = 0;
+                distanceHistory = [];
+                timeHistory = [];
+                lastDistanceUpdateTime = 0;
+                
+                startBtn.disabled = false;
+                pauseBtn.disabled = true;
+                startBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+                startBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                
+                updateTimeDisplay();
+                updateDistanceDisplay();
+                updatePace();
+                resetMilestones();
+                
+                // Reset progress circle
+                progressCircle.style.strokeDashoffset = circumference;
+            }
+            
+            function addDistance() {
+                if (lastPosition && currentPosition) {
+                    const distance = calculateDistance(
+                        lastPosition.coords.latitude,
+                        lastPosition.coords.longitude,
+                        currentPosition.coords.latitude,
+                        currentPosition.coords.longitude
+                    );
+                    
+                    if (distance > 0) {
+                        totalDistance += Math.round(distance);
+                        lastPosition = currentPosition;
+                    distanceHistory.push(totalDistance);
+                    timeHistory.push(elapsedTime);
+                    lastDistanceUpdateTime = elapsedTime;
+                    
+                    updateDistanceDisplay();
+                    updatePace();
+                    checkMilestones();
+                    
+                    // Clear input
+                    distanceInput.value = '';
+                    
+                    // Check if goal is reached
+                    if (totalDistance >= goalDistance) {
+                        finishGoal();
+                    }
+                }
+            }
+            
+            function updateTimeDisplay() {
+                const remainingSeconds = Math.max(0, goalTime - elapsedTime);
+                const minutes = Math.floor(remainingSeconds / 60);
+                const seconds = remainingSeconds % 60;
+                timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Change color when time is running out
+                if (remainingSeconds <= 60) {
+                    timeDisplay.classList.add('text-red-500', 'pulse-animation');
+                } else {
+                    timeDisplay.classList.remove('text-red-500', 'pulse-animation');
+                }
+            }
+            
+            function updateDistanceDisplay() {
+                distanceDisplay.textContent = `${totalDistance}m`;
+                remainingDistanceDisplay.textContent = `${Math.max(0, goalDistance - totalDistance)}m`;
+                
+                // Update progress color based on pace
+                const requiredPace = goalDistance / goalTime; // m/s
+                const currentPace = totalDistance / Math.max(1, elapsedTime);
+                
+                if (currentPace >= requiredPace) {
+                    distanceDisplay.classList.remove('text-red-500');
+                    distanceDisplay.classList.add('text-green-500');
+                } else {
+                    distanceDisplay.classList.remove('text-green-500');
+                    distanceDisplay.classList.add('text-red-500');
+                }
+            }
+            
+            function updatePace() {
+                if (elapsedTime > 0 && totalDistance > 0) {
+                    // Current pace (last segment)
+                    let currentPace = 0;
+                    if (distanceHistory.length > 1) {
+                        const lastDistance = distanceHistory[distanceHistory.length - 1] - distanceHistory[distanceHistory.length - 2];
+                        const lastTime = timeHistory[timeHistory.length - 1] - timeHistory[timeHistory.length - 2];
+                        currentPace = lastTime / (lastDistance / 1000); // s/km
+                    }
+                    
+                    // Average pace
+                    const avgPace = elapsedTime / (totalDistance / 1000); // s/km
+                    
+                    // Format pace as mm:ss
+                    const formatPace = (seconds) => {
+                        const mins = Math.floor(seconds / 60);
+                        const secs = Math.floor(seconds % 60);
+                        return `${mins}:${secs.toString().padStart(2, '0')}`;
+                    };
+                    
+                    paceDisplay.textContent = `${formatPace(avgPace)} /km`;
+                    currentPaceDisplay.textContent = formatPace(currentPace);
+                    avgPaceDisplay.textContent = formatPace(avgPace);
+                }
+            }
+            
+            function checkMilestones() {
+                milestoneCards.forEach(card => {
+                    const milestoneDistance = parseInt(card.dataset.distance);
+                    const milestoneTime = milestoneDistance / (goalDistance / goalTime);
+                    
+                    if (totalDistance >= milestoneDistance && elapsedTime <= milestoneTime) {
+                        card.classList.add('bg-green-50', 'border', 'border-green-200');
+                        card.querySelector('.milestone-check').classList.remove('hidden');
+                    } else if (totalDistance >= milestoneDistance) {
+                        card.classList.add('bg-yellow-50', 'border', 'border-yellow-200');
+                        card.querySelector('.milestone-check').classList.remove('hidden');
+                    }
+                });
+            }
+            
+            function resetMilestones() {
+                milestoneCards.forEach(card => {
+                    card.classList.remove('bg-green-50', 'bg-yellow-50', 'border', 'border-green-200', 'border-yellow-200');
+                    card.querySelector('.milestone-check').classList.add('hidden');
+                });
+            }
+            
+            function finishGoal() {
+                clearInterval(timerInterval);
+                isRunning = false;
+                startBtn.disabled = true;
+                pauseBtn.disabled = true;
+                
+                // Celebrate!
+                document.querySelector('.progress-ring__circle').classList.add('text-green-500');
+                timeDisplay.classList.add('text-green-500', 'text-4xl');
+                timeDisplay.classList.remove('text-red-500');
+                
+                // Show confetti effect
+                showConfetti();
+                
+                // Update message
+                document.querySelector('.bg-gray-100').textContent = "Parabéns! Você alcançou sua meta!";
+                document.querySelector('.bg-gray-100').classList.add('bg-green-100', 'text-green-800');
+            }
+            
+            function showConfetti() {
+                // Simple confetti effect
+                const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800', '#FF5722'];
+                
+                for (let i = 0; i < 100; i++) {
+                    setTimeout(() => {
+                        const confetti = document.createElement('div');
+                        confetti.style.position = 'fixed';
+                        confetti.style.width = '10px';
+                        confetti.style.height = '10px';
+                        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                        confetti.style.borderRadius = '50%';
+                        confetti.style.left = Math.random() * 100 + 'vw';
+                        confetti.style.top = '-10px';
+                        confetti.style.zIndex = '1000';
+                        confetti.style.transform = 'rotate(' + Math.random() * 360 + 'deg)';
+                        
+                        document.body.appendChild(confetti);
+                        
+                        const animation = confetti.animate([
+                            { top: '-10px', opacity: 1 },
+                            { top: '100vh', opacity: 0 }
+                        ], {
+                            duration: Math.random() * 3000 + 2000,
+                            easing: 'cubic-bezier(0.1, 0.8, 0.3, 1)'
+                        });
+                        
+                        animation.onfinish = () => confetti.remove();
+                    }, Math.random() * 1000);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
