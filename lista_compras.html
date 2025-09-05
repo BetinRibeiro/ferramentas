@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Recibos</title>
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📄</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <style>
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #receipt, #receipt * {
+                visibility: visible;
+            }
+            #receipt {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+        }
+        .receipt-line {
+            border-top: 1px dashed #cbd5e1;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <header class="text-center mb-8" data-aos="fade-down">
+            <h1 class="text-3xl font-bold text-blue-700 mb-2">Gerador de Recibos</h1>
+            <p class="text-gray-600">Crie recibos profissionais em segundos</p>
+        </header>
+
+        <!-- Input Form -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8" data-aos="fade-up">
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Descrição do Serviço</label>
+                    <input type="text" id="description" placeholder="Ex: Consultoria em Design" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Valor (R$)</label>
+                    <input type="number" id="value" placeholder="Ex: 250,00" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Data</label>
+                    <input type="date" id="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Emitente</label>
+                    <input type="text" id="issuer" placeholder="Seu nome ou empresa" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Destinatário</label>
+                    <input type="text" id="receiver" placeholder="Nome do cliente" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+            </div>
+            
+            <button onclick="generateReceipt()" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center">
+                <i data-feather="file-text" class="mr-2"></i>
+                Gerar Recibo
+            </button>
+        </div>
+
+        <!-- Receipt Preview -->
+        <div id="receipt-container" class="hidden" data-aos="zoom-in">
+            <div class="bg-white rounded-lg shadow-lg p-8 border-2 border-dashed border-gray-200">
+                <div id="receipt" class="max-w-md mx-auto">
+                    <div class="text-center mb-6">
+                        <div class="text-xs text-gray-500 mb-2">=======================</div>
+                        <h2 class="text-2xl font-bold uppercase tracking-wide">Recibo</h2>
+                        <div class="text-xs text-gray-500 mt-2">=======================</div>
+                    </div>
+                    
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="font-medium">Valor:</span>
+                            <span id="receipt-value" class="text-right"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Data:</span>
+                            <span id="receipt-date" class="text-right"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Emitente:</span>
+                            <span id="receipt-issuer" class="text-right"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Destinatário:</span>
+                            <span id="receipt-receiver" class="text-right"></span>
+                        </div>
+                    </div>
+
+                    <div class="receipt-line"></div>
+                    
+                    <div class="space-y-3 text-sm mt-4">
+                        <div class="text-center">
+                            <span class="font-medium">Descrição:</span>
+                        </div>
+                        <div class="text-center">
+                            <span id="receipt-description" class="text-sm"></span>
+                        </div>
+                    </div>
+
+                    <div class="receipt-line"></div>
+                    
+                    <div class="text-center mt-6">
+                        <div class="text-xs text-gray-500 mb-2">_________________________</div>
+                        <p class="text-xs text-gray-600">Assinatura do Emitente</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex justify-center gap-4 mt-6">
+                <button onclick="window.print()" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg transition duration-200 flex items-center">
+                    <i data-feather="printer" class="mr-2"></i>
+                    Imprimir
+                </button>
+                <button onclick="resetForm()" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition duration-200 flex items-center">
+                    <i data-feather="refresh-cw" class="mr-2"></i>
+                    Novo Recibo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer with description -->
+    <footer class="container mx-auto px-4 py-8 max-w-4xl mt-12 border-t border-gray-200">
+        <div class="text-center text-gray-600">
+            <h3 class="text-lg font-semibold mb-4">Sobre a Ferramenta</h3>
+            <p class="mb-2">Esta é uma ferramenta simples e prática para gerar recibos profissionais.</p>
+            <p class="mb-2">Preencha os campos com os dados do serviço prestado, valor, data, seu nome e do cliente.</p>
+            <p class="mb-2">Clique em "Gerar Recibo" para visualizar o documento pronto para impressão.</p>
+            <p>Use o botão "Imprimir" para salvar como PDF ou imprimir fisicamente.</p>
+        </div>
+    </footer>
+
+    <script>
+        feather.replace();
+        
+        function generateReceipt() {
+            const description = document.getElementById('description').value;
+            const value = document.getElementById('value').value;
+            const date = document.getElementById('date').value;
+            const issuer = document.getElementById('issuer').value;
+            const receiver = document.getElementById('receiver').value;
+
+            if(!description || !value || !date || !issuer || !receiver) {
+                alert('Por favor, preencha todos os campos!');
+                return;
+            }
+
+            // Format values
+            const formattedDate = new Date(date).toLocaleDateString('pt-BR');
+            const formattedValue = new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
+
+            // Update receipt
+            document.getElementById('receipt-description').textContent = description;
+            document.getElementById('receipt-value').textContent = formattedValue;
+            document.getElementById('receipt-date').textContent = formattedDate;
+            document.getElementById('receipt-issuer').textContent = issuer;
+            document.getElementById('receipt-receiver').textContent = receiver;
+
+            // Show receipt
+            document.getElementById('receipt-container').classList.remove('hidden');
+            
+            // Scroll to receipt
+            document.getElementById('receipt-container').scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+
+        function resetForm() {
+            document.getElementById('description').value = '';
+            document.getElementById('value').value = '';
+            document.getElementById('date').value = '';
+            document.getElementById('issuer').value = '';
+            document.getElementById('receiver').value = '';
+            document.getElementById('receipt-container').classList.add('hidden');
+        }
+
+        // Set today's date as default
+        document.getElementById('date').valueAsDate = new Date();
+    </script>
+</body>
+</html>
