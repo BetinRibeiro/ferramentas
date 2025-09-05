@@ -3,194 +3,378 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Recibos</title>
-    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📄</text></svg>">
+    <title>Lista de Compras</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛒</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <style>
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            #receipt, #receipt * {
-                visibility: visible;
-            }
-            #receipt {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-            }
+        .completed {
+            text-decoration: line-through;
+            opacity: 0.7;
+            background-color: #f0fdf4;
         }
-        .receipt-line {
-            border-top: 1px dashed #cbd5e1;
-            margin: 1rem 0;
+        .edit-modal {
+            transition: all 0.3s ease;
         }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <div class="container mx-auto px-4 py-8 max-w-4xl">
-        <!-- Header -->
-        <header class="text-center mb-8" data-aos="fade-down">
-            <h1 class="text-3xl font-bold text-blue-700 mb-2">Gerador de Recibos</h1>
-            <p class="text-gray-600">Crie recibos profissionais em segundos</p>
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-green-600 mb-2">Lista de Compras</h1>
+            <p class="text-gray-600">Gerencie seus itens de compra de forma simples e eficiente</p>
         </header>
 
-        <!-- Input Form -->
+        <!-- Formulário de Adição -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-8" data-aos="fade-up">
-            <div class="grid md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Descrição do Serviço</label>
-                    <input type="text" id="description" placeholder="Ex: Consultoria em Design" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Valor (R$)</label>
-                    <input type="number" id="value" placeholder="Ex: 250,00" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Data</label>
-                    <input type="date" id="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Emitente</label>
-                    <input type="text" id="issuer" placeholder="Seu nome ou empresa" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">Adicionar Novo Item</h2>
+            <form id="add-item-form" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Destinatário</label>
-                    <input type="text" id="receiver" placeholder="Nome do cliente" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Descrição *</label>
+                    <input type="text" id="description" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
                 </div>
-            </div>
-            
-            <button onclick="generateReceipt()" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center">
-                <i data-feather="file-text" class="mr-2"></i>
-                Gerar Recibo
-            </button>
+                <div>
+                    <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
+                    <input type="number" id="quantity" min="1" value="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+                <div>
+                    <label for="unit-price" class="block text-sm font-medium text-gray-700 mb-1">Valor Unitário (R$)</label>
+                    <input type="number" id="unit-price" min="0" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+                <div class="md:col-span-4 flex justify-end mt-4">
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-md transition duration-200 flex items-center">
+                        <i data-feather="plus" class="mr-2 w-4 h-4"></i> Adicionar Item
+                    </button>
+                </div>
+            </form>
         </div>
 
-        <!-- Receipt Preview -->
-        <div id="receipt-container" class="hidden" data-aos="zoom-in">
-            <div class="bg-white rounded-lg shadow-lg p-8 border-2 border-dashed border-gray-200">
-                <div id="receipt" class="max-w-md mx-auto">
-                    <div class="text-center mb-6">
-                        <div class="text-xs text-gray-500 mb-2">=======================</div>
-                        <h2 class="text-2xl font-bold uppercase tracking-wide">Recibo</h2>
-                        <div class="text-xs text-gray-500 mt-2">=======================</div>
-                    </div>
-                    
-                    <div class="space-y-3 text-sm">
-                        <div class="flex justify-between">
-                            <span class="font-medium">Valor:</span>
-                            <span id="receipt-value" class="text-right"></span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="font-medium">Data:</span>
-                            <span id="receipt-date" class="text-right"></span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="font-medium">Emitente:</span>
-                            <span id="receipt-issuer" class="text-right"></span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="font-medium">Destinatário:</span>
-                            <span id="receipt-receiver" class="text-right"></span>
-                        </div>
-                    </div>
-
-                    <div class="receipt-line"></div>
-                    
-                    <div class="space-y-3 text-sm mt-4">
-                        <div class="text-center">
-                            <span class="font-medium">Descrição:</span>
-                        </div>
-                        <div class="text-center">
-                            <span id="receipt-description" class="text-sm"></span>
-                        </div>
-                    </div>
-
-                    <div class="receipt-line"></div>
-                    
-                    <div class="text-center mt-6">
-                        <div class="text-xs text-gray-500 mb-2">_________________________</div>
-                        <p class="text-xs text-gray-600">Assinatura do Emitente</p>
-                    </div>
-                </div>
+        <!-- Tabela de Itens -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden" data-aos="fade-up">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantidade</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor Unitário</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor Total</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="items-list" class="divide-y divide-gray-200">
+                        <!-- Itens serão renderizados aqui via JavaScript -->
+                    </tbody>
+                </table>
             </div>
+            <div id="empty-state" class="hidden py-12 text-center">
+                <i data-feather="shopping-cart" class="w-16 h-16 text-gray-300 mx-auto"></i>
+                <p class="mt-4 text-gray-500">Sua lista de compras está vazia</p>
+                <p class="text-gray-400 text-sm">Adicione itens usando o formulário acima</p>
+            </div>
+        </div>
 
-            <!-- Actions -->
-            <div class="flex justify-center gap-4 mt-6">
-                <button onclick="window.print()" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg transition duration-200 flex items-center">
-                    <i data-feather="printer" class="mr-2"></i>
-                    Imprimir
-                </button>
-                <button onclick="resetForm()" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition duration-200 flex items-center">
-                    <i data-feather="refresh-cw" class="mr-2"></i>
-                    Novo Recibo
-                </button>
+        <!-- Resumo -->
+        <div class="mt-6 bg-white rounded-lg shadow-md p-6" data-aos="fade-up">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-medium text-gray-700">Resumo da Compra</h3>
+                <div class="text-right">
+                    <p class="text-gray-600">Total: <span id="total-amount" class="text-xl font-bold text-green-600">R$ 0,00</span></p>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Footer with description -->
-    <footer class="container mx-auto px-4 py-8 max-w-4xl mt-12 border-t border-gray-200">
-        <div class="text-center text-gray-600">
-            <h3 class="text-lg font-semibold mb-4">Sobre a Ferramenta</h3>
-            <p class="mb-2">Esta é uma ferramenta simples e prática para gerar recibos profissionais.</p>
-            <p class="mb-2">Preencha os campos com os dados do serviço prestado, valor, data, seu nome e do cliente.</p>
-            <p class="mb-2">Clique em "Gerar Recibo" para visualizar o documento pronto para impressão.</p>
-            <p>Use o botão "Imprimir" para salvar como PDF ou imprimir fisicamente.</p>
+    <!-- Modal de Edição -->
+    <div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden edit-modal">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-gray-800">Editar Item</h3>
+                <button id="close-modal" class="text-gray-400 hover:text-gray-600">
+                    <i data-feather="x"></i>
+                </button>
+            </div>
+            <form id="edit-item-form" class="space-y-4">
+                <input type="hidden" id="edit-id">
+                <div>
+                    <label for="edit-description" class="block text-sm font-medium text-gray-700 mb-1">Descrição *</label>
+                    <input type="text" id="edit-description" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="edit-quantity" class="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
+                        <input type="number" id="edit-quantity" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+                    <div>
+                        <label for="edit-unit-price" class="block text-sm font-medium text-gray-700 mb-1">Valor Unitário (R$)</label>
+                        <input type="number" id="edit-unit-price" min="0" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" id="cancel-edit" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancelar</button>
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md">Salvar Alterações</button>
+                </div>
+            </form>
         </div>
-    </footer>
+    </div>
 
     <script>
-        feather.replace();
-        
-        function generateReceipt() {
-            const description = document.getElementById('description').value;
-            const value = document.getElementById('value').value;
-            const date = document.getElementById('date').value;
-            const issuer = document.getElementById('issuer').value;
-            const receiver = document.getElementById('receiver').value;
+        // Funções para gerenciar o localStorage
+        function getItems() {
+            const items = localStorage.getItem('shoppingList');
+            return items ? JSON.parse(items) : [];
+        }
 
-            if(!description || !value || !date || !issuer || !receiver) {
-                alert('Por favor, preencha todos os campos!');
+        function saveItems(items) {
+            localStorage.setItem('shoppingList', JSON.stringify(items));
+        }
+
+        // Funções para renderizar a interface
+        function renderItems() {
+            const items = getItems();
+            const itemsList = document.getElementById('items-list');
+            const emptyState = document.getElementById('empty-state');
+            
+            itemsList.innerHTML = '';
+            
+            if (items.length === 0) {
+                emptyState.classList.remove('hidden');
                 return;
             }
-
-            // Format values
-            const formattedDate = new Date(date).toLocaleDateString('pt-BR');
-            const formattedValue = new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            }).format(value);
-
-            // Update receipt
-            document.getElementById('receipt-description').textContent = description;
-            document.getElementById('receipt-value').textContent = formattedValue;
-            document.getElementById('receipt-date').textContent = formattedDate;
-            document.getElementById('receipt-issuer').textContent = issuer;
-            document.getElementById('receipt-receiver').textContent = receiver;
-
-            // Show receipt
-            document.getElementById('receipt-container').classList.remove('hidden');
             
-            // Scroll to receipt
-            document.getElementById('receipt-container').scrollIntoView({
-                behavior: 'smooth'
+            emptyState.classList.add('hidden');
+            
+            items.forEach(item => {
+                const total = (item.quantity * item.unitPrice).toFixed(2);
+                const row = document.createElement('tr');
+                row.className = `hover:bg-gray-50 cursor-pointer ${item.status === 'Comprado' ? 'completed' : ''}`;
+                row.dataset.id = item.id;
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full ${item.status === 'Comprado' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                                ${item.status}
+                            </span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">${item.description}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">${item.quantity}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">R$ ${item.unitPrice.toFixed(2)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">R$ ${total}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button class="text-blue-600 hover:text-blue-900 edit-btn mr-3" data-id="${item.id}">
+                            <i data-feather="edit" class="w-4 h-4"></i>
+                        </button>
+                        <button class="text-red-600 hover:text-red-900 delete-btn" data-id="${item.id}">
+                            <i data-feather="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                `;
+                
+                itemsList.appendChild(row);
+            });
+            
+            updateTotal();
+            feather.replace();
+            attachRowEvents();
+        }
+
+        function updateTotal() {
+            const items = getItems();
+            const total = items.reduce((sum, item) => {
+                return sum + (item.quantity * item.unitPrice);
+            }, 0);
+            
+            document.getElementById('total-amount').textContent = `R$ ${total.toFixed(2)}`;
+        }
+
+        // Funções para manipular eventos
+        function attachRowEvents() {
+            // Clique na linha para alternar status
+            document.querySelectorAll('#items-list tr').forEach(row => {
+                row.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('edit-btn') && !e.target.classList.contains('delete-btn') && 
+                        !e.target.closest('.edit-btn') && !e.target.closest('.delete-btn')) {
+                        toggleStatus(row.dataset.id);
+                    }
+                });
+            });
+            
+            // Botões de editar
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openEditModal(btn.dataset.id);
+                });
+            });
+            
+            // Botões de excluir
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteItem(btn.dataset.id);
+                });
             });
         }
 
-        function resetForm() {
-            document.getElementById('description').value = '';
-            document.getElementById('value').value = '';
-            document.getElementById('date').value = '';
-            document.getElementById('issuer').value = '';
-            document.getElementById('receiver').value = '';
-            document.getElementById('receipt-container').classList.add('hidden');
+        function toggleStatus(id) {
+            const items = getItems();
+            const itemIndex = items.findIndex(item => item.id === id);
+            
+            if (itemIndex !== -1) {
+                items[itemIndex].status = items[itemIndex].status === 'Aguardando' ? 'Comprado' : 'Aguardando';
+                saveItems(items);
+                renderItems();
+                
+                // Feedback visual
+                showNotification(`Status alterado para ${items[itemIndex].status}`, 'success');
+            }
         }
 
-        // Set today's date as default
-        document.getElementById('date').valueAsDate = new Date();
+        function deleteItem(id) {
+            if (confirm('Tem certeza que deseja excluir este item?')) {
+                const items = getItems();
+                const filteredItems = items.filter(item => item.id !== id);
+                saveItems(filteredItems);
+                renderItems();
+                
+                // Feedback visual
+                showNotification('Item excluído com sucesso', 'success');
+            }
+        }
+
+        function openEditModal(id) {
+            const items = getItems();
+            const item = items.find(item => item.id === id);
+            
+            if (item) {
+                document.getElementById('edit-id').value = item.id;
+                document.getElementById('edit-description').value = item.description;
+                document.getElementById('edit-quantity').value = item.quantity;
+                document.getElementById('edit-unit-price').value = item.unitPrice;
+                
+                document.getElementById('edit-modal').classList.remove('hidden');
+            }
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.add('hidden');
+        }
+
+        function showNotification(message, type) {
+            // Criar e mostrar uma notificação temporária
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-4 py-2 rounded-md shadow-md text-white font-medium ${
+                type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Event Listeners
+        document.getElementById('add-item-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const description = document.getElementById('description').value.trim();
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+            const unitPrice = parseFloat(document.getElementById('unit-price').value) || 0;
+            
+            // Validação
+            if (!description) {
+                showNotification('A descrição é obrigatória', 'error');
+                return;
+            }
+            
+            if (quantity <= 0) {
+                showNotification('A quantidade deve ser maior que zero', 'error');
+                return;
+            }
+            
+            if (unitPrice < 0) {
+                showNotification('O valor unitário não pode ser negativo', 'error');
+                return;
+            }
+            
+            // Adicionar item
+            const items = getItems();
+            const newItem = {
+                id: Date.now().toString(),
+                description,
+                quantity,
+                unitPrice,
+                status: 'Aguardando'
+            };
+            
+            items.push(newItem);
+            saveItems(items);
+            renderItems();
+            
+            // Limpar formulário
+            this.reset();
+            document.getElementById('quantity').value = 1;
+            
+            // Feedback visual
+            showNotification('Item adicionado com sucesso', 'success');
+        });
+
+        document.getElementById('edit-item-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('edit-id').value;
+            const description = document.getElementById('edit-description').value.trim();
+            const quantity = parseInt(document.getElementById('edit-quantity').value) || 1;
+            const unitPrice = parseFloat(document.getElementById('edit-unit-price').value) || 0;
+            
+            // Validação
+            if (!description) {
+                showNotification('A descrição é obrigatória', 'error');
+                return;
+            }
+            
+            if (quantity <= 0) {
+                showNotification('A quantidade deve ser maior que zero', 'error');
+                return;
+            }
+            
+            if (unitPrice < 0) {
+                showNotification('O valor unitário não pode ser negativo', 'error');
+                return;
+            }
+            
+            // Atualizar item
+            const items = getItems();
+            const itemIndex = items.findIndex(item => item.id === id);
+            
+            if (itemIndex !== -1) {
+                items[itemIndex].description = description;
+                items[itemIndex].quantity = quantity;
+                items[itemIndex].unitPrice = unitPrice;
+                
+                saveItems(items);
+                renderItems();
+                closeEditModal();
+                
+                // Feedback visual
+                showNotification('Item atualizado com sucesso', 'success');
+            }
+        });
+
+        document.getElementById('close-modal').addEventListener('click', closeEditModal);
+        document.getElementById('cancel-edit').addEventListener('click', closeEditModal);
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+            renderItems();
+        });
     </script>
 </body>
 </html>
