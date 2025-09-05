@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Cobrança</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c5c5c5;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div id="app" class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-blue-600 text-white shadow-lg">
+            <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+                <h1 class="text-2xl font-bold flex items-center">
+                    <i data-feather="dollar-sign" class="mr-2"></i> Sistema de Cobrança
+                </h1>
+                <div class="flex space-x-2">
+                    <button onclick="openModal('importModal')" class="bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded-lg flex items-center">
+                        <i data-feather="upload" class="mr-2"></i> Importar CSV
+                    </button>
+                    <button onclick="exportToCSV()" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg flex items-center">
+                        <i data-feather="download" class="mr-2"></i> Exportar CSV
+                    </button>
+                    <button onclick="openModal('recordModal')" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg flex items-center">
+                        <i data-feather="plus" class="mr-2"></i> Novo Registro
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto px-4 py-6">
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white rounded-lg shadow p-4" data-aos="fade-up">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-gray-500 text-sm font-medium">Total Geral</h3>
+                        <i data-feather="dollar-sign" class="text-blue-500"></i>
+                    </div>
+                    <p class="text-2xl font-bold mt-2" id="totalAmount">R$ 0,00</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-gray-500 text-sm font-medium">Total de Registros</h3>
+                        <i data-feather="list" class="text-green-500"></i>
+                    </div>
+                    <p class="text-2xl font-bold mt-2" id="totalRecords">0</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-gray-500 text-sm font-medium">Dias Trabalhados</h3>
+                        <i data-feather="calendar" class="text-purple-500"></i>
+                    </div>
+                    <p class="text-2xl font-bold mt-2" id="workedDays">0</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-gray-500 text-sm font-medium">Média Diária</h3>
+                        <i data-feather="trending-up" class="text-yellow-500"></i>
+                    </div>
+                    <p class="text-2xl font-bold mt-2" id="dailyAverage">R$ 0,00</p>
+                </div>
+            </div>
+
+            <!-- Records Table -->
+            <div class="bg-white rounded-lg shadow overflow-hidden" data-aos="fade-up">
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="recordsTable">
+                            <!-- Records will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Analysis Section -->
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow p-6" data-aos="fade-up">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800">Análise de Período</h2>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Primeiro dia:</span>
+                            <span class="font-medium" id="firstDay">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Último dia:</span>
+                            <span class="font-medium" id="lastDay">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Total de dias no período:</span>
+                            <span class="font-medium" id="totalDays">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Dias de folga:</span>
+                            <span class="font-medium" id="daysOff">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6" data-aos="fade-up" data-aos-delay="100">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800">Projeções de Cobrança</h2>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">60 dias:</span>
+                            <span class="font-medium" id="projection60">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">65 dias:</span>
+                            <span class="font-medium" id="projection65">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">75 dias:</span>
+                            <span class="font-medium" id="projection75">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">80 dias:</span>
+                            <span class="font-medium" id="projection80">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-white py-4 mt-8">
+            <div class="container mx-auto px-4 text-center">
+                <p>Sistema de Cobrança &copy; 2025</p>
+            </div>
+        </footer>
+
+        <!-- Record Modal -->
+        <div id="recordModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+                <div class="px-6 py-4 border-b">
+                    <h2 class="text-xl font-semibold text-gray-800" id="modalTitle">Novo Registro</h2>
+                </div>
+                <form id="recordForm" class="px-6 py-4">
+                    <input type="hidden" id="recordId">
+                    <div class="mb-4">
+                        <label for="recordDate" class="block text-gray-700 text-sm font-medium mb-2">Data</label>
+                        <input type="date" id="recordDate" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="mb-4">
+                        <label for="recordValue" class="block text-gray-700 text-sm font-medium mb-2">Valor (R$)</label>
+                        <input type="number" id="recordValue" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0,00">
+                    </div>
+                </form>
+                <div class="px-6 py-4 border-t flex justify-end space-x-2">
+                    <button onclick="closeModal('recordModal')" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
+                    <button onclick="saveRecord()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Salvar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Import Modal -->
+        <div id="importModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+                <div class="px-6 py-4 border-b">
+                    <h2 class="text-xl font-semibold text-gray-800">Importar CSV</h2>
+                </div>
+                <div class="px-6 py-4">
+                    <input type="file" id="csvFile" accept=".csv" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <p class="text-sm text-gray-500 mt-2">O arquivo CSV deve conter as colunas: id, date, value</p>
+                </div>
+                <div class="px-6 py-4 border-t flex justify-end space-x-2">
+                    <button onclick="closeModal('importModal')" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
+                    <button onclick="importCSV()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Importar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+                <div class="px-6 py-4 border-b">
+                    <h2 class="text-xl font-semibold text-gray-800">Confirmar Exclusão</h2>
+                </div>
+                <div class="px-6 py-4">
+                    <p>Tem certeza que deseja excluir este registro?</p>
+                </div>
+                <div class="px-6 py-4 border-t flex justify-end space-x-2">
+                    <button onclick="closeModal('deleteModal')" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
+                    <button onclick="confirmDelete()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Excluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize libraries
+        AOS.init({ duration: 800 });
+        feather.replace();
+
+        // Database and state management
+        let db;
+        let records = [];
+        let recordToDelete = null;
+
+        // Initialize IndexedDB
+        function initDB() {
+            const request = indexedDB.open("BillingSystemDB", 1);
+
+            request.onerror = (event) => {
+                console.error("IndexedDB error:", event.target.error);
+            };
+
+            request.onupgradeneeded = (event) => {
+                db = event.target.result;
+                if (!db.objectStoreNames.contains('records')) {
+                    const store = db.createObjectStore('records', { keyPath: 'id' });
+                    store.createIndex('date', 'date', { unique: false });
+                }
+            };
+
+            request.onsuccess = (event) => {
+                db = event.target.result;
+                loadRecords();
+            };
+        }
+
+        // Load all records from IndexedDB
+        function loadRecords() {
+            const transaction = db.transaction(['records'], 'readonly');
+            const store = transaction.objectStore('records');
+            const request = store.getAll();
+
+            request.onsuccess = (event) => {
+                records = event.target.result;
+                displayRecords();
+                updateSummary();
+                updateAnalysis();
+                updateProjections();
+            };
+
+            request.onerror = (event) => {
+                console.error("Error loading records:", event.target.error);
+            };
+        }
+
+        // Add or update a record
+        function saveRecord() {
+            const id = document.getElementById('recordId').value || self.crypto.randomUUID();
+            const date = document.getElementById('recordDate').value;
+            const value = parseFloat(document.getElementById('recordValue').value);
+
+            if (!date || isNaN(value)) {
+                alert('Por favor, preencha todos os campos corretamente.');
+                return;
+            }
+
+            const record = { id, date, value };
+            const transaction = db.transaction(['records'], 'readwrite');
+            const store = transaction.objectStore('records');
+
+            const request = store.put(record);
+
+            request.onsuccess = () => {
+                closeModal('recordModal');
+                loadRecords();
+            };
+
+            request.onerror = (event) => {
+                console.error("Error saving record:", event.target.error);
+            };
+        }
+
+        // Delete a record
+        function deleteRecord(id) {
+            recordToDelete = id;
+            openModal('deleteModal');
+        }
+
+        function confirmDelete() {
+            if (!recordToDelete) return;
+
+            const transaction = db.transaction(['records'], 'readwrite');
+            const store = transaction.objectStore('records');
+            const request = store.delete(recordToDelete);
+
+            request.onsuccess = () => {
+                closeModal('deleteModal');
+                recordToDelete = null;
+                loadRecords();
+            };
+
+            request.onerror = (event) => {
+                console.error("Error deleting record:", event.target.error);
+            };
+        }
+
+        // Edit a record
+        function editRecord(id) {
+            const record = records.find(r => r.id === id);
+            if (!record) return;
+
+            document.getElementById('recordId').value = record.id;
+            document.getElementById('recordDate').value = record.date;
+            document.getElementById('recordValue').value = record.value;
+            document.getElementById('modalTitle').textContent = 'Editar Registro';
+            openModal('recordModal');
+        }
+
+        // Display records in table
+        function displayRecords() {
+            const table = document.getElementById('recordsTable');
+            table.innerHTML = '';
+
+            records.sort((a, b) => new Date(a.date) - new Date(b.date)).forEach(record => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">${formatDate(record.date)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">R$ ${record.value.toFixed(2).replace('.', ',')}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button onclick="editRecord('${record.id}')" class="text-indigo-600 hover:text-indigo-900 mr-3">
+                            <i data-feather="edit" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="deleteRecord('${record.id}')" class="text-red-600 hover:text-red-900">
+                            <i data-feather="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                `;
+                table.appendChild(row);
+            });
+
+            feather.replace();
+        }
+
+        // Update summary cards
+        function updateSummary() {
+            const totalAmount = records.reduce((sum, record) => sum + record.value, 0);
+            const totalRecords = records.length;
+            
+            // Calculate worked days (days with at least one record)
+            const uniqueDates = new Set(records.map(record => record.date));
+            const workedDays = uniqueDates.size;
+            
+            const dailyAverage = workedDays > 0 ? totalAmount / workedDays : 0;
+
+            document.getElementById('totalAmount').textContent = `R$ ${totalAmount.toFixed(2).replace('.', ',')}`;
+            document.getElementById('totalRecords').textContent = totalRecords;
+            document.getElementById('workedDays').textContent = workedDays;
+            document.getElementById('dailyAverage').textContent = `R$ ${dailyAverage.toFixed(2).replace('.', ',')}`;
+        }
+
+        // Update analysis section
+        function updateAnalysis() {
+            if (records.length === 0) {
+                document.getElementById('firstDay').textContent = '-';
+                document.getElementById('lastDay').textContent = '-';
+                document.getElementById('totalDays').textContent = '0';
+                document.getElementById('daysOff').textContent = '0';
+                return;
+            }
+
+            const dates = records.map(record => new Date(record.date));
+            const firstDate = new Date(Math.min(...dates));
+            const lastDate = new Date(Math.max(...dates));
+            
+            const totalDays = Math.ceil((lastDate - firstDate) / (1000 * 60 * 60 * 24)) + 1;
+            const uniqueDates = new Set(records.map(record => record.date));
+            const workedDays = uniqueDates.size;
+            const daysOff = totalDays - workedDays;
+
+            document.getElementById('firstDay').textContent = formatDate(firstDate.toISOString().split('T')[0]);
+            document.getElementById('lastDay').textContent = formatDate(lastDate.toISOString().split('T')[0]);
+            document.getElementById('totalDays').textContent = totalDays;
+            document.getElementById('daysOff').textContent = daysOff;
+        }
+
+        // Update projections
+        function updateProjections() {
+            const uniqueDates = new Set(records.map(record => record.date));
+            const workedDays = uniqueDates.size;
+            const totalAmount = records.reduce((sum, record) => sum + record.value, 0);
+            const dailyAverage = workedDays > 0 ? totalAmount / workedDays : 0;
+
+            document.getElementById('projection60').textContent = `R$ ${(dailyAverage * 60).toFixed(2).replace('.', ',')}`;
+            document.getElementById('projection65').textContent = `R$ ${(dailyAverage * 65).toFixed(2).replace('.', ',')}`;
+            document.getElementById('projection75').textContent = `R$ ${(dailyAverage * 75).toFixed(2).replace('.', ',')}`;
+            document.getElementById('projection80').textContent = `R$ ${(dailyAverage * 80).toFixed(2).replace('.', ',')}`;
+        }
+
+        // Export to CSV
+        function exportToCSV() {
+            if (records.length === 0) {
+                alert('Não há registros para exportar.');
+                return;
+            }
+
+            const headers = ['id', 'date', 'value'];
+            const csvContent = [
+                headers.join(','),
+                ...records.map(record => `${record.id},${record.date},${record.value}`)
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'registros_cobranca.csv');
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Import from CSV
+        function importCSV() {
+            const fileInput = document.getElementById('csvFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Por favor, selecione um arquivo CSV.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const csv = e.target.result;
+                const lines = csv.split('\n');
+                const headers = lines[0].split(',').map(h => h.trim());
+                
+                // Validate headers
+                if (!headers.includes('id') || !headers.includes('date') || !headers.includes('value')) {
+                    alert('O arquivo CSV deve conter as colunas: id, date, value');
+                    return;
+                }
+
+                const newRecords = [];
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue;
+                    
+                    const values = lines[i].split(',').map(v => v.trim());
+                    if (values.length !== headers.length) continue;
+                    
+                    const record = {};
+                    headers.forEach((header, index) => {
+                        record[header] = values[index];
+                    });
+                    
+                    // Validate record
+                    if (!record.id || !record.date || isNaN(parseFloat(record.value))) continue;
+                    
+                    record.value = parseFloat(record.value);
+                    newRecords.push(record);
+                }
+
+                if (newRecords.length === 0) {
+                    alert('Nenhum registro válido encontrado no arquivo.');
+                    return;
+                }
+
+                // Import records
+                const transaction = db.transaction(['records'], 'readwrite');
+                const store = transaction.objectStore('records');
+                
+                newRecords.forEach(record => {
+                    store.put(record);
+                });
+
+                transaction.oncomplete = () => {
+                    closeModal('importModal');
+                    fileInput.value = '';
+                    loadRecords();
+                    alert(`${newRecords.length} registros importados com sucesso.`);
+                };
+
+                transaction.onerror = (event) => {
+                    console.error("Error importing records:", event.target.error);
+                    alert('Erro ao importar registros.');
+                };
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            if (modalId === 'recordModal') {
+                document.getElementById('recordForm').reset();
+                document.getElementById('recordId').value = '';
+                document.getElementById('modalTitle').textContent = 'Novo Registro';
+            }
+        }
+
+        // Utility function to format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        // Initialize the application
+        window.onload = function() {
+            initDB();
+            
+            // Close modals when clicking outside
+            document.addEventListener('click', (event) => {
+                if (event.target.id === 'recordModal') closeModal('recordModal');
+                if (event.target.id === 'importModal') closeModal('importModal');
+                if (event.target.id === 'deleteModal') closeModal('deleteModal');
+            });
+        };
+    </script>
+</body>
+</html>
