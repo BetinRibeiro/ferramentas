@@ -142,57 +142,61 @@
         const DB_NAME = 'RequirementsDB';
         const DB_VERSION = 1;
         const STORE_NAME = 'requirements';
-
+        
         // Initialize app
         document.addEventListener('DOMContentLoaded', async () => {
             await initDB();
-await initializeDefaultRequirements();
-await loadRequirements();
-
+            await initializeDefaultRequirements();
+            await loadRequirements();
+        
             feather.replace();
             setupEventListeners();
         });
-
+        
         // Function to clear all requirements
         async function clearAllRequirements() {
             return new Promise((resolve, reject) => {
                 const transaction = db.transaction([STORE_NAME], 'readwrite');
                 const store = transaction.objectStore(STORE_NAME);
                 const request = store.clear();
-                
+        
                 request.onerror = () => reject(request.error);
                 request.onsuccess = () => resolve();
             });
         }
-
+        
         // Database functions
         async function initDB() {
             return new Promise((resolve, reject) => {
                 const request = indexedDB.open(DB_NAME, DB_VERSION);
-                
+        
                 request.onerror = () => reject(request.error);
                 request.onsuccess = () => {
                     db = request.result;
                     resolve();
                 };
-                
+        
                 request.onupgradeneeded = (event) => {
                     const db = event.target.result;
                     if (!db.objectStoreNames.contains(STORE_NAME)) {
-                        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-                        store.createIndex('text', 'text', { unique: false });
+                        const store = db.createObjectStore(STORE_NAME, {
+                            keyPath: 'id'
+                        });
+                        store.createIndex('text', 'text', {
+                            unique: false
+                        });
                     }
                 };
             });
         }
-
+        
         async function addOrUpdateRequirement(requirement) {
             return new Promise((resolve, reject) => {
                 try {
                     const transaction = db.transaction([STORE_NAME], 'readwrite');
                     const store = transaction.objectStore(STORE_NAME);
                     const request = store.put(requirement);
-                    
+        
                     request.onerror = () => reject(request.error);
                     request.onsuccess = () => resolve(request.result);
                 } catch (error) {
@@ -200,7 +204,7 @@ await loadRequirements();
                 }
             });
         }
-
+        
         async function getAllRequirements() {
             return new Promise((resolve, reject) => {
                 const transaction = db.transaction([STORE_NAME], 'readonly');
@@ -208,70 +212,70 @@ await loadRequirements();
                 const request = store.getAll();
                 request.onsuccess = () => {
                     // Sort by createdAt date
-                    const sorted = request.result.sort((a, b) => 
+                    const sorted = request.result.sort((a, b) =>
                         new Date(a.createdAt) - new Date(b.createdAt)
                     );
                     resolve(sorted);
                 };
-                
+        
                 request.onerror = () => reject(request.error);
             });
         }
-
+        
         async function deleteRequirement(id) {
             return new Promise((resolve, reject) => {
                 const transaction = db.transaction([STORE_NAME], 'readwrite');
                 const store = transaction.objectStore(STORE_NAME);
                 const request = store.delete(id);
-                
+        
                 request.onerror = () => reject(request.error);
                 request.onsuccess = () => resolve();
             });
         }
-
+        
         // UI functions
         async function loadRequirements() {
             const requirements = await getAllRequirements();
             const list = document.getElementById('requirementsList');
             const summary = document.getElementById('summaryText');
-            
+        
             list.innerHTML = '';
             summary.value = '';
-            
+        
             requirements.forEach((req, index) => {
                 // Add to list
                 const requirementElement = document.createElement('div');
                 requirementElement.className = 'glass-effect rounded-2xl p-4';
                 requirementElement.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div class="flex-1">
-                            <p class="text-white">${req.text}</p>
-                        </div>
-                        <div class="flex space-x-2 ml-4">
-                            <button class="edit-btn p-2 text-blue-300 hover:text-blue-100" data-id="${req.id}">
-                                <i data-feather="edit" class="w-4 h-4"></i>
-                            </button>
-                            <button class="delete-btn p-2 text-red-300 hover:text-red-100" data-id="${req.id}">
-                                <i data-feather="trash-2" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <p class="text-white">${req.text}</p>
+                                </div>
+                                <div class="flex space-x-2 ml-4">
+                                    <button class="edit-btn p-2 text-blue-300 hover:text-blue-100" data-id="${req.id}">
+                                        <i data-feather="edit" class="w-4 h-4"></i>
+                                    </button>
+                                    <button class="delete-btn p-2 text-red-300 hover:text-red-100" data-id="${req.id}">
+                                        <i data-feather="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
                 list.appendChild(requirementElement);
-                
+        
                 // Add to summary
                 summary.value += `${index + 1}. ${req.text}\n`;
             });
-            
+        
             feather.replace();
         }
-
+        
         function setupEventListeners() {
             // Add requirement
             document.getElementById('requirementForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const text = document.getElementById('requirementText').value.trim();
-                
+        
                 if (text) {
                     try {
                         const requirement = {
@@ -279,7 +283,7 @@ await loadRequirements();
                             text: text,
                             createdAt: new Date().toISOString()
                         };
-                        
+        
                         await addOrUpdateRequirement(requirement);
                         document.getElementById('requirementForm').reset();
                         await loadRequirements();
@@ -289,14 +293,14 @@ await loadRequirements();
                     }
                 }
             });
-
+        
             // Edit requirement
             document.addEventListener('click', (e) => {
                 if (e.target.closest('.edit-btn')) {
                     const id = e.target.closest('.edit-btn').dataset.id;
                     // Get all requirement items
                     const requirementItems = document.querySelectorAll('#requirementsList > div');
-                    
+        
                     // Find the requirement with matching id
                     let requirementElement = null;
                     for (const item of requirementItems) {
@@ -306,7 +310,7 @@ await loadRequirements();
                             break;
                         }
                     }
-                    
+        
                     if (requirementElement) {
                         document.getElementById('editText').value = requirementElement.querySelector('p').textContent;
                         document.getElementById('editModal').classList.remove('hidden');
@@ -314,31 +318,31 @@ await loadRequirements();
                     }
                 }
             });
-
+        
             // Save edit
             document.getElementById('saveEditBtn').addEventListener('click', async () => {
                 const id = document.getElementById('editModal').dataset.editingId;
                 const newText = document.getElementById('editText').value.trim();
-                
+        
                 if (newText) {
                     const requirements = await getAllRequirements();
                     const requirement = requirements.find(req => req.id === id);
-                    
+        
                     if (requirement) {
                         requirement.text = newText;
                         await addOrUpdateRequirement(requirement);
                         loadRequirements();
                     }
-                    
+        
                     document.getElementById('editModal').classList.add('hidden');
                 }
             });
-
+        
             // Cancel edit
             document.getElementById('cancelEditBtn').addEventListener('click', () => {
                 document.getElementById('editModal').classList.add('hidden');
             });
-
+        
             // Delete requirement
             document.addEventListener('click', async (e) => {
                 if (e.target.closest('.delete-btn')) {
@@ -349,7 +353,7 @@ await loadRequirements();
                     }
                 }
             });
-
+        
             // Copy summary
             document.getElementById('copyBtn').addEventListener('click', () => {
                 const summary = document.getElementById('summaryText');
@@ -357,15 +361,17 @@ await loadRequirements();
                 document.execCommand('copy');
                 alert('Requisitos copiados para a área de transferência!');
             });
-
+        
             // Export CSV
             document.getElementById('exportBtn').addEventListener('click', async () => {
                 const requirements = await getAllRequirements();
-                const csvContent = requirements.map(req => 
+                const csvContent = requirements.map(req =>
                     `"${req.id}","${req.text.replace(/"/g, '""')}","${req.createdAt}"`
                 ).join('\n');
-                
-                const blob = new Blob(['id,text,createdAt\n' + csvContent], { type: 'text/csv' });
+        
+                const blob = new Blob(['id,text,createdAt\n' + csvContent], {
+                    type: 'text/csv'
+                });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
@@ -373,20 +379,20 @@ await loadRequirements();
                 a.click();
                 URL.revokeObjectURL(url);
             });
-
+        
             // Import CSV
             document.getElementById('importFile').addEventListener('change', async (e) => {
                 const file = e.target.files[0];
                 if (file) {
                     const text = await file.text();
                     const lines = text.split('\n').slice(1); // Skip header
-                    
+        
                     for (const line of lines) {
                         if (line.trim()) {
-                            const [id, text, createdAt] = line.split(',').map(field => 
+                            const [id, text, createdAt] = line.split(',').map(field =>
                                 field.trim().replace(/^"|"$/g, '')
                             );
-                            
+        
                             if (id && text) {
                                 await addOrUpdateRequirement({
                                     id: id,
@@ -396,12 +402,12 @@ await loadRequirements();
                             }
                         }
                     }
-                    
+        
                     loadRequirements();
                     e.target.value = '';
                 }
             });
-
+        
             // Clear all requirements
             document.getElementById('clearBtn').addEventListener('click', async () => {
                 if (confirm('Tem certeza que deseja limpar todos os requisitos? Esta ação não pode ser desfeita.')) {
@@ -411,51 +417,50 @@ await loadRequirements();
             });
         }
         async function initializeDefaultRequirements() {
-    const requirements = await getAllRequirements();
-    if (requirements.length === 0) {
-        const defaultRequirements = [
-            {
-                "id": "e1fededd-b3da-4fca-9eae-977044fb96db",
-                "text": "Cada registro deve possuir um UUID único para identificação, garantindo que não haja duplicidade e permitindo atualização em vez de duplicação.",
-                "createdAt": "2025-09-05T16:44:07.252Z"
-            },
-            {
-                "id": "94d6418e-229e-4c13-8508-cde782aa13a2",
-                "text": "O sistema deve armazenar todos os registros localmente usando IndexedDB, garantindo que os dados permaneçam disponíveis mesmo após fechar o navegador ou reiniciar o dispositivo.",
-                "createdAt": "2025-09-05T16:44:03.724Z"
-            },
-            {
-                "id": "5656ef03-f8cd-47ca-b63a-b3d1f2295cb7",
-                "text": "Cada registro deve permitir operações de criar, ler, atualizar e deletar, garantindo total gerenciamento dos dados pelo usuário.",
-                "createdAt": "2025-09-05T16:44:09.764Z"
-            },
-            {
-                "id": "6f35408d-5c4f-4fdb-8b9d-ad75ab2058e6",
-                "text": "Importar CSV: O sistema deve permitir importar registros em formato CSV, atualizando os existentes pelo UUID e adicionando apenas os novos.",
-                "createdAt": "2025-09-05T16:44:03.724Z"
-            },
-            {
-                "id": "2c0c33ff-7bea-4a1b-9ead-22d41b7d9e13",
-                "text": "Exportar CSV: O sistema deve permitir exportar todos os registros em formato CSV.",
-                "createdAt": "2025-09-05T16:44:09.764Z"
-            },
-            {
-                "id": "5d46ec28-9bfc-41c3-8408-5087bfcc632d",
-                "text": "O sistema deve possuir um favicon em formato embutido, sem necessidade de arquivo local na pasta do projeto.",
-                "createdAt": "2025-09-05T16:44:07.252Z"
-            },
-            {
-                "id": "5d123c28-945c-41c3-8408-5087bfcc4574",
-                "text": "caso algum formulario tenha cpf ou telefone colocar uma mascara .",
-                "createdAt": "2025-09-05T16:44:07.252Z"
+            const requirements = await getAllRequirements();
+            if (requirements.length === 0) {
+                const defaultRequirements = [{
+                        "id": "e1fededd-b3da-4fca-9eae-977044fb96db",
+                        "text": "Cada registro deve possuir um UUID único para identificação, garantindo que não haja duplicidade e permitindo atualização em vez de duplicação.",
+                        "createdAt": "2025-09-05T16:44:07.252Z"
+                    },
+                    {
+                        "id": "94d6418e-229e-4c13-8508-cde782aa13a2",
+                        "text": "O sistema deve armazenar todos os registros localmente usando IndexedDB, garantindo que os dados permaneçam disponíveis mesmo após fechar o navegador ou reiniciar o dispositivo.",
+                        "createdAt": "2025-09-06T16:44:03.724Z"
+                    },
+                    {
+                        "id": "5656ef03-f8cd-47ca-b63a-b3d1f2295cb7",
+                        "text": "Cada registro deve permitir operações de criar, ler, atualizar e deletar, garantindo total gerenciamento dos dados pelo usuário.",
+                        "createdAt": "2025-09-07T16:44:09.764Z"
+                    },
+                    {
+                        "id": "6f35408d-5c4f-4fdb-8b9d-ad75ab2058e6",
+                        "text": "Importar CSV: O sistema deve permitir importar registros em formato CSV, atualizando os existentes pelo UUID e adicionando apenas os novos.",
+                        "createdAt": "2025-09-08T16:44:03.724Z"
+                    },
+                    {
+                        "id": "2c0c33ff-7bea-4a1b-9ead-22d41b7d9e13",
+                        "text": "Exportar CSV: O sistema deve permitir exportar todos os registros em formato CSV.",
+                        "createdAt": "2025-09-09T16:44:09.764Z"
+                    },
+                    {
+                        "id": "5d46ec28-9bfc-41c3-8408-5087bfcc632d",
+                        "text": "O sistema deve possuir um favicon em formato embutido, sem necessidade de arquivo local na pasta do projeto.",
+                        "createdAt": "2025-09-10T16:44:07.252Z"
+                    },
+                    {
+                        "id": "5d123c28-945c-41c3-8408-5087bfcc4574",
+                        "text": "caso algum formulario tenha cpf ou telefone colocar uma mascara .",
+                        "createdAt": "2025-09-11T16:44:07.252Z"
+                    }
+                ];
+        
+                for (const req of defaultRequirements) {
+                    await addOrUpdateRequirement(req);
+                }
             }
-        ];
-
-        for (const req of defaultRequirements) {
-            await addOrUpdateRequirement(req);
         }
-    }
-}
 
     </script>
 </body>
