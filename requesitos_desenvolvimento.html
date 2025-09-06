@@ -206,9 +206,15 @@ await loadRequirements();
                 const transaction = db.transaction([STORE_NAME], 'readonly');
                 const store = transaction.objectStore(STORE_NAME);
                 const request = store.getAll();
+                request.onsuccess = () => {
+                    // Sort by createdAt date
+                    const sorted = request.result.sort((a, b) => 
+                        new Date(a.createdAt) - new Date(b.createdAt)
+                    );
+                    resolve(sorted);
+                };
                 
                 request.onerror = () => reject(request.error);
-                request.onsuccess = () => resolve(request.result);
             });
         }
 
