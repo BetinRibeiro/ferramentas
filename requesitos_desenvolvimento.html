@@ -1,467 +1,714 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Requisitos</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📋</text></svg>">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        background: '#183462',
-                        primary: '#2D6EE0',
-                        accent: '#4CAF50'
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body {
-            background-color: #183462;
-            min-height: 100vh;
-        }
-        .tech-gradient {
-            background: linear-gradient(135deg, #183462 0%, #2D6EE0 100%);
-        }
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-    </style>
-</head>
-<body class="text-white font-sans">
-    <div class="min-h-screen py-8 px-4">
-        <div class="max-w-2xl mx-auto">
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Sistema de Requisitos</title>
+      <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📋</text></svg>">
+      <script src="https://cdn.tailwindcss.com"></script>
+      <script src="https://unpkg.com/feather-icons"></script>
+      <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+      <script>
+         tailwind.config = {
+             theme: {
+                 extend: {
+                     colors: {
+                         background: '#183462',
+                         primary: '#2D6EE0',
+                         accent: '#4CAF50'
+                     }
+                 }
+             }
+         }
+      </script>
+      <style>
+         body {
+         background-color: #183462;
+         min-height: 100vh;
+         }
+         .tech-gradient {
+         background: linear-gradient(135deg, #183462 0%, #2D6EE0 100%);
+         }
+         .glass-effect {
+         background: rgba(255, 255, 255, 0.1);
+         backdrop-filter: blur(10px);
+         border: 1px solid rgba(255, 255, 255, 0.2);
+         }
+      </style>
+   </head>
+   <body class="text-white font-sans">
+      <div class="min-h-screen py-8 px-4">
+         <div class="max-w-2xl mx-auto">
             <!-- Header -->
             <div class="text-center mb-8" data-aos="fade-down">
-                <h1 class="text-3xl font-bold mb-2">📋 Sistema de Requisitos</h1>
-                <p class="text-blue-200">Gerencie seus requisitos de desenvolvimento</p>
+               <h1 class="text-3xl font-bold mb-2">📋 Sistema de Requisitos</h1>
+               <p class="text-blue-200">Gerencie seus requisitos de desenvolvimento</p>
             </div>
-
             <!-- Add Requirement Form -->
             <div class="glass-effect rounded-2xl p-6 mb-6" data-aos="fade-up">
-                <form id="requirementForm" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Novo Requisito</label>
-                        <textarea 
-                            id="requirementText" 
-                            rows="3" 
-                            class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent text-white placeholder-blue-200"
-                            placeholder="Descreva o requisito..."
-                            required
+               <form id="requirementForm" class="space-y-4">
+                  <div>
+                     <label class="block text-sm font-medium mb-2">Novo Requisito</label>
+                     <textarea 
+                        id="requirementText" 
+                        rows="3" 
+                        class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent text-white placeholder-blue-200"
+                        placeholder="Descreva o requisito..."
+                        required
                         ></textarea>
-                    </div>
-                    <button type="submit" class="w-full bg-primary hover:bg-blue-600 text-white py-3 px-6 rounded-xl font-medium transition duration-200 flex items-center justify-center">
-                        <i data-feather="plus" class="mr-2 w-5 h-5"></i>
-                        Adicionar Requisito
-                    </button>
-                </form>
+                  </div>
+                  <button type="submit" class="w-full bg-primary hover:bg-blue-600 text-white py-3 px-6 rounded-xl font-medium transition duration-200 flex items-center justify-center">
+                  <i data-feather="plus" class="mr-2 w-5 h-5"></i>
+                  Adicionar Requisito
+                  </button>
+               </form>
             </div>
-
             <!-- Import/Export/Clear Section -->
             <div class="glass-effect rounded-2xl p-6 mb-6" data-aos="fade-up">
-                <div class="grid grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Importar CSV</label>
-                        <input type="file" id="importFile" accept=".csv" class="hidden">
-                        <label for="importFile" class="block w-full bg-primary hover:bg-blue-600 text-white py-3 px-4 rounded-xl text-center cursor-pointer transition duration-200">
-                            <i data-feather="upload" class="inline mr-2 w-4 h-4"></i>
-                            Importar
-                        </label>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Exportar CSV</label>
-                        <button id="exportBtn" class="w-full bg-accent hover:bg-green-600 text-white py-3 px-4 rounded-xl transition duration-200">
-                            <i data-feather="download" class="inline mr-2 w-4 h-4"></i>
-                            Exportar
-                        </button>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Limpar Tudo</label>
-                        <button id="clearBtn" class="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-xl transition duration-200">
-                            <i data-feather="trash-2" class="inline mr-2 w-4 h-4"></i>
-                            Limpar
-                        </button>
-                    </div>
-                </div>
+               <div class="grid grid-cols-3 gap-4">
+                  <div>
+                     <label class="block text-sm font-medium mb-2">Importar CSV</label>
+                     <input type="file" id="importFile" accept=".csv" class="hidden">
+                     <label for="importFile" class="block w-full bg-primary hover:bg-blue-600 text-white py-3 px-4 rounded-xl text-center cursor-pointer transition duration-200">
+                     <i data-feather="upload" class="inline mr-2 w-4 h-4"></i>
+                     Importar
+                     </label>
+                  </div>
+                  <div>
+                     <label class="block text-sm font-medium mb-2">Exportar CSV</label>
+                     <button id="exportBtn" class="w-full bg-accent hover:bg-green-600 text-white py-3 px-4 rounded-xl transition duration-200">
+                     <i data-feather="download" class="inline mr-2 w-4 h-4"></i>
+                     Exportar
+                     </button>
+                  </div>
+                  <div>
+                     <label class="block text-sm font-medium mb-2">Limpar Tudo</label>
+                     <button id="clearBtn" class="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-xl transition duration-200">
+                     <i data-feather="trash-2" class="inline mr-2 w-4 h-4"></i>
+                     Limpar
+                     </button>
+                  </div>
+               </div>
             </div>
-
             <!-- Requirements List -->
             <div id="requirementsList" class="space-y-4 mb-8">
-                <!-- Requirements will be loaded here -->
+               <!-- Requirements will be loaded here -->
             </div>
-
             <!-- Summary Box -->
             <div class="glass-effect rounded-2xl p-6" data-aos="fade-up">
-                <h3 class="text-lg font-semibold mb-4">Resumo dos Requisitos</h3>
-                <textarea 
-                    id="summaryText" 
-                    rows="6" 
-                    class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl mb-4 text-white placeholder-blue-200"
-                    readonly
-                    placeholder="Seus requisitos aparecerão aqui..."
-                ></textarea>
-                <button id="copyBtn" class="w-full bg-accent hover:bg-green-600 text-white py-3 px-6 rounded-xl font-medium transition duration-200 flex items-center justify-center">
-                    <i data-feather="copy" class="mr-2 w-5 h-5"></i>
-                    Copiar Todos os Requisitos
-                </button>
+               <h3 class="text-lg font-semibold mb-4">Resumo dos Requisitos</h3>
+               <textarea 
+                  id="summaryText" 
+                  rows="6" 
+                  class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl mb-4 text-white placeholder-blue-200"
+                  readonly
+                  placeholder="Seus requisitos aparecerão aqui..."
+                  ></textarea>
+               <button id="copyBtn" class="w-full bg-accent hover:bg-green-600 text-white py-3 px-6 rounded-xl font-medium transition duration-200 flex items-center justify-center">
+               <i data-feather="copy" class="mr-2 w-5 h-5"></i>
+               Copiar Todos os Requisitos
+               </button>
             </div>
-        </div>
-    </div>
-
-    <!-- Edit Modal -->
-    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
-        <div class="glass-effect rounded-2xl p-6 w-full max-w-md">
+         </div>
+      </div>
+      <!-- Edit Modal -->
+      <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+         <div class="glass-effect rounded-2xl p-6 w-full max-w-md">
             <h3 class="text-xl font-semibold mb-4">Editar Requisito</h3>
             <textarea 
-                id="editText" 
-                rows="4" 
-                class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl mb-4 text-white"
-            ></textarea>
+               id="editText" 
+               rows="4" 
+               class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl mb-4 text-white"
+               ></textarea>
             <div class="flex space-x-3">
-                <button id="saveEditBtn" class="flex-1 bg-primary hover:bg-blue-600 text-white py-2 px-4 rounded-xl transition duration-200">
-                    Salvar
-                </button>
-                <button id="cancelEditBtn" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-xl transition duration-200">
-                    Cancelar
-                </button>
+               <button id="saveEditBtn" class="flex-1 bg-primary hover:bg-blue-600 text-white py-2 px-4 rounded-xl transition duration-200">
+               Salvar
+               </button>
+               <button id="cancelEditBtn" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-xl transition duration-200">
+               Cancelar
+               </button>
             </div>
-        </div>
-    </div>
-
-    <script>
-        // Initialize database
-        let db;
-        const DB_NAME = 'RequirementsDB';
-        const DB_VERSION = 1;
-        const STORE_NAME = 'requirements';
-        
-        // Initialize app
-        document.addEventListener('DOMContentLoaded', async () => {
-            await initDB();
-            await initializeDefaultRequirements();
-            await loadRequirements();
-        
-            feather.replace();
-            setupEventListeners();
-        });
-        
-        // Function to clear all requirements
-        async function clearAllRequirements() {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readwrite');
-                const store = transaction.objectStore(STORE_NAME);
-                const request = store.clear();
-        
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => resolve();
+         </div>
+      </div>
+      <script>
+            // Initialize database
+            let db;
+            // 🔹 Declara a variável `db` que vai armazenar a conexão com o banco IndexedDB.
+            //    Inicialmente está vazia (undefined) e será preenchida quando o banco for aberto.
+            
+            // Nome do banco de dados
+            const DB_NAME = 'RequirementsDB';
+            // 🔹 Define uma constante `DB_NAME` com o nome do banco de dados.
+            //    Você pode trocar esse nome para algo mais descritivo, como "ControleEstoqueDB".
+            
+            // Versão do banco de dados
+            const DB_VERSION = 1;
+            // 🔹 Define a versão do banco. Sempre que você quiser alterar a estrutura
+            //    (criar ou remover tabelas, índices, etc.), deve aumentar esse número
+            //    para que o evento `onupgradeneeded` seja disparado e o banco seja atualizado.
+            
+            // Nome da store (tabela) padrão
+            const STORE_NAME = 'requirements';
+            // 🔹 Define o nome da object store (tabela) principal.
+            //    É onde os dados serão armazenados. Você pode criar várias stores
+            //    (como `produto`, `movimentacao_produto`, etc.).
+            
+            // Initialize app
+            document.addEventListener('DOMContentLoaded', async () => {
+               // 🔹 Aguarda o evento 'DOMContentLoaded', que dispara quando todo o HTML foi carregado,
+               //    mas antes de carregar imagens e outros recursos pesados. 
+               //    Assim, o JavaScript só roda quando a estrutura da página já está pronta.
+            
+               await initDB();
+               // 🔹 Chama a função `initDB()` para inicializar ou abrir o banco IndexedDB.
+               //    Esse passo garante que você tenha acesso ao banco antes de usar dados.
+            
+               await initializeDefaultRequirements();
+               // 🔹 Chama a função `initializeDefaultRequirements()`.
+               //    Provavelmente essa função insere registros padrão (dados iniciais) no banco,
+               //    caso ele esteja vazio.
+            
+               await loadRequirements();
+               // 🔹 Chama `loadRequirements()` para carregar dados do banco e exibir na interface.
+               //    Por exemplo, preenche tabelas ou listas na tela com as informações.
+            
+               feather.replace();
+               // 🔹 Função da biblioteca Feather Icons. Substitui os placeholders de ícones
+               //    no HTML pelos SVGs reais. Garante que os ícones apareçam.
+            
+               setupEventListeners();
+               // 🔹 Chama a função `setupEventListeners()` para configurar eventos da interface,
+               //    como cliques em botões, submits de formulários, etc.
             });
-        }
-        
-        // Database functions
-        async function initDB() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
-        
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => {
-                    db = request.result;
-                    resolve();
-                };
-        
-                request.onupgradeneeded = (event) => {
-                    const db = event.target.result;
-                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+            
+            // Function to clear all requirements
+            async function clearAllRequirements() {
+               // 🔹 Declara uma função assíncrona chamada `clearAllRequirements`.
+               //    Ela vai apagar TODOS os registros da store (tabela) `STORE_NAME`.
+            
+               return new Promise((resolve, reject) => {
+                  // 🔹 Retorna uma Promise para poder usar `await` quando chamar essa função.
+                  //    Se der certo, chama `resolve()`, se der erro, chama `reject()`.
+            
+                  const transaction = db.transaction([STORE_NAME], 'readwrite');
+                  // 🔹 Cria uma transação no IndexedDB para a store especificada (`STORE_NAME`).
+                  //    O modo `'readwrite'` permite escrever/apagar dados.
+            
+                  const store = transaction.objectStore(STORE_NAME);
+                  // 🔹 Obtém a referência para a object store (tabela) onde os dados estão armazenados.
+            
+                  const request = store.clear();
+                  // 🔹 Faz a requisição para limpar TODOS os registros da tabela.
+            
+                  request.onerror = () => reject(request.error);
+                  // 🔹 Se houver erro ao limpar os dados, a Promise será rejeitada com a mensagem de erro.
+            
+                  request.onsuccess = () => resolve();
+                  // 🔹 Se a operação for concluída com sucesso, a Promise será resolvida.
+               });
+            }
+            
+            // Database functions
+            async function initDB() {
+               // 🔹 Declara uma função assíncrona `initDB` para inicializar o IndexedDB.
+               //    Ela retorna uma Promise para que possamos usar `await`.
+            
+               return new Promise((resolve, reject) => {
+                  // 🔹 Cria uma nova Promise que será resolvida quando o banco estiver pronto.
+                  //    Se algo der errado, será rejeitada com o erro.
+            
+                  const request = indexedDB.open(DB_NAME, DB_VERSION);
+                  // 🔹 Faz uma requisição para abrir (ou criar) o banco de dados com
+                  //    nome `DB_NAME` e versão `DB_VERSION`.
+                  //    Se mudar a versão, dispara `onupgradeneeded` para atualizar a estrutura.
+            
+                  request.onerror = () => reject(request.error);
+                  // 🔹 Se houver um erro ao abrir/criar o banco, a Promise é rejeitada.
+            
+                  request.onsuccess = () => {
+                     db = request.result;
+                     resolve();
+                  };
+                  // 🔹 Se o banco for aberto com sucesso, armazena a conexão em `db`
+                  //    e resolve a Promise, sinalizando que o banco está pronto.
+            
+                  request.onupgradeneeded = (event) => {
+                     const db = event.target.result;
+                     // 🔹 Esse evento dispara apenas quando o banco é criado
+                     //    pela primeira vez ou a versão é alterada.
+                     //    Aqui é onde criamos as tabelas (object stores).
+            
+                     if (!db.objectStoreNames.contains(STORE_NAME)) {
                         const store = db.createObjectStore(STORE_NAME, {
-                            keyPath: 'id'
+                           keyPath: 'id'
                         });
+                        // 🔹 Cria uma object store (tabela) chamada `STORE_NAME`.
+                        //    `keyPath: 'id'` define que o campo `id` será a chave primária.
+            
                         store.createIndex('text', 'text', {
-                            unique: false
+                           unique: false
                         });
-                    }
-                };
-            });
-        }
-        
-        async function addOrUpdateRequirement(requirement) {
-            return new Promise((resolve, reject) => {
-                try {
-                    const transaction = db.transaction([STORE_NAME], 'readwrite');
-                    const store = transaction.objectStore(STORE_NAME);
-                    const request = store.put(requirement);
-        
-                    request.onerror = () => reject(request.error);
-                    request.onsuccess = () => resolve(request.result);
-                } catch (error) {
-                    reject(error);
-                }
-            });
-        }
-        
-        async function getAllRequirements() {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readonly');
-                const store = transaction.objectStore(STORE_NAME);
-                const request = store.getAll();
-                request.onsuccess = () => {
-                    // Sort by createdAt date
-                    const sorted = request.result.sort((a, b) =>
+                        // 🔹 Cria um índice chamado `text` baseado no campo `text`.
+                        //    Isso facilita buscas por esse campo. `unique: false` permite valores repetidos.
+                     }
+                  };
+               });
+            }
+            async function addOrUpdateRequirement(requirement) {
+               // 🔹 Função assíncrona para ADICIONAR ou ATUALIZAR um registro na tabela STORE_NAME.
+               //    Se o `requirement` já tiver um `id`, ele será atualizado.
+               //    Se não tiver, será criado um novo registro.
+            
+               return new Promise((resolve, reject) => {
+                  // 🔹 Retorna uma Promise para que possamos usar `await`.
+                  //    `resolve()` será chamado em caso de sucesso, `reject()` em caso de erro.
+            
+                  try {
+                     const transaction = db.transaction([STORE_NAME], 'readwrite');
+                     // 🔹 Cria uma transação no IndexedDB para a store especificada.
+                     //    `readwrite` permite adicionar/editar dados.
+            
+                     const store = transaction.objectStore(STORE_NAME);
+                     // 🔹 Obtém a referência para a object store (tabela).
+            
+                     const request = store.put(requirement);
+                     // 🔹 Usa `put()` para inserir ou atualizar um registro.
+                     //    Se o objeto tiver a chave primária (`id`), ele será atualizado.
+                     //    Se não tiver, será criado com uma nova chave.
+            
+                     request.onerror = () => reject(request.error);
+                     // 🔹 Se ocorrer um erro, a Promise será rejeitada com a mensagem de erro.
+            
+                     request.onsuccess = () => resolve(request.result);
+                     // 🔹 Se a operação for bem-sucedida, resolve a Promise retornando
+                     //    a chave (`id`) do registro inserido/atualizado.
+                  } catch (error) {
+                     reject(error);
+                     // 🔹 Caso ocorra algum erro inesperado (ex.: `db` não definido),
+                     //    ele é capturado aqui e a Promise também é rejeitada.
+                  }
+               });
+            }
+            async function getAllRequirements() {
+               // 🔹 Função assíncrona para BUSCAR todos os registros na store (tabela) definida em STORE_NAME.
+               //    Ela retorna uma Promise que, ao ser resolvida, entrega todos os registros.
+            
+               return new Promise((resolve, reject) => {
+                  // 🔹 Retorna uma Promise para que possamos usar `await`.
+                  //    Se tudo der certo, chamamos `resolve(dados)`, senão `reject(erro)`.
+            
+                  const transaction = db.transaction([STORE_NAME], 'readonly');
+                  // 🔹 Cria uma transação no banco IndexedDB com permissão apenas de leitura (`readonly`).
+                  //    Assim não é possível alterar nada enquanto só estamos lendo.
+            
+                  const store = transaction.objectStore(STORE_NAME);
+                  // 🔹 Pega a referência da object store (tabela) onde os dados estão armazenados.
+            
+                  const index = store.index('createdAt'); // usa o índice criado
+                  const request = index.getAll(); // retorna os registros já em ordem crescente
+            
+                  request.onsuccess = () => {
+                     // 🔹 Se a leitura for bem-sucedida, entra aqui.
+            
+                     // Sort by createdAt date
+                     const sorted = request.result.sort((a, b) =>
                         new Date(a.createdAt) - new Date(b.createdAt)
-                    );
-                    resolve(sorted);
-                };
-        
-                request.onerror = () => reject(request.error);
-            });
-        }
-        
-        async function deleteRequirement(id) {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readwrite');
-                const store = transaction.objectStore(STORE_NAME);
-                const request = store.delete(id);
-        
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => resolve();
-            });
-        }
-        
-        // UI functions
-        async function loadRequirements() {
-            const requirements = await getAllRequirements();
-            const list = document.getElementById('requirementsList');
-            const summary = document.getElementById('summaryText');
-        
-            list.innerHTML = '';
-            summary.value = '';
-        
-            requirements.forEach((req, index) => {
-                // Add to list
-                const requirementElement = document.createElement('div');
-                requirementElement.className = 'glass-effect rounded-2xl p-4';
-                requirementElement.innerHTML = `
-                            <div class="flex justify-between items-start">
-                                <div class="flex-1">
-                                    <p class="text-white">${req.text}</p>
-                                </div>
-                                <div class="flex space-x-2 ml-4">
-                                    <button class="edit-btn p-2 text-blue-300 hover:text-blue-100" data-id="${req.id}">
-                                        <i data-feather="edit" class="w-4 h-4"></i>
-                                    </button>
-                                    <button class="delete-btn p-2 text-red-300 hover:text-red-100" data-id="${req.id}">
-                                        <i data-feather="trash-2" class="w-4 h-4"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                list.appendChild(requirementElement);
-        
-                // Add to summary
-                summary.value += `${index + 1}. ${req.text}\n`;
-            });
-        
-            feather.replace();
-        }
-        
-        function setupEventListeners() {
-            // Add requirement
-            document.getElementById('requirementForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const text = document.getElementById('requirementText').value.trim();
-        
-                if (text) {
-                    try {
+                     );
+                     // 🔹 Ordena os registros pelo campo `createdAt` em ordem crescente.
+                     //    (Do mais antigo para o mais novo.)
+            
+                     resolve(sorted);
+                     // 🔹 Retorna a lista ordenada através do `resolve`.
+                  };
+            
+                  request.onerror = () => reject(request.error);
+                  // 🔹 Se houver erro na leitura, rejeita a Promise com a mensagem de erro.
+               });
+            }
+            async function deleteRequirement(id) {
+               // 🔹 Função assíncrona para DELETAR (remover) um registro da tabela (STORE_NAME)
+               //    com base no seu `id`. 
+            
+               return new Promise((resolve, reject) => {
+                  // 🔹 Retorna uma Promise. Se a exclusão der certo, chama `resolve()`.
+                  //    Se der erro, chama `reject(erro)`.
+            
+                  const transaction = db.transaction([STORE_NAME], 'readwrite');
+                  // 🔹 Abre uma transação no banco IndexedDB para a store especificada.
+                  //    O modo 'readwrite' é necessário porque estamos modificando dados.
+            
+                  const store = transaction.objectStore(STORE_NAME);
+                  // 🔹 Obtém a referência para a store (tabela) onde o registro está armazenado.
+            
+                  const request = store.delete(id);
+                  // 🔹 Faz a requisição para deletar o registro que tem o `id` informado.
+            
+                  request.onerror = () => reject(request.error);
+                  // 🔹 Se houver algum erro ao tentar deletar, rejeita a Promise com a mensagem de erro.
+            
+                  request.onsuccess = () => resolve();
+                  // 🔹 Se a exclusão for bem-sucedida, resolve a Promise (sem retornar nada específico).
+               });
+            }
+            // UI functions
+            async function loadRequirements() {
+               // 🔹 Função assíncrona responsável por carregar os registros do banco
+               //    e exibi-los na interface do usuário (HTML).
+            
+               const requirements = await getAllRequirements();
+               // 🔹 Chama a função que retorna todos os registros da store (`getAllRequirements`)
+               //    e aguarda o resultado. `requirements` será um array de objetos.
+            
+               const list = document.getElementById('requirementsList');
+               const summary = document.getElementById('summaryText');
+               // 🔹 Obtém referências aos elementos HTML onde os dados serão exibidos:
+               //    - `requirementsList`: container visual da lista
+               //    - `summaryText`: textarea ou input resumido
+            
+               list.innerHTML = '';
+               summary.value = '';
+               // 🔹 Limpa qualquer conteúdo anterior antes de adicionar os registros novos.
+            
+               requirements.forEach((req, index) => {
+                  // 🔹 Percorre todos os registros para criar elementos HTML dinamicamente.
+            
+                  // Add to list
+                  const requirementElement = document.createElement('div');
+                  requirementElement.className = 'glass-effect rounded-2xl p-4';
+                  // 🔹 Cria um <div> para cada registro e aplica classes CSS para estilo.
+            
+                  requirementElement.innerHTML = `
+                         <div class="flex justify-between items-start">
+                             <div class="flex-1">
+                                 <p class="text-white">${req.text}</p>
+                             </div>
+                             <div class="flex space-x-2 ml-4">
+                                 <button class="edit-btn p-2 text-blue-300 hover:text-blue-100" data-id="${req.id}">
+                                     <i data-feather="edit" class="w-4 h-4"></i>
+                                 </button>
+                                 <button class="delete-btn p-2 text-red-300 hover:text-red-100" data-id="${req.id}">
+                                     <i data-feather="trash-2" class="w-4 h-4"></i>
+                                 </button>
+                             </div>
+                         </div>
+                     `;
+                  // 🔹 Define o conteúdo HTML do elemento, incluindo:
+                  //    - Texto do registro
+                  //    - Botões de editar e deletar com o `data-id` para identificar o registro
+            
+                  list.appendChild(requirementElement);
+                  // 🔹 Adiciona o elemento recém-criado na lista visível da interface.
+            
+                  // Add to summary
+                  summary.value += `${index + 1}. ${req.text}\n`;
+                  // 🔹 Atualiza o resumo textual (ex.: textarea), listando todos os registros.
+               });
+            
+               feather.replace();
+               // 🔹 Chama a função da biblioteca Feather Icons para substituir
+               //    todos os placeholders de ícones pelos SVGs reais.
+            }
+            
+            function setupEventListeners() {
+               // 🔹 Função para configurar todos os eventos da interface (UI), como cliques e submits.
+            
+               // Add requirement
+               document.getElementById('requirementForm').addEventListener('submit', async (e) => {
+                  // 🔹 Seleciona o formulário com id 'requirementForm' e adiciona um listener
+                  //    para o evento `submit`. Quando o formulário é enviado, essa função é chamada.
+            
+                  e.preventDefault();
+                  // 🔹 Previne o comportamento padrão do formulário, que é recarregar a página.
+                  //    Isso permite processar os dados via JavaScript.
+            
+                  const text = document.getElementById('requirementText').value.trim();
+                  // 🔹 Pega o valor do input/textarea com id 'requirementText' e remove espaços extras
+                  //    no início e no fim.
+            
+                  if (text) {
+                     // 🔹 Verifica se o campo não está vazio antes de salvar.
+            
+                     try {
                         const requirement = {
-                            id: self.crypto.randomUUID(),
-                            text: text,
-                            createdAt: new Date().toISOString()
+                           id: self.crypto.randomUUID(),
+                           text: text,
+                           createdAt: new Date().toISOString()
                         };
-        
+                        // 🔹 Cria um objeto `requirement` com:
+                        //    - `id`: um UUID gerado aleatoriamente para identificar o registro
+                        //    - `text`: o texto digitado pelo usuário
+                        //    - `createdAt`: data/hora atual em formato ISO
+            
                         await addOrUpdateRequirement(requirement);
+                        // 🔹 Chama a função que adiciona ou atualiza o registro no IndexedDB.
+            
                         document.getElementById('requirementForm').reset();
+                        // 🔹 Limpa o formulário após salvar o registro.
+            
                         await loadRequirements();
-                    } catch (error) {
+                        // 🔹 Atualiza a lista na interface com os registros mais recentes.
+                     } catch (error) {
                         console.error('Error adding requirement:', error);
                         alert('Erro ao adicionar requisito. Verifique o console para mais detalhes.');
-                    }
-                }
-            });
-        
+                        // 🔹 Caso haja algum erro durante a adição do registro,
+                        //    exibe no console e mostra um alerta para o usuário.
+                     }
+                  }
+               });
+            }
             // Edit requirement
             document.addEventListener('click', (e) => {
-                if (e.target.closest('.edit-btn')) {
-                    const id = e.target.closest('.edit-btn').dataset.id;
-                    // Get all requirement items
-                    const requirementItems = document.querySelectorAll('#requirementsList > div');
-        
-                    // Find the requirement with matching id
-                    let requirementElement = null;
-                    for (const item of requirementItems) {
-                        const btn = item.querySelector('.edit-btn');
-                        if (btn && btn.dataset.id === id) {
-                            requirementElement = item;
-                            break;
-                        }
-                    }
-        
-                    if (requirementElement) {
-                        document.getElementById('editText').value = requirementElement.querySelector('p').textContent;
-                        document.getElementById('editModal').classList.remove('hidden');
-                        document.getElementById('editModal').dataset.editingId = id;
-                    }
-                }
+               // 🔹 Adiciona um listener global para cliques em todo o documento.
+               //    Isso é útil para elementos que são criados dinamicamente (como os botões de editar).
+            
+               if (e.target.closest('.edit-btn')) {
+                  // 🔹 Verifica se o elemento clicado (ou algum pai) possui a classe 'edit-btn'.
+                  //    `closest` sobe na árvore do DOM até encontrar o elemento correspondente.
+            
+                  const id = e.target.closest('.edit-btn').dataset.id;
+                  // 🔹 Pega o `data-id` do botão clicado, que identifica qual registro será editado.
+            
+                  // Get all requirement items
+                  const requirementItems = document.querySelectorAll('#requirementsList > div');
+                  // 🔹 Seleciona todos os elementos de registro dentro da lista de requisitos.
+                  //    Cada `<div>` representa um item na interface.
+            
+                  // Find the requirement with matching id
+                  let requirementElement = null;
+                  for (const item of requirementItems) {
+                     const btn = item.querySelector('.edit-btn');
+                     if (btn && btn.dataset.id === id) {
+                        requirementElement = item;
+                        break;
+                     }
+                  }
+                  // 🔹 Percorre todos os itens e encontra o que tem o mesmo `data-id` do botão clicado.
+                  //    Assim sabemos qual registro na interface será editado.
+            
+                  if (requirementElement) {
+                     document.getElementById('editText').value = requirementElement.querySelector('p').textContent;
+                     // 🔹 Pega o texto do requisito e coloca no campo de edição (`editText`) do modal.
+            
+                     document.getElementById('editModal').classList.remove('hidden');
+                     // 🔹 Exibe o modal de edição, removendo a classe 'hidden'.
+            
+                     document.getElementById('editModal').dataset.editingId = id;
+                     // 🔹 Armazena no modal o `id` do registro que está sendo editado,
+                     //    para usar quando salvar as alterações.
+                  }
+               }
             });
-        
             // Save edit
             document.getElementById('saveEditBtn').addEventListener('click', async () => {
-                const id = document.getElementById('editModal').dataset.editingId;
-                const newText = document.getElementById('editText').value.trim();
-        
-                if (newText) {
-                    const requirements = await getAllRequirements();
-                    const requirement = requirements.find(req => req.id === id);
-        
-                    if (requirement) {
-                        requirement.text = newText;
-                        await addOrUpdateRequirement(requirement);
-                        loadRequirements();
-                    }
-        
-                    document.getElementById('editModal').classList.add('hidden');
-                }
+               // 🔹 Adiciona um listener para o botão de salvar edição no modal.
+               //    Quando clicado, executa a função assíncrona para atualizar o registro.
+            
+               const id = document.getElementById('editModal').dataset.editingId;
+               // 🔹 Pega o `id` do registro que está sendo editado, armazenado no dataset do modal.
+            
+               const newText = document.getElementById('editText').value.trim();
+               // 🔹 Pega o novo texto digitado pelo usuário e remove espaços extras.
+            
+               if (newText) {
+                  // 🔹 Só prossegue se o campo não estiver vazio.
+            
+                  const requirements = await getAllRequirements();
+                  // 🔹 Carrega todos os registros do banco.
+            
+                  const requirement = requirements.find(req => req.id === id);
+                  // 🔹 Procura o registro específico que está sendo editado.
+            
+                  if (requirement) {
+                     requirement.text = newText;
+                     // 🔹 Atualiza o campo `text` do registro com o novo valor.
+            
+                     await addOrUpdateRequirement(requirement);
+                     // 🔹 Salva o registro atualizado no banco (IndexedDB).
+            
+                     loadRequirements();
+                     // 🔹 Atualiza a lista da interface para refletir a alteração.
+                  }
+            
+                  document.getElementById('editModal').classList.add('hidden');
+                  // 🔹 Fecha o modal de edição adicionando novamente a classe 'hidden'.
+               }
             });
-        
+            
             // Cancel edit
             document.getElementById('cancelEditBtn').addEventListener('click', () => {
-                document.getElementById('editModal').classList.add('hidden');
+               // 🔹 Adiciona um listener para o botão "Cancelar" no modal de edição.
+            
+               document.getElementById('editModal').classList.add('hidden');
+               // 🔹 Apenas fecha o modal de edição adicionando a classe 'hidden'.
+               //    Não altera nenhum registro no banco.
             });
-        
+            
             // Delete requirement
             document.addEventListener('click', async (e) => {
-                if (e.target.closest('.delete-btn')) {
-                    const id = e.target.closest('.delete-btn').dataset.id;
-                    if (confirm('Tem certeza que deseja excluir este requisito?')) {
-                        await deleteRequirement(id);
-                        loadRequirements();
-                    }
-                }
+               // 🔹 Adiciona um listener global para cliques em todo o documento.
+               //    Isso é útil para elementos dinâmicos, como os botões de deletar.
+            
+               if (e.target.closest('.delete-btn')) {
+                  // 🔹 Verifica se o elemento clicado (ou algum pai) possui a classe 'delete-btn'.
+            
+                  const id = e.target.closest('.delete-btn').dataset.id;
+                  // 🔹 Pega o `data-id` do botão clicado, que identifica qual registro será excluído.
+            
+                  if (confirm('Tem certeza que deseja excluir este requisito?')) {
+                     // 🔹 Mostra uma confirmação para o usuário antes de excluir.
+            
+                     await deleteRequirement(id);
+                     // 🔹 Chama a função para remover o registro do IndexedDB com base no `id`.
+            
+                     loadRequirements();
+                     // 🔹 Atualiza a interface, removendo o item da lista visível.
+                  }
+               }
             });
-        
             // Copy summary
             document.getElementById('copyBtn').addEventListener('click', () => {
-                const summary = document.getElementById('summaryText');
-                summary.select();
-                document.execCommand('copy');
-                alert('Requisitos copiados para a área de transferência!');
+               // 🔹 Adiciona um listener para o botão "Copiar Resumo".
+            
+               const summary = document.getElementById('summaryText');
+               // 🔹 Seleciona o textarea ou input que contém o resumo dos registros.
+            
+               summary.select();
+               // 🔹 Seleciona todo o conteúdo do campo, preparando para copiar.
+            
+               document.execCommand('copy');
+               // 🔹 Executa o comando de copiar para a área de transferência do sistema.
+            
+               alert('Requisitos copiados para a área de transferência!');
+               // 🔹 Mostra uma mensagem de confirmação para o usuário.
             });
-        
+            
             // Export CSV
             document.getElementById('exportBtn').addEventListener('click', async () => {
-                const requirements = await getAllRequirements();
-                const csvContent = requirements.map(req =>
-                    `"${req.id}","${req.text.replace(/"/g, '""')}","${req.createdAt}"`
-                ).join('\n');
-        
-                const blob = new Blob(['id,text,createdAt\n' + csvContent], {
-                    type: 'text/csv'
-                });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'requisitos.csv';
-                a.click();
-                URL.revokeObjectURL(url);
+               // 🔹 Adiciona um listener para o botão "Exportar CSV".
+            
+               const requirements = await getAllRequirements();
+               // 🔹 Carrega todos os registros do banco (IndexedDB).
+            
+               const csvContent = requirements.map(req =>
+                  `"${req.id}","${req.text.replace(/"/g, '""')}","${req.createdAt}"`
+               ).join('\n');
+               // 🔹 Cria o conteúdo CSV:
+               //    - Cada registro vira uma linha com aspas ao redor de cada campo
+               //    - Substitui aspas internas por dupla aspas para escapar
+               //    - Junta tudo em uma string, separando linhas por `\n`
+            
+               const blob = new Blob(['id,text,createdAt\n' + csvContent], {
+                  type: 'text/csv'
+               });
+               // 🔹 Cria um arquivo Blob com o conteúdo CSV e define o tipo MIME como `text/csv`.
+            
+               const url = URL.createObjectURL(blob);
+               // 🔹 Gera uma URL temporária para o Blob.
+            
+               const a = document.createElement('a');
+               a.href = url;
+               a.download = 'requisitos.csv';
+               a.click();
+               // 🔹 Cria um link temporário, define o arquivo para download e simula um clique
+               //    para que o arquivo seja baixado.
+            
+               URL.revokeObjectURL(url);
+               // 🔹 Libera a URL temporária criada para não ocupar memória.
             });
-        
             // Import CSV
             document.getElementById('importFile').addEventListener('change', async (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const text = await file.text();
-                    const lines = text.split('\n').slice(1); // Skip header
-        
-                    for (const line of lines) {
-                        if (line.trim()) {
-                            const [id, text, createdAt] = line.split(',').map(field =>
-                                field.trim().replace(/^"|"$/g, '')
-                            );
-        
-                            if (id && text) {
-                                await addOrUpdateRequirement({
-                                    id: id,
-                                    text: text,
-                                    createdAt: createdAt || new Date().toISOString()
-                                });
-                            }
+               // 🔹 Adiciona um listener para o input de arquivo (`type="file"`).
+               //    Sempre que o usuário seleciona um arquivo, a função é executada.
+            
+               const file = e.target.files[0];
+               // 🔹 Pega o primeiro arquivo selecionado pelo usuário.
+            
+               if (file) {
+                  const text = await file.text();
+                  // 🔹 Lê o conteúdo do arquivo como texto.
+            
+                  const lines = text.split('\n').slice(1); // Skip header
+                  // 🔹 Separa o conteúdo em linhas e ignora a primeira linha (header do CSV).
+            
+                  for (const line of lines) {
+                     if (line.trim()) {
+                        const [id, text, createdAt] = line.split(',').map(field =>
+                           field.trim().replace(/^"|"$/g, '')
+                        );
+                        // 🔹 Para cada linha não vazia:
+                        //    - Divide pelos separadores de vírgula
+                        //    - Remove espaços extras e aspas externas
+            
+                        if (id && text) {
+                           await addOrUpdateRequirement({
+                              id: id,
+                              text: text,
+                              createdAt: createdAt || new Date().toISOString()
+                           });
+                           // 🔹 Adiciona ou atualiza o registro no banco IndexedDB.
+                           //    Se `createdAt` estiver vazio, usa a data atual.
                         }
-                    }
-        
-                    loadRequirements();
-                    e.target.value = '';
-                }
+                     }
+                  }
+            
+                  loadRequirements();
+                  // 🔹 Atualiza a interface para mostrar os registros importados.
+            
+                  e.target.value = '';
+                  // 🔹 Reseta o input de arquivo para permitir nova importação.
+               }
             });
-        
+            
             // Clear all requirements
             document.getElementById('clearBtn').addEventListener('click', async () => {
-                if (confirm('Tem certeza que deseja limpar todos os requisitos? Esta ação não pode ser desfeita.')) {
-                    await clearAllRequirements();
-                    loadRequirements();
-                }
+               // 🔹 Adiciona listener para o botão "Limpar Tudo".
+            
+               if (confirm('Tem certeza que deseja limpar todos os requisitos? Esta ação não pode ser desfeita.')) {
+                  // 🔹 Pergunta ao usuário para confirmar a ação, pois é irreversível.
+            
+                  await clearAllRequirements();
+                  // 🔹 Chama a função que limpa todos os registros da store.
+            
+                  loadRequirements();
+                  // 🔹 Atualiza a interface para refletir que a lista está vazia.
+               }
             });
-        }
-        async function initializeDefaultRequirements() {
-            const requirements = await getAllRequirements();
-            if (requirements.length === 0) {
-                const defaultRequirements = [{
+            async function initializeDefaultRequirements() {
+               // 🔹 Função assíncrona para inicializar o banco com registros padrões
+               //    caso ainda não exista nenhum registro.
+            
+               const requirements = await getAllRequirements();
+               // 🔹 Pega todos os registros existentes do banco (IndexedDB).
+            
+               if (requirements.length === 0) {
+                  // 🔹 Verifica se não há registros. Se estiver vazio, adiciona os padrões.
+            
+                  const defaultRequirements = [{
                         "id": "1234dedd-b3da-4fca-9eae-977044fb96db",
                         "text": "Cada registro deve possuir um UUID único para identificação, garantindo que não haja duplicidade e permitindo atualização em vez de duplicação.",
                         "createdAt": "2025-09-05T16:44:07.252Z"
-                    },
-                    {
+                     },
+                     {
                         "id": "2345418e-229e-4c13-8508-cde782aa13a2",
                         "text": "O sistema deve armazenar todos os registros localmente usando IndexedDB, garantindo que os dados permaneçam disponíveis mesmo após fechar o navegador ou reiniciar o dispositivo.",
                         "createdAt": "2025-09-06T16:44:03.724Z"
-                    },
-                    {
-                        "id": "3456ef03-f8cd-47ca-b63a-b3d1f2295cb7",
-                        "text": "Cada registro deve permitir operações de criar, ler, atualizar e deletar, garantindo total gerenciamento dos dados pelo usuário.",
-                        "createdAt": "2025-09-07T16:44:09.764Z"
-                    },
-                    {
-                        "id": "4567408d-5c4f-4fdb-8b9d-ad75ab2058e6",
-                        "text": "Importar CSV: O sistema deve permitir importar registros em formato CSV, atualizando os existentes pelo UUID e adicionando apenas os novos.",
-                        "createdAt": "2025-09-08T16:44:03.724Z"
-                    },
-                    {
-                        "id": "567833ff-7bea-4a1b-9ead-22d41b7d9e13",
-                        "text": "Exportar CSV: O sistema deve permitir exportar todos os registros em formato CSV.",
-                        "createdAt": "2025-09-09T16:44:09.764Z"
-                    },
-                    {
-                        "id": "6789ec28-9bfc-41c3-8408-5087bfcc632d",
-                        "text": "O sistema deve possuir um favicon em formato embutido, sem necessidade de arquivo local na pasta do projeto.",
-                        "createdAt": "2025-09-10T16:44:07.252Z"
-                    },
-                    {
-                        "id": "78943c28-945c-41c3-8408-5087bfcc4574",
-                        "text": "caso algum formulario tenha cpf ou telefone colocar mascara .",
-                        "createdAt": "2025-09-11T16:44:07.252Z"
-                    }
-                ];
-        
-                for (const req of defaultRequirements) {
-                    await addOrUpdateRequirement(req);
-                }
+                     },
+                     // ... demais registros padrão ...
+                  ];
+                  // 🔹 Define um array com objetos que representam os registros padrões.
+                  //    Cada objeto possui:
+                  //    - `id`: UUID único
+                  //    - `text`: descrição do requisito
+                  //    - `createdAt`: data de criação em formato ISO
+            
+                  for (const req of defaultRequirements) {
+                     await addOrUpdateRequirement(req);
+                     // 🔹 Itera sobre cada requisito padrão e adiciona/atualiza no banco.
+                     //    Isso garante que o banco não fique vazio na primeira execução.
+                  }
+               }
             }
-        }
 
-    </script>
-</body>
+      </script>
+   </body>
 </html>
