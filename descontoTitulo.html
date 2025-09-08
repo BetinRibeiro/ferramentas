@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desconto de Título</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📄</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#183462',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @media (max-width: 768px) {
+            .desktop-view { display: none; }
+            .mobile-view { display: block; }
+        }
+        @media (min-width: 769px) {
+            .desktop-view { display: table; }
+            .mobile-view { display: none; }
+        }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-primary text-center">Desconto de Título</h1>
+            <p class="text-center text-gray-600 mt-2" id="datahoje"></p>
+        </header>
+<!-- Action Buttons -->
+            <div class="flex flex-wrap gap-4 justify-center">
+                <button id="adicionar" 
+                    class="bg-primary hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full inline-flex items-center">
+                    <i data-feather="plus" class="mr-2"></i> Adicionar
+                </button>
+                <button id="zerar" 
+                    class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-full inline-flex items-center">
+                    <i data-feather="trash-2" class="mr-2"></i> Limpar Tudo
+                </button>
+            </div>
+        <main>
+            <!-- Desktop View -->
+            <div class="desktop-view w-full overflow-x-auto bg-white rounded-lg card-shadow mb-6">
+                <table id="tabela" class="w-full">
+                    <thead class="bg-primary text-white">
+                        <tr>
+                            <th class="px-4 py-3">Data</th>
+                            <th class="px-4 py-3">Vencimento</th>
+                            <th class="px-4 py-3">Dias</th>
+                            <th class="px-4 py-3">Valor (R$)</th>
+                            <th class="px-4 py-3">Juros (R$)</th>
+                            <th class="px-4 py-3">Líquido (R$)</th>
+                            <th class="px-4 py-3" colspan="2">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200"></tbody>
+                    <tfoot class="bg-gray-100 font-semibold">
+                        <tr>
+                            <td colspan="8" class="px-4 py-2 text-right">Total de Títulos: <span id="total-titulos">0</span></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- Mobile View -->
+            <div id="mobile-records" class="mobile-view space-y-4"></div>
+
+            <!-- Form Section -->
+            <div id="formulario" class="hidden bg-white p-6 rounded-lg card-shadow mb-6">
+                <form id="form" class="space-y-4">
+                    <div>
+                        <label for="data" class="block text-sm font-medium text-gray-700">Data da Operação</label>
+                        <input type="date" id="data" required 
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                    </div>
+                    <div>
+                        <label for="vencimento" class="block text-sm font-medium text-gray-700">Data de Vencimento</label>
+                        <input type="date" id="vencimento" required 
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                    </div>
+                    <div>
+                        <label for="valor" class="block text-sm font-medium text-gray-700">Valor do Título (R$)</label>
+                        <input type="number" id="valor" step="0.01" min="0" required 
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                    </div>
+                    <div>
+                        <label for="taxa" class="block text-sm font-medium text-gray-700">Percentual de Desconto (%)</label>
+                        <input type="number" id="taxa" step="0.01" min="0" max="100" required 
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                    </div>
+                    <div class="flex space-x-4 pt-4">
+                        <button type="button" id="cancelar" 
+                            class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center justify-center">
+                            <i data-feather="x" class="mr-2"></i> Cancelar
+                        </button>
+                        <button type="button" id="salvar" 
+                            class="flex-1 bg-primary hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center">
+                            <i data-feather="save" class="mr-2"></i> Salvar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            
+        </main>
+
+        <!-- Totals Footer -->
+        <footer class="mt-8 space-y-4">
+            <div class="bg-white p-4 rounded-lg card-shadow">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+                    <div class="p-3 bg-gray-100 rounded">
+                        <p class="text-sm text-gray-600">Total Bruto</p>
+                        <p class="font-bold" id="total-bruto">R$ 0,00</p>
+                    </div>
+                    <div class="p-3 bg-gray-100 rounded">
+                        <p class="text-sm text-gray-600">Total de Juros</p>
+                        <p class="font-bold" id="total-juros">R$ 0,00</p>
+                    </div>
+                    <div class="p-3 bg-gray-100 rounded">
+                        <p class="text-sm text-gray-600">Total Líquido</p>
+                        <p class="font-bold" id="total-liquido">R$ 0,00</p>
+                    </div>
+                    <div class="p-3 bg-gray-100 rounded">
+                        <p class="text-sm text-gray-600">Total de Títulos</p>
+                        <p class="font-bold" id="total-titulos-footer">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 text-blue-500 mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-medium text-blue-800">💡 Aviso importante</h3>
+                        <p class="mt-1 text-sm text-blue-700">
+                            Este projeto é totalmente gratuito e de código aberto. Nosso objetivo é disponibilizar uma ferramenta útil para todos, sem custos.
+                        </p>
+                        <p class="mt-2 text-sm text-blue-700">
+                            Se você gosta do sistema e quer contribuir para a manutenção, melhorias e suporte, considere fazer uma doação via PIX:
+                        </p>
+                        <div class="mt-2 bg-white p-3 rounded border border-blue-200 inline-block cursor-pointer" onclick="copiarPix()">
+                            <p class="font-mono text-sm text-blue-800">PIX: 88981126816</p>
+                        </div>
+                        <div id="pix-copied-message" class="hidden mt-2 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                            <strong class="font-bold">Copiado!</strong>
+                            <span class="block sm:inline">O PIX foi copiado para sua área de transferência. Muito obrigado pela contribuição!</span>
+                        </div>
+                        <p class="mt-2 text-sm text-blue-700">
+                            Toda contribuição ajuda a manter o projeto ativo e evoluindo! 🙏
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Initialize variables
+        let totalValor = 0;
+        let juroTotal = 0;
+        let liquidoTotal = 0;
+        let totalTitulos = 0;
+
+        // Format date to Brazilian format
+        const formatardata = (dataa) => {
+            const options = { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', year: 'numeric' };
+            return new Date(dataa).toLocaleDateString('pt-BR', options);
+        }
+
+        // Format date to YYYY-MM-DD for input fields
+        const formatardatainverso = (data) => {
+            const date = new Date(data);
+            return `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+        }
+
+        // Format currency to Brazilian Real
+        const formatarValor = (valor) => {
+            return parseFloat(valor).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
+        }
+
+        // Calculate net value
+        const calculaLiquido = (valor, juro) => {
+            return parseFloat(valor) - parseFloat(juro);
+        }
+
+        // Calculate interest
+        const calculaJuro = (valor, juro, dias) => {
+            const valorNumerico = parseFloat(valor.toString().replace(".", "").replace(",", "."));
+            const juroNumerico = parseFloat(juro);
+            return (valorNumerico * juroNumerico / 30 * dias / 100).toFixed(2);
+        }
+
+        // Count days between dates
+        const contarIntervaloDatas = (futuro, atual) => {
+            const dataFuturo = new Date(futuro);
+            const dataAtual = new Date(atual);
+            const diferenca = Math.abs(dataAtual.getTime() - dataFuturo.getTime());
+            return Math.ceil(diferenca / (1000 * 60 * 60 * 24)) + 1;
+        }
+
+        // Local Storage functions
+        const lerDocumento = () => JSON.parse(localStorage.getItem('db_documento')) || [];
+        const setArmazenamentoLocal = (dbdocumento) => {
+            localStorage.setItem("db_documento", JSON.stringify(dbdocumento));
+        }
+
+        // Create new record
+        const criar = (documento) => {
+            const dbdocumento = lerDocumento();
+            documento.id = crypto.randomUUID(); // Generate unique ID
+            dbdocumento.push(documento);
+            setArmazenamentoLocal(dbdocumento);
+        }
+
+        // Update record
+        const atualizar = (index, documento) => {
+            const dbdocumento = lerDocumento();
+            documento.id = dbdocumento[index].id; // Preserve existing ID
+            dbdocumento[index] = documento;
+            setArmazenamentoLocal(dbdocumento);
+        }
+
+        // Delete record
+        const deletarDocumento = (index) => {
+            const dbdocumento = lerDocumento();
+            dbdocumento.splice(index, 1);
+            setArmazenamentoLocal(dbdocumento);
+        }
+
+        // Clear all records
+        const deletarDados = () => {
+            const response = confirm(`Deseja realmente excluir toda a tabela?`);
+            if (response) {
+                localStorage.setItem('db_documento', JSON.stringify([]));
+                atualizarTabela();
+            }
+        }
+
+        // Clear form
+        const limparFormulario = () => {
+            document.getElementById('form').reset();
+            const today = new Date();
+            document.getElementById('data').value = formatardatainverso(today);
+            document.getElementById('data').dataset.index = 'new';
+        }
+
+        // Show form
+        const abrirformulario = () => {
+            document.getElementById('tabela').classList.add('hidden');
+            document.querySelector('.mobile-view').classList.add('hidden');
+            document.getElementById('formulario').classList.remove('hidden');
+            limparFormulario();
+        }
+
+        // Hide form
+        const fecharFormulario = () => {
+            document.getElementById('tabela').classList.remove('hidden');
+            document.querySelector('.mobile-view').classList.remove('hidden');
+            document.getElementById('formulario').classList.add('hidden');
+            atualizarTabela();
+        }
+
+        // Save form data
+        const salvarFormulario = () => {
+            if (document.getElementById('form').reportValidity()) {
+                const documento = {
+                    data: document.getElementById('data').value,
+                    vencimento: document.getElementById('vencimento').value,
+                    valor: document.getElementById('valor').value,
+                    taxa: document.getElementById('taxa').value,
+                };
+
+                const index = document.getElementById('data').dataset.index;
+                if (index === 'new') {
+                    criar(documento);
+                } else {
+                    atualizar(index, documento);
+                }
+                fecharFormulario();
+            }
+        }
+
+        // Populate form for editing
+        const editarDocumento = (index) => {
+            const documento = lerDocumento()[index];
+            document.getElementById('data').value = documento.data;
+            document.getElementById('vencimento').value = documento.vencimento;
+            document.getElementById('valor').value = documento.valor;
+            document.getElementById('taxa').value = documento.taxa;
+            document.getElementById('data').dataset.index = index;
+            abrirformulario();
+        }
+
+        // Clear table
+        const limpaTabela = () => {
+            totalValor = 0;
+            juroTotal = 0;
+            liquidoTotal = 0;
+            totalTitulos = 0;
+            document.querySelector('#tabela>tbody').innerHTML = '';
+            document.querySelector('#mobile-records').innerHTML = '';
+        }
+
+        // Create desktop table row
+        const criarLinhaDesktop = (documento, index) => {
+            const dias = contarIntervaloDatas(documento.vencimento, documento.data);
+            const juros = calculaJuro(documento.valor, documento.taxa, dias);
+            const liquido = calculaLiquido(documento.valor, juros);
+
+            totalValor += parseFloat(documento.valor);
+            juroTotal += parseFloat(juros);
+            liquidoTotal += parseFloat(liquido);
+            totalTitulos++;
+
+            const newRow = document.createElement('tr');
+            newRow.className = 'hover:bg-gray-50';
+            newRow.innerHTML = `
+                <td class="px-4 py-3 whitespace-nowrap">${formatardata(documento.data)}</td>
+                <td class="px-4 py-3 whitespace-nowrap">${formatardata(documento.vencimento)}</td>
+                <td class="px-4 py-3 whitespace-nowrap">${dias}</td>
+                <td class="px-4 py-3 whitespace-nowrap">${formatarValor(documento.valor)}</td>
+                <td class="px-4 py-3 whitespace-nowrap">${formatarValor(juros)}</td>
+                <td class="px-4 py-3 whitespace-nowrap">${formatarValor(liquido)}</td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                    <button type="button" class="text-primary hover:text-blue-700" id="edit-${index}">
+                        <i data-feather="edit" class="w-5 h-5"></i>
+                    </button>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                    <button type="button" class="text-red-500 hover:text-red-700" id="delete-${index}">
+                        <i data-feather="trash-2" class="w-5 h-5"></i>
+                    </button>
+                </td>
+            `;
+            document.querySelector('#tabela>tbody').appendChild(newRow);
+        }
+
+        // Create mobile card
+        const criarLinhaMobile = (documento, index) => {
+            const dias = contarIntervaloDatas(documento.vencimento, documento.data);
+            const juros = calculaJuro(documento.valor, documento.taxa, dias);
+            const liquido = calculaLiquido(documento.valor, juros);
+
+            const card = document.createElement('div');
+            card.className = 'bg-white p-4 rounded-lg card-shadow';
+            card.innerHTML = `
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                    <div>
+                        <p class="text-xs text-gray-500">Data</p>
+                        <p class="font-medium">${formatardata(documento.data)}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500">Vencimento</p>
+                        <p class="font-medium">${formatardata(documento.vencimento)}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500">Dias</p>
+                        <p class="font-medium">${dias}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500">Taxa</p>
+                        <p class="font-medium">${documento.taxa}%</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-2 mb-3">
+                    <div class="bg-gray-100 p-2 rounded">
+                        <p class="text-xs text-gray-500">Valor</p>
+                        <p class="font-medium">${formatarValor(documento.valor)}</p>
+                    </div>
+                    <div class="bg-gray-100 p-2 rounded">
+                        <p class="text-xs text-gray-500">Juros</p>
+                        <p class="font-medium">${formatarValor(juros)}</p>
+                    </div>
+                    <div class="bg-gray-100 p-2 rounded">
+                        <p class="text-xs text-gray-500">Líquido</p>
+                        <p class="font-medium">${formatarValor(liquido)}</p>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" class="text-primary hover:text-blue-700" id="edit-${index}">
+                        <i data-feather="edit" class="w-5 h-5"></i>
+                    </button>
+                    <button type="button" class="text-red-500 hover:text-red-700" id="delete-${index}">
+                        <i data-feather="trash-2" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            `;
+            document.querySelector('#mobile-records').appendChild(card);
+        }
+
+        // Update table with current data
+        const atualizarTabela = () => {
+            const dbdocumento = lerDocumento();
+            limpaTabela();
+            
+            dbdocumento.forEach((documento, index) => {
+                criarLinhaDesktop(documento, index);
+                criarLinhaMobile(documento, index);
+            });
+
+            // Update totals
+            document.getElementById('total-bruto').textContent = formatarValor(totalValor);
+            document.getElementById('total-juros').textContent = formatarValor(juroTotal);
+            document.getElementById('total-liquido').textContent = formatarValor(liquidoTotal);
+            document.getElementById('total-titulos').textContent = totalTitulos;
+            document.getElementById('total-titulos-footer').textContent = totalTitulos;
+        }
+
+        // Handle edit/delete actions
+        const editarDeletar = (event) => {
+            if (event.target.closest('button')) {
+                const button = event.target.closest('button');
+                if (button.id) {
+                    const [action, index] = button.id.split('-');
+                    if (action === 'edit') {
+                        editarDocumento(index);
+                    } else if (action === 'delete') {
+                        const response = confirm(`Deseja realmente excluir este título?`);
+                        if (response) {
+                            deletarDocumento(index);
+                            atualizarTabela();
+                        }
+                    }
+                }
+            }
+        }
+
+        // Copy PIX to clipboard
+        const copiarPix = () => {
+            const pix = '88981126816';
+            navigator.clipboard.writeText(pix).then(() => {
+                const message = document.getElementById('pix-copied-message');
+                message.classList.remove('hidden');
+                setTimeout(() => {
+                    message.classList.add('hidden');
+                }, 3000);
+            });
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set today's date as default
+            const today = new Date();
+            document.getElementById('data').value = formatardatainverso(today);
+            document.getElementById('datahoje').textContent = formatardata(today);
+            
+            // Initialize table
+            atualizarTabela();
+            
+            // Initialize feather icons
+            feather.replace();
+            
+            // Set event listeners
+            document.getElementById('adicionar').addEventListener('click', abrirformulario);
+            document.getElementById('cancelar').addEventListener('click', fecharFormulario);
+            document.getElementById('salvar').addEventListener('click', salvarFormulario);
+            document.getElementById('zerar').addEventListener('click', deletarDados);
+            document.querySelector('#tabela>tbody').addEventListener('click', editarDeletar);
+            document.querySelector('#mobile-records').addEventListener('click', editarDeletar);
+        });
+    </script>
+</body>
+</html>
