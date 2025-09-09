@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevDoc - Documentação de Sistemas</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>< ></text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0033 100%);
+            min-height: 100vh;
+        }
+        .purple-accent {
+            background: linear-gradient(135deg, #4a00e0 0%, #8e2de2 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(138, 43, 226, 0.3);
+        }
+        .input-purple:focus {
+            border-color: #8e2de2;
+            box-shadow: 0 0 0 3px rgba(142, 45, 226, 0.2);
+        }
+    </style>
+</head>
+<body class="text-white font-sans">
+    <!-- Header -->
+    <header class="bg-black bg-opacity-80 backdrop-blur-sm border-b border-purple-900 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 purple-accent rounded-lg flex items-center justify-center">
+                        <span class="font-bold">< ></span>
+                    </div>
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        DevDoc
+                    </h1>
+                </div>
+                <button onclick="exportDocumentation()" class="px-4 py-2 purple-accent rounded-lg hover:opacity-90 transition-opacity flex items-center space-x-2">
+                    <i data-feather="download"></i>
+                    <span>Exportar</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- System Info Section -->
+        <section class="mb-12" data-aos="fade-up">
+            <div class="bg-black bg-opacity-50 rounded-xl p-6 border border-purple-900 card-hover">
+                <h2 class="text-xl font-semibold mb-4 text-purple-300">Informações do Sistema</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Nome do Sistema</label>
+                        <input type="text" id="systemName" placeholder="Ex: Sistema de Gestão" 
+                               class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg input-purple focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Descrição</label>
+                        <textarea id="systemDescription" placeholder="Descreva o propósito do sistema..." 
+                                 class="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg input-purple focus:outline-none h-20"></textarea>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Requirements Sections -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <!-- Functional Requirements -->
+            <section data-aos="fade-right">
+                <div class="bg-black bg-opacity-50 rounded-xl p-6 border border-purple-900 card-hover">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-semibold text-purple-300">Requisitos Funcionais</h2>
+                        <button onclick="addItem('functional')" class="p-2 purple-accent rounded-lg hover:opacity-90">
+                            <i data-feather="plus"></i>
+                        </button>
+                    </div>
+                    <div id="functionalRequirements" class="space-y-3">
+                        <!-- Items will be added here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Non-Functional Requirements -->
+            <section data-aos="fade-left">
+                <div class="bg-black bg-opacity-50 rounded-xl p-6 border border-purple-900 card-hover">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-semibold text-purple-300">Requisitos Não Funcionais</h2>
+                        <button onclick="addItem('nonFunctional')" class="p-2 purple-accent rounded-lg hover:opacity-90">
+                            <i data-feather="plus"></i>
+                        </button>
+                    </div>
+                    <div id="nonFunctionalRequirements" class="space-y-3">
+                        <!-- Items will be added here -->
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- System Functions -->
+        <section class="mb-12" data-aos="fade-up">
+            <div class="bg-black bg-opacity-50 rounded-xl p-6 border border-purple-900 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold text-purple-300">Funções do Sistema</h2>
+                    <button onclick="addFunction()" class="px-4 py-2 purple-accent rounded-lg hover:opacity-90 flex items-center space-x-2">
+                        <i data-feather="plus"></i>
+                        <span>Adicionar Função</span>
+                    </button>
+                </div>
+                <div id="systemFunctions" class="space-y-4">
+                    <!-- Function items will be added here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- UI Components -->
+        <section data-aos="fade-up">
+            <div class="bg-black bg-opacity-50 rounded-xl p-6 border border-purple-900 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold text-purple-300">Componentes da Interface</h2>
+                    <button onclick="addComponent()" class="px-4 py-2 purple-accent rounded-lg hover:opacity-90 flex items-center space-x-2">
+                        <i data-feather="plus"></i>
+                        <span>Adicionar Componente</span>
+                    </button>
+                </div>
+                <div id="uiComponents" class="space-y-4">
+                    <!-- Component items will be added here -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Save Button -->
+    <div class="fixed bottom-8 right-8">
+        <button onclick="saveAll()" class="w-14 h-14 purple-accent rounded-full shadow-lg hover:scale-110 transition-transform flex items-center justify-center">
+            <i data-feather="save" class="w-6 h-6"></i>
+        </button>
+    </div>
+
+    <script>
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+            loadFromStorage();
+            setupAutoSave();
+        });
+
+        function setupAutoSave() {
+            const inputs = document.querySelectorAll('input, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('input', debounce(saveAll, 1000));
+            });
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function addItem(type) {
+            const container = type === 'functional' ? 
+                document.getElementById('functionalRequirements') : 
+                document.getElementById('nonFunctionalRequirements');
+            
+            const id = Date.now();
+            const item = document.createElement('div');
+            item.className = 'flex items-start space-x-2';
+            item.innerHTML = `
+                <input type="text" placeholder="Digite o requisito..." 
+                       class="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg input-purple focus:outline-none"
+                       oninput="saveAll()">
+                <button onclick="this.parentElement.remove(); saveAll();" class="p-2 text-red-400 hover:text-red-300">
+                    <i data-feather="trash-2" class="w-4 h-4"></i>
+                </button>
+            `;
+            container.appendChild(item);
+            feather.replace();
+        }
+
+        function addFunction() {
+            const container = document.getElementById('systemFunctions');
+            const id = Date.now();
+            const item = document.createElement('div');
+            item.className = 'bg-gray-900 rounded-lg p-4';
+            item.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Nome da Função</label>
+                        <input type="text" placeholder="Ex: Cadastrar usuário" 
+                               class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg input-purple focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Descrição</label>
+                        <input type="text" placeholder="O que essa função faz?" 
+                               class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg input-purple focus:outline-none">
+                    </div>
+                </div>
+                <button onclick="this.parentElement.remove(); saveAll();" class="text-red-400 hover:text-red-300 text-sm flex items-center">
+                    <i data-feather="trash-2" class="w-4 h-4 mr-1"></i> Remover
+                </button>
+            `;
+            container.appendChild(item);
+            feather.replace();
+        }
+
+        function addComponent() {
+            const container = document.getElementById('uiComponents');
+            const id = Date.now();
+            const item = document.createElement('div');
+            item.className = 'bg-gray-900 rounded-lg p-4';
+            item.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Nome do Componente</label>
+                        <input type="text" placeholder="Ex: Botão de salvar" 
+                               class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg input-purple focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Descrição</label>
+                        <input type="text" placeholder="Para que serve este componente?" 
+                               class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg input-purple focus:outline-none">
+                    </div>
+                </div>
+                <button onclick="this.parentElement.remove(); saveAll();" class="text-red-400 hover:text-red-300 text-sm flex items-center">
+                    <i data-feather="trash-2" class="w-4 h-4 mr-1"></i> Remover
+                </button>
+            `;
+            container.appendChild(item);
+            feather.replace();
+        }
+
+        function saveAll() {
+            const data = {
+                systemName: document.getElementById('systemName').value,
+                systemDescription: document.getElementById('systemDescription').value,
+                functional: Array.from(document.getElementById('functionalRequirements').children).map(item => 
+                    item.querySelector('input').value
+                ).filter(val => val),
+                nonFunctional: Array.from(document.getElementById('nonFunctionalRequirements').children).map(item => 
+                    item.querySelector('input').value
+                ).filter(val => val),
+                functions: Array.from(document.getElementById('systemFunctions').children).map(item => ({
+                    name: item.querySelector('input:nth-child(1)').value,
+                    description: item.querySelector('input:nth-child(2)').value
+                })),
+                components: Array.from(document.getElementById('uiComponents').children).map(item => ({
+                    name: item.querySelector('input:nth-child(1)').value,
+                    description: item.querySelector('input:nth-child(2)').value
+                }))
+            };
+            
+            localStorage.setItem('devDocData', JSON.stringify(data));
+        }
+
+        function loadFromStorage() {
+            const saved = localStorage.getItem('devDocData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                
+                document.getElementById('systemName').value = data.systemName || '';
+                document.getElementById('systemDescription').value = data.systemDescription || '';
+                
+                data.functional?.forEach(req => {
+                    addItem('functional');
+                    const lastInput = document.getElementById('functionalRequirements').lastChild.querySelector('input');
+                    lastInput.value = req;
+                });
+                
+                data.nonFunctional?.forEach(req => {
+                    addItem('nonFunctional');
+                    const lastInput = document.getElementById('nonFunctionalRequirements').lastChild.querySelector('input');
+                    lastInput.value = req;
+                });
+                
+                data.functions?.forEach(func => {
+                    addFunction();
+                    const lastItem = document.getElementById('systemFunctions').lastChild;
+                    lastItem.querySelector('input:nth-child(1)').value = func.name || '';
+                    lastItem.querySelector('input:nth-child(2)').value = func.description || '';
+                });
+                
+                data.components?.forEach(comp => {
+                    addComponent();
+                    const lastItem = document.getElementById('uiComponents').lastChild;
+                    lastItem.querySelector('input:nth-child(1)').value = comp.name || '';
+                    lastItem.querySelector('input:nth-child(2)').value = comp.description || '';
+                });
+            }
+        }
+
+        function exportDocumentation() {
+            const data = JSON.parse(localStorage.getItem('devDocData') || '{}');
+            const doc = `
+# DOCUMENTAÇÃO DO SISTEMA: ${data.systemName || 'Não definido'}
+
+## Descrição
+${data.systemDescription || 'Não definida'}
+
+## Requisitos Funcionais
+${data.functional?.map((req, index) => `${index + 1}. ${req}`).join('\n') || 'Nenhum requisito funcional definido'}
+
+## Requisitos Não Funcionais
+${data.nonFunctional?.map((req, index) => `${index + 1}. ${req}`).join('\n') || 'Nenhum requisito não funcional definido'}
+
+## Funções do Sistema
+${data.functions?.map(func => `### ${func.name || 'Sem nome'}
+${func.description || 'Sem descrição'}`).join('\n\n') || 'Nenhuma função definida'}
+
+## Componentes da Interface
+${data.components?.map(comp => `### ${comp.name || 'Sem nome'}
+${comp.description || 'Sem descrição'}`).join('\n\n') || 'Nenhum componente definido'}
+            `;
+            
+            const blob = new Blob([doc], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `documentacao-${data.systemName || 'sistema'}.md`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
