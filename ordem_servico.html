@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Serviços</title>
+    <link rel="icon" type="image/svg+xml" href="https://cdn-icons-png.flaticon.com/512/10694/10694195.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .service-card {
+            transition: all 0.3s ease;
+        }
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow: auto;
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            animation: modalopen 0.4s;
+        }
+        @keyframes modalopen {
+            from {opacity: 0; transform: translateY(-60px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+        .floating-button {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 100;
+        }
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .status-open { background-color: #dbeafe; color: #1e40af; }
+        .status-progress { background-color: #ffedd5; color: #ea580c; }
+        .status-completed { background-color: #dcfce7; color: #166534; }
+        .status-cancelled { background-color: #fee2e2; color: #b91c1c; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i data-feather="tool" class="text-blue-600"></i>
+                <h1 class="text-xl font-bold text-gray-800">Controle de Serviços</h1>
+            </div>
+            <div class="flex space-x-3">
+                <button id="exportBtn" class="px-4 py-2 bg-green-600 text-white rounded-lg flex items-center text-sm">
+                    <i data-feather="download" class="mr-1"></i> Exportar
+                </button>
+                <button id="importBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center text-sm">
+                    <i data-feather="upload" class="mr-1"></i> Importar
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Ordens de Serviço</h2>
+            <button id="addServiceBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center">
+                <i data-feather="plus" class="mr-1"></i> Nova OS
+            </button>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+                    <input type="text" id="searchInput" placeholder="Pesquisar..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select id="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Todos</option>
+                        <option value="aberta">Aberta</option>
+                        <option value="em andamento">Em Andamento</option>
+                        <option value="concluída">Concluída</option>
+                        <option value="cancelada">Cancelada</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Data Início</label>
+                    <input type="date" id="dateStart" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Data Fim</label>
+                    <input type="date" id="dateEnd" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+        </div>
+
+        <!-- Services List -->
+        <div id="servicesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Service cards will be dynamically inserted here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-12">
+            <i data-feather="folder" class="mx-auto h-12 w-12 text-gray-400"></i>
+            <h3 class="mt-2 text-lg font-medium text-gray-900">Nenhuma ordem de serviço</h3>
+            <p class="mt-1 text-gray-500">Comece criando uma nova ordem de serviço.</p>
+            <div class="mt-6">
+                <button id="addServiceBtnEmpty" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none">
+                    <i data-feather="plus" class="mr-2"></i>
+                    Nova OS
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Floating Action Button -->
+    <button id="fab" class="floating-button w-14 h-14 bg-blue-600 rounded-full shadow-lg flex items-center justify-center text-white hover:bg-blue-700">
+        <i data-feather="plus" class="w-6 h-6"></i>
+    </button>
+
+    <!-- Add/Edit Service Modal -->
+    <div id="serviceModal" class="modal">
+        <div class="modal-content">
+            <span class="close absolute top-4 right-4 text-gray-500 cursor-pointer">
+                <i data-feather="x"></i>
+            </span>
+            <h2 id="modalTitle" class="text-xl font-bold mb-4">Nova Ordem de Serviço</h2>
+            <form id="serviceForm">
+                <input type="hidden" id="serviceId">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome da Oficina</label>
+                        <input type="text" id="nome_oficina" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Telefone da Oficina</label>
+                        <input type="text" id="telefone_oficina" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Cliente</label>
+                        <input type="text" id="nome_cliente" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Telefone do Cliente</label>
+                        <input type="text" id="telefone_cliente" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Data</label>
+                        <input type="date" id="data" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select id="status" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="aberta">Aberta</option>
+                            <option value="em andamento">Em Andamento</option>
+                            <option value="concluída">Concluída</option>
+                            <option value="cancelada">Cancelada</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Valor Total</label>
+                        <input type="number" id="valor_total" step="0.01" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Observação</label>
+                        <textarea id="observacao" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" id="cancelServiceBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div id="importModal" class="modal">
+        <div class="modal-content">
+            <span class="close absolute top-4 right-4 text-gray-500 cursor-pointer">
+                <i data-feather="x"></i>
+            </span>
+            <h2 class="text-xl font-bold mb-4">Importar CSV</h2>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Selecione o arquivo CSV</label>
+                <input type="file" id="csvFile" accept=".csv" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button type="button" id="cancelImportBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancelar</button>
+                <button id="importCsvBtn" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Importar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg hidden">
+        Operação realizada com sucesso!
+    </div>
+
+    <script>
+        // Initialize Feather Icons
+        feather.replace();
+        
+        // Initialize AOS
+        AOS.init();
+        
+        // Initialize IndexedDB
+        let db;
+        const dbName = "OficinaDB";
+        const dbVersion = 1;
+        
+        // Open IndexedDB
+        const request = indexedDB.open(dbName, dbVersion);
+        
+        request.onerror = function(event) {
+            console.error("Erro ao abrir o banco de dados:", event.target.error);
+        };
+        
+        request.onsuccess = function(event) {
+            db = event.target.result;
+            loadServices();
+        };
+        
+        request.onupgradeneeded = function(event) {
+            db = event.target.result;
+            
+            // Create ordem_servico table
+            if (!db.objectStoreNames.contains("ordem_servico")) {
+                const ordemServicoStore = db.createObjectStore("ordem_servico", { keyPath: "id" });
+                ordemServicoStore.createIndex("nome_oficina", "nome_oficina", { unique: false });
+                ordemServicoStore.createIndex("status", "status", { unique: false });
+                ordemServicoStore.createIndex("data", "data", { unique: false });
+            }
+            
+            // Create itens_ordem_servico table
+            if (!db.objectStoreNames.contains("itens_ordem_servico")) {
+                const itensStore = db.createObjectStore("itens_ordem_servico", { keyPath: "id" });
+                itensStore.createIndex("ordem_servico_id", "ordem_servico_id", { unique: false });
+            }
+        };
+        
+        // DOM Elements
+        const servicesContainer = document.getElementById('servicesContainer');
+        const emptyState = document.getElementById('emptyState');
+        const serviceModal = document.getElementById('serviceModal');
+        const importModal = document.getElementById('importModal');
+        const serviceForm = document.getElementById('serviceForm');
+        const toast = document.getElementById('toast');
+        
+        // Buttons
+        const addServiceBtn = document.getElementById('addServiceBtn');
+        const addServiceBtnEmpty = document.getElementById('addServiceBtnEmpty');
+        const fab = document.getElementById('fab');
+        const importBtn = document.getElementById('importBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const cancelServiceBtn = document.getElementById('cancelServiceBtn');
+        const cancelImportBtn = document.getElementById('cancelImportBtn');
+        const importCsvBtn = document.getElementById('importCsvBtn');
+        
+        // Form fields
+        const serviceId = document.getElementById('serviceId');
+        const nomeOficina = document.getElementById('nome_oficina');
+        const telefoneOficina = document.getElementById('telefone_oficina');
+        const nomeCliente = document.getElementById('nome_cliente');
+        const telefoneCliente = document.getElementById('telefone_cliente');
+        const data = document.getElementById('data');
+        const status = document.getElementById('status');
+        const valorTotal = document.getElementById('valor_total');
+        const observacao = document.getElementById('observacao');
+        
+        // Filters
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const dateStart = document.getElementById('dateStart');
+        const dateEnd = document.getElementById('dateEnd');
+        
+        // Apply masks
+        $(document).ready(function(){
+            $('#telefone_oficina').mask('(00) 00000-0000');
+            $('#telefone_cliente').mask('(00) 00000-0000');
+        });
+        
+        // Event Listeners
+        addServiceBtn.addEventListener('click', openAddServiceModal);
+        addServiceBtnEmpty.addEventListener('click', openAddServiceModal);
+        fab.addEventListener('click', openAddServiceModal);
+        importBtn.addEventListener('click', () => importModal.style.display = 'block');
+        exportBtn.addEventListener('click', exportToCSV);
+        cancelServiceBtn.addEventListener('click', () => serviceModal.style.display = 'none');
+        cancelImportBtn.addEventListener('click', () => importModal.style.display = 'none');
+        importCsvBtn.addEventListener('click', importFromCSV);
+        
+        // Close modals when clicking on X or outside
+        document.querySelectorAll('.close').forEach(closeBtn => {
+            closeBtn.addEventListener('click', function() {
+                this.closest('.modal').style.display = 'none';
+            });
+        });
+        
+        window.addEventListener('click', function(event) {
+            if (event.target === serviceModal) serviceModal.style.display = 'none';
+            if (event.target === importModal) importModal.style.display = 'none';
+        });
+        
+        // Load saved oficina data on startup
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedOficina = JSON.parse(localStorage.getItem('oficinaData'));
+            if (savedOficina) {
+                nomeOficina.value = savedOficina.nome;
+                telefoneOficina.value = savedOficina.telefone;
+            }
+        });
+        
+        // Form submission
+        serviceForm.addEventListener('submit', saveService);
+        
+        // Filter events
+        searchInput.addEventListener('input', loadServices);
+        statusFilter.addEventListener('change', loadServices);
+        dateStart.addEventListener('change', loadServices);
+        dateEnd.addEventListener('change', loadServices);
+        
+        // Functions
+        function openAddServiceModal() {
+            document.getElementById('modalTitle').textContent = 'Nova Ordem de Serviço';
+            serviceForm.reset();
+            serviceId.value = '';
+            data.value = new Date().toISOString().split('T')[0];
+            
+            // Restore oficina data from localStorage
+            const savedOficina = JSON.parse(localStorage.getItem('oficinaData'));
+            if (savedOficina) {
+                nomeOficina.value = savedOficina.nome;
+                telefoneOficina.value = savedOficina.telefone;
+            }
+            
+            serviceModal.style.display = 'block';
+        }
+        
+        function openEditServiceModal(service) {
+            document.getElementById('modalTitle').textContent = 'Editar Ordem de Serviço';
+            serviceId.value = service.id;
+            nomeOficina.value = service.nome_oficina;
+            telefoneOficina.value = service.telefone_oficina;
+            nomeCliente.value = service.nome_cliente;
+            telefoneCliente.value = service.telefone_cliente;
+            data.value = service.data;
+            status.value = service.status;
+            valorTotal.value = service.valor_total;
+            observacao.value = service.observacao || '';
+            serviceModal.style.display = 'block';
+        }
+        
+        function saveService(e) {
+            e.preventDefault();
+            
+            // Save oficina data to localStorage
+            const oficinaData = {
+                nome: nomeOficina.value,
+                telefone: telefoneOficina.value
+            };
+            localStorage.setItem('oficinaData', JSON.stringify(oficinaData));
+            
+            const service = {
+                id: serviceId.value || generateUUID(),
+                nome_oficina: nomeOficina.value,
+                telefone_oficina: telefoneOficina.value,
+                nome_cliente: nomeCliente.value,
+                telefone_cliente: telefoneCliente.value,
+                data: data.value,
+                status: status.value,
+                valor_total: parseFloat(valorTotal.value) || 0,
+                observacao: observacao.value
+            };
+            
+            const transaction = db.transaction(["ordem_servico"], "readwrite");
+            const store = transaction.objectStore("ordem_servico");
+            const request = store.put(service);
+            
+            request.onsuccess = function() {
+                serviceModal.style.display = 'none';
+                showToast('Ordem de serviço salva com sucesso!');
+                loadServices();
+            };
+            
+            request.onerror = function(event) {
+                console.error("Erro ao salvar:", event.target.error);
+                showToast('Erro ao salvar ordem de serviço', 'error');
+            };
+        }
+        
+        function deleteService(id) {
+            if (confirm('Tem certeza que deseja excluir esta ordem de serviço?')) {
+                const transaction = db.transaction(["ordem_servico"], "readwrite");
+                const store = transaction.objectStore("ordem_servico");
+                const request = store.delete(id);
+                
+                request.onsuccess = function() {
+                    showToast('Ordem de serviço excluída com sucesso!');
+                    loadServices();
+                };
+                
+                request.onerror = function(event) {
+                    console.error("Erro ao excluir:", event.target.error);
+                    showToast('Erro ao excluir ordem de serviço', 'error');
+                };
+            }
+        }
+        
+        function loadServices() {
+            const transaction = db.transaction(["ordem_servico"], "readonly");
+            const store = transaction.objectStore("ordem_servico");
+            const request = store.getAll();
+            
+            request.onsuccess = function(event) {
+                const services = event.target.result;
+                displayServices(filterServices(services));
+            };
+        }
+        
+        function filterServices(services) {
+            const searchTerm = searchInput.value.toLowerCase();
+            const statusValue = statusFilter.value;
+            const startDate = dateStart.value;
+            const endDate = dateEnd.value;
+            
+            return services.filter(service => {
+                const matchesSearch = 
+                    service.nome_oficina.toLowerCase().includes(searchTerm) ||
+                    service.nome_cliente.toLowerCase().includes(searchTerm) ||
+                    service.id.includes(searchTerm);
+                
+                const matchesStatus = statusValue ? service.status === statusValue : true;
+                
+                const serviceDate = new Date(service.data);
+                const matchesDate = 
+                    (!startDate || serviceDate >= new Date(startDate)) && 
+                    (!endDate || serviceDate <= new Date(endDate));
+                
+                return matchesSearch && matchesStatus && matchesDate;
+            });
+        }
+        
+        function displayServices(services) {
+            servicesContainer.innerHTML = '';
+            
+            if (services.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            
+            emptyState.classList.add('hidden');
+            
+            services.forEach(service => {
+                const serviceCard = document.createElement('div');
+                serviceCard.className = 'service-card bg-white rounded-lg shadow-sm p-4 border border-gray-200';
+                serviceCard.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-bold text-gray-800">${service.nome_oficina}</h3>
+                            <p class="text-sm text-gray-600">${service.nome_cliente}</p>
+                        </div>
+                        <span class="status-badge ${
+                            service.status === 'aberta' ? 'status-open' :
+                            service.status === 'em andamento' ? 'status-progress' :
+                            service.status === 'concluída' ? 'status-completed' : 'status-cancelled'
+                        }">
+                            ${service.status}
+                        </span>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-sm text-gray-500">Data: ${formatDate(service.data)}</p>
+                        <p class="text-lg font-bold text-gray-800 mt-1">R$ ${parseFloat(service.valor_total).toFixed(2)}</p>
+                        ${service.observacao ? `<p class="text-sm text-gray-600 mt-2">Obs: ${service.observacao}</p>` : ''}
+                    </div>
+                    <div class="mt-4 flex justify-between">
+                        <button onclick="openEditServiceModal(${JSON.stringify(service).replace(/"/g, '&quot;')})" class="text-blue-600 hover:text-blue-800 text-sm">
+                            <i data-feather="edit-2" class="w-4 h-4 inline mr-1"></i> Editar
+                        </button>
+                        <button onclick="deleteService('${service.id}')" class="text-red-600 hover:text-red-800 text-sm">
+                            <i data-feather="trash-2" class="w-4 h-4 inline mr-1"></i> Excluir
+                        </button>
+                    </div>
+                `;
+                servicesContainer.appendChild(serviceCard);
+            });
+            
+            feather.replace();
+        }
+        
+        function formatDate(dateString) {
+            const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+            return new Date(dateString).toLocaleDateString('pt-BR', options);
+        }
+        
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+        
+        function showToast(message, type = 'success') {
+            toast.textContent = message;
+            toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-md shadow-lg ${
+                type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            } text-white hidden`;
+            toast.classList.remove('hidden');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+        
+        function exportToCSV() {
+            const transaction = db.transaction(["ordem_servico"], "readonly");
+            const store = transaction.objectStore("ordem_servico");
+            const request = store.getAll();
+            
+            request.onsuccess = function(event) {
+                const services = event.target.result;
+                let csvContent = "data:text/csv;charset=utf-8,";
+                
+                // Add headers
+                csvContent += "id,nome_oficina,telefone_oficina,nome_cliente,telefone_cliente,data,status,valor_total\n";
+                
+                // Add data
+                services.forEach(service => {
+                    csvContent += `${service.id},${service.nome_oficina},${service.telefone_oficina},${service.nome_cliente},${service.telefone_cliente},${service.data},${service.status},${service.valor_total}\n`;
+                });
+                
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "ordens_servico.csv");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showToast('Arquivo exportado com sucesso!');
+            };
+        }
+        
+        function importFromCSV() {
+            const fileInput = document.getElementById('csvFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showToast('Por favor, selecione um arquivo CSV', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const csv = e.target.result;
+                const lines = csv.split('\n');
+                
+                // Skip header
+                const dataLines = lines.slice(1).filter(line => line.trim() !== '');
+                
+                const transaction = db.transaction(["ordem_servico"], "readwrite");
+                const store = transaction.objectStore("ordem_servico");
+                
+                dataLines.forEach(line => {
+                    const [id, nome_oficina, telefone_oficina, nome_cliente, telefone_cliente, data, status, valor_total] = line.split(',');
+                    
+                    const service = {
+                        id: id.trim(),
+                        nome_oficina: nome_oficina.trim(),
+                        telefone_oficina: telefone_oficina.trim(),
+                        nome_cliente: nome_cliente.trim(),
+                        telefone_cliente: telefone_cliente.trim(),
+                        data: data.trim(),
+                        status: status.trim(),
+                        valor_total: parseFloat(valor_total.trim()) || 0
+                    };
+                    
+                    store.put(service);
+                });
+                
+                transaction.oncomplete = function() {
+                    importModal.style.display = 'none';
+                    showToast('Arquivo importado com sucesso!');
+                    loadServices();
+                };
+                
+                transaction.onerror = function(event) {
+                    console.error("Erro ao importar:", event.target.error);
+                    showToast('Erro ao importar arquivo', 'error');
+                };
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        // Expose functions to global scope for inline event handlers
+        window.openEditServiceModal = openEditServiceModal;
+        window.deleteService = deleteService;
+    </script>
+</body>
+</html>
