@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Estoque</title>
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/5669/5669109.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        .modal {
+            transition: opacity 0.25s ease;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div id="vanta-bg" class="fixed inset-0 -z-10"></div>
+    
+    <div class="container mx-auto px-4 py-8 relative">
+        <!-- Header -->
+        <header class="text-center mb-12" data-aos="fade-down">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">📦 Controle de Estoque</h1>
+            <p class="text-gray-600">Sistema completo de gerenciamento de produtos e movimentações</p>
+        </header>
+
+        <!-- Actions Section -->
+        <div class="flex flex-wrap justify-center gap-4 mb-8" data-aos="fade-up">
+            <button onclick="openModal('produto')" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors">
+                <i data-feather="plus"></i> Novo Produto
+            </button>
+            <button onclick="importCSV()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors">
+                <i data-feather="upload"></i> Importar CSV
+            </button>
+            <button onclick="exportCSV()" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors">
+                <i data-feather="download"></i> Exportar CSV
+            </button>
+            <button onclick="deleteDatabase()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors">
+                <i data-feather="trash-2"></i> Limpar Banco
+            </button>
+        </div>
+
+        <!-- Products Table -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden" data-aos="fade-up">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estoque</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Preço Venda</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Preço Compra</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="products-table-body" class="divide-y divide-gray-200">
+                        <!-- Products will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+                <div class="text-sm text-gray-700">
+                    Mostrando <span id="pagination-from">0</span> a <span id="pagination-to">0</span> de <span id="pagination-total">0</span> resultados
+                </div>
+                <div class="flex gap-2">
+                    <button id="prev-page" class="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50">
+                        <i data-feather="chevron-left"></i>
+                    </button>
+                    <span id="current-page" class="px-3 py-1 bg-blue-600 text-white rounded-md">1</span>
+                    <button id="next-page" class="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50">
+                        <i data-feather="chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="product-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 modal opacity-0 pointer-events-none">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800" id="modal-title">Novo Produto</h3>
+            </div>
+            <form id="product-form" class="px-6 py-4 space-y-4">
+                <input type="hidden" id="product-id">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+                    <input type="text" id="product-name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                    <textarea id="product-description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Estoque Atual *</label>
+                    <input type="number" id="product-stock" required min="0" step="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Preço Venda *</label>
+                        <input type="number" id="product-price" required min="0" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Preço Compra</label>
+                        <input type="number" id="product-cost" min="0" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Código de Barras</label>
+                    <input type="text" id="product-barcode" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </form>
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+                <button type="button" onclick="closeModal('produto')" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
+                <button type="button" onclick="saveProduct()" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CSV Import Modal -->
+    <div id="csv-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 modal opacity-0 pointer-events-none">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800">Importar CSV</h3>
+            </div>
+            <div class="px-6 py-4 space-y-4">
+                <input type="file" id="csv-file" accept=".csv" class="w-full">
+                <p class="text-sm text-gray-600">Formato esperado: nome,descricao,estoque_atual,preco_unitario,preco_compra,codigo_barras</p>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+                <button type="button" onclick="closeModal('csv')" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
+                <button type="button" onclick="processCSV()" class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Importar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.globe.min.js"></script>
+    <script>
+        // Vanta.js Background
+        VANTA.GLOBE({
+            el: "#vanta-bg",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x3b82f6,
+            backgroundColor: 0xf8fafc
+        });
+
+        // Database setup
+        const DB_NAME = 'ControleEstoqueDB';
+        const DB_VERSION = 1.4;
+        let db;
+        let currentPage = 1;
+        const itemsPerPage = 10;
+
+        // Initialize database
+        function initDatabase() {
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+            request.onerror = (event) => {
+                console.error('Erro ao abrir o banco de dados:', event.target.error);
+            };
+
+            request.onsuccess = (event) => {
+                db = event.target.result;
+                loadProducts();
+            };
+
+            request.onupgradeneeded = (event) => {
+                const database = event.target.result;
+                
+                // Create products store
+                if (!database.objectStoreNames.contains('produto')) {
+                    const produtoStore = database.createObjectStore('produto', { keyPath: 'id' });
+                    produtoStore.createIndex('nome', 'nome', { unique: false });
+                }
+
+                // Create movements store
+                if (!database.objectStoreNames.contains('movimentacao_produto')) {
+                    const movStore = database.createObjectStore('movimentacao_produto', { keyPath: 'id' });
+                    movStore.createIndex('produto_id', 'produto_id', { unique: false });
+                }
+            };
+        }
+
+        // Generate UUID
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        // Modal functions
+        function openModal(type) {
+            if (type === 'produto') {
+                document.getElementById('product-modal').classList.remove('opacity-0', 'pointer-events-none');
+                document.getElementById('product-modal').classList.add('opacity-100');
+            } else if (type === 'csv') {
+                document.getElementById('csv-modal').classList.remove('opacity-0', 'pointer-events-none');
+                document.getElementById('csv-modal').classList.add('opacity-100');
+            }
+        }
+
+        function closeModal(type) {
+            if (type === 'produto') {
+                document.getElementById('product-modal').classList.remove('opacity-100');
+                document.getElementById('product-modal').classList.add('opacity-0', 'pointer-events-none');
+                document.getElementById('product-form').reset();
+            } else if (type === 'csv') {
+                document.getElementById('csv-modal').classList.remove('opacity-100');
+                document.getElementById('csv-modal').classList.add('opacity-0', 'pointer-events-none');
+                document.getElementById('csv-file').value = '';
+            }
+        }
+
+        // Product CRUD operations
+        async function saveProduct() {
+            const product = {
+                id: document.getElementById('product-id').value || generateUUID(),
+                nome: document.getElementById('product-name').value,
+                descricao: document.getElementById('product-description').value,
+                estoque_atual: parseInt(document.getElementById('product-stock').value),
+                preco_unitario: parseFloat(document.getElementById('product-price').value),
+                preco_compra: parseFloat(document.getElementById('product-cost').value) || 0,
+                codigo_barras: document.getElementById('product-barcode').value
+            };
+
+            const transaction = db.transaction(['produto'], 'readwrite');
+            const store = transaction.objectStore('produto');
+            
+            await store.put(product);
+            
+            closeModal('produto');
+            loadProducts();
+        }
+
+        function editProduct(id) {
+            const transaction = db.transaction(['produto'], 'readonly');
+            const store = transaction.objectStore('produto');
+            const request = store.get(id);
+
+            request.onsuccess = (event) => {
+                const product = event.target.result;
+                if (product) {
+                    document.getElementById('product-id').value = product.id;
+                    document.getElementById('product-name').value = product.nome;
+                    document.getElementById('product-description').value = product.descricao;
+                    document.getElementById('product-stock').value = product.estoque_atual;
+                    document.getElementById('product-price').value = product.preco_unitario;
+                    document.getElementById('product-cost').value = product.preco_compra;
+                    document.getElementById('product-barcode').value = product.codigo_barras;
+                    document.getElementById('modal-title').textContent = 'Editar Produto';
+                    openModal('produto');
+                }
+            };
+        }
+
+        function deleteProduct(id) {
+            if (confirm('Tem certeza que deseja excluir este produto?')) {
+                const transaction = db.transaction(['produto'], 'readwrite');
+                const store = transaction.objectStore('produto');
+                store.delete(id);
+                loadProducts();
+            }
+        }
+
+        // Load products with pagination
+        function loadProducts() {
+            const transaction = db.transaction(['produto'], 'readonly');
+            const store = transaction.objectStore('produto');
+            const request = store.getAll();
+
+            request.onsuccess = (event) => {
+                const products = event.target.result;
+                const totalPages = Math.ceil(products.length / itemsPerPage);
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
+                const paginatedProducts = products.slice(startIndex, endIndex);
+
+                const tableBody = document.getElementById('products-table-body');
+                tableBody.innerHTML = '';
+
+                paginatedProducts.forEach(product => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">${product.nome}</div>
+                            <div class="text-sm text-gray-500">${product.descricao || 'Sem descrição'}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full ${product.estoque_atual > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                ${product.estoque_atual}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            R$ ${product.preco_unitario.toFixed(2)}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            R$ ${product.preco_compra.toFixed(2)}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button onclick="editProduct('${product.id}')" class="text-blue-600 hover:text-blue-900 mr-3">
+                                <i data-feather="edit"></i>
+                            </button>
+                            <button onclick="deleteProduct('${product.id}')" class="text-red-600 hover:text-red-900">
+                                <i data-feather="trash-2"></i>
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+
+                // Update pagination info
+                document.getElementById('pagination-from').textContent = startIndex + 1;
+                document.getElementById('pagination-to').textContent = Math.min(endIndex, products.length);
+                document.getElementById('pagination-total').textContent = products.length;
+                document.getElementById('current-page').textContent = currentPage;
+
+                // Update button states
+                document.getElementById('prev-page').disabled = currentPage === 1;
+                document.getElementById('next-page').disabled = currentPage === totalPages || totalPages === 0;
+
+                feather.replace();
+            };
+        }
+
+        // Pagination handlers
+        document.getElementById('prev-page').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                loadProducts();
+            }
+        });
+
+        document.getElementById('next-page').addEventListener('click', () => {
+            currentPage++;
+            loadProducts();
+        });
+
+        // CSV Import/Export
+        function importCSV() {
+            openModal('csv');
+        }
+
+        function processCSV() {
+            const fileInput = document.getElementById('csv-file');
+            const file = fileInput.files[0];
+
+            if (file) {
+                Papa.parse(file, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        const transaction = db.transaction(['produto'], 'readwrite');
+                        const store = transaction.objectStore('produto');
+
+                        results.data.forEach(row => {
+                            const product = {
+                                id: row.id || generateUUID(),
+                                nome: row.nome,
+                                descricao: row.descricao,
+                                estoque_atual: parseInt(row.estoque_atual) || 0,
+                                preco_unitario: parseFloat(row.preco_unitario) || 0,
+                                preco_compra: parseFloat(row.preco_compra) || 0,
+                                codigo_barras: row.codigo_barras
+                            };
+                            store.put(product);
+                        });
+
+                        closeModal('csv');
+                        loadProducts();
+                    }
+                });
+            }
+        }
+
+        function exportCSV() {
+            const transaction = db.transaction(['produto'], 'readonly');
+            const store = transaction.objectStore('produto');
+            const request = store.getAll();
+
+            request.onsuccess = (event) => {
+                const products = event.target.result;
+                const csv = Papa.unparse(products);
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'estoque.csv');
+                link.style.visibility = 'hidden';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+        }
+
+        // Delete database
+        function deleteDatabase() {
+            if (confirm('Tem certeza que deseja limpar todo o banco de dados? Esta ação não pode ser desfeita.')) {
+                indexedDB.deleteDatabase(DB_NAME);
+                setTimeout(() => {
+                    initDatabase();
+                    alert('Banco de dados limpo com sucesso!');
+                }, 1000);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            AOS.init();
+            feather.replace();
+            initDatabase();
+        });
+    </script>
+</body>
+</html>
