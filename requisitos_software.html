@@ -121,7 +121,7 @@
         </section>
 
         <!-- UI Components -->
-        <section data-aos="fade-up">
+        <section class="mb-12" data-aos="fade-up">
             <div class="bg-black bg-opacity-50 rounded-xl p-6 border border-purple-900 card-hover">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-xl font-semibold text-purple-300">Componentes da Interface</h2>
@@ -132,6 +132,22 @@
                 </div>
                 <div id="uiComponents" class="space-y-4">
                     <!-- Component items will be added here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Data Structure -->
+        <section data-aos="fade-up">
+            <div class="bg-black bg-opacity-50 rounded-xl p-6 border border-purple-900 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold text-purple-300">Estrutura de Dados</h2>
+                    <button onclick="addDataStructure()" class="px-4 py-2 purple-accent rounded-lg hover:opacity-90 flex items-center space-x-2">
+                        <i data-feather="plus"></i>
+                        <span>Adicionar Estrutura</span>
+                    </button>
+                </div>
+                <div id="dataStructures" class="space-y-4">
+                    <!-- Data structure items will be added here -->
                 </div>
             </div>
         </section>
@@ -243,6 +259,37 @@
             feather.replace();
         }
 
+        function addDataStructure() {
+            const container = document.getElementById('dataStructures');
+            const id = Date.now();
+            const item = document.createElement('div');
+            item.className = 'bg-gray-900 rounded-lg p-4';
+            item.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Nome da Estrutura</label>
+                        <input type="text" placeholder="Ex: Usuário, Produto, Pedido" 
+                               class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg input-purple focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Descrição</label>
+                        <input type="text" placeholder="Descreva a estrutura de dados" 
+                               class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg input-purple focus:outline-none">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Campos/Atributos</label>
+                    <textarea placeholder="Ex: id: number, nome: string, email: string, dataCriacao: Date" 
+                              class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg input-purple focus:outline-none h-20"></textarea>
+                </div>
+                <button onclick="this.parentElement.remove(); saveAll();" class="text-red-400 hover:text-red-300 text-sm flex items-center">
+                    <i data-feather="trash-2" class="w-4 h-4 mr-1"></i> Remover
+                </button>
+            `;
+            container.appendChild(item);
+            feather.replace();
+        }
+
         function saveAll() {
             const data = {
                 systemName: document.getElementById('systemName').value,
@@ -260,6 +307,11 @@
                 components: Array.from(document.getElementById('uiComponents').children).map(item => ({
                     name: item.querySelector('input:nth-child(1)').value,
                     description: item.querySelector('input:nth-child(2)').value
+                })),
+                dataStructures: Array.from(document.getElementById('dataStructures').children).map(item => ({
+                    name: item.querySelector('input:nth-child(1)').value,
+                    description: item.querySelector('input:nth-child(2)').value,
+                    fields: item.querySelector('textarea').value
                 }))
             };
             
@@ -299,6 +351,14 @@
                     lastItem.querySelector('input:nth-child(1)').value = comp.name || '';
                     lastItem.querySelector('input:nth-child(2)').value = comp.description || '';
                 });
+
+                data.dataStructures?.forEach(structure => {
+                    addDataStructure();
+                    const lastItem = document.getElementById('dataStructures').lastChild;
+                    lastItem.querySelector('input:nth-child(1)').value = structure.name || '';
+                    lastItem.querySelector('input:nth-child(2)').value = structure.description || '';
+                    lastItem.querySelector('textarea').value = structure.fields || '';
+                });
             }
         }
 
@@ -323,6 +383,12 @@ ${func.description || 'Sem descrição'}`).join('\n\n') || 'Nenhuma função def
 ## Componentes da Interface
 ${data.components?.map(comp => `### ${comp.name || 'Sem nome'}
 ${comp.description || 'Sem descrição'}`).join('\n\n') || 'Nenhum componente definido'}
+
+## Estruturas de Dados
+${data.dataStructures?.map(structure => `### ${structure.name || 'Sem nome'}
+**Descrição:** ${structure.description || 'Sem descrição'}
+**Campos:** 
+${structure.fields || 'Sem campos definidos'}`).join('\n\n') || 'Nenhuma estrutura de dados definida'}
             `;
             
             const blob = new Blob([doc], { type: 'text/markdown' });
@@ -338,3 +404,4 @@ ${comp.description || 'Sem descrição'}`).join('\n\n') || 'Nenhum componente de
     </script>
 </body>
 </html>
+
