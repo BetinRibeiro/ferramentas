@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meta TAF - Evolução de Exercícios</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🏋️</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#183462',
+                        secondary: '#5C8D89',
+                        accent: '#FFD369'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .modal-backdrop {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+        }
+        .chart-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="bg-primary text-white min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <!-- Header -->
+        <header class="py-8 border-b border-white/10 sticky top-0 bg-primary/95 z-50">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <i data-feather="activity" class="w-8 h-8 text-accent"></i>
+                    <h1 class="text-2xl font-bold ml-3">Meta TAF</h1>
+                </div>
+                <button id="addBtn" class="bg-accent hover:bg-yellow-500 text-primary font-bold py-2 px-6 rounded-lg flex items-center transition">
+                    <i data-feather="plus" class="mr-2 w-5 h-5"></i> Novo Registro
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+            <div class="bg-white/5 p-6 rounded-xl border border-white/10" data-aos="fade-up">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-semibold">Abdominal</h3>
+                    <i data-feather="target" class="text-secondary"></i>
+                </div>
+                <div class="mt-4">
+                    <p class="text-3xl font-bold">42 reps</p>
+                    <p class="text-sm text-gray-300 mt-1">Último: 05/06</p>
+                </div>
+            </div>
+            <div class="bg-white/5 p-6 rounded-xl border border-white/10" data-aos="fade-up" data-aos-delay="100">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-semibold">Barra</h3>
+                    <i data-feather="bar-chart-2" class="text-secondary"></i>
+                </div>
+                <div class="mt-4">
+                    <p class="text-3xl font-bold">15 reps</p>
+                    <p class="text-sm text-gray-300 mt-1">Último: 04/06</p>
+                </div>
+            </div>
+            <div class="bg-white/5 p-6 rounded-xl border border-white/10" data-aos="fade-up" data-aos-delay="200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-semibold">Corrida</h3>
+                    <i data-feather="trending-up" class="text-secondary"></i>
+                </div>
+                <div class="mt-4">
+                    <p class="text-3xl font-bold">5.2 km</p>
+                    <p class="text-sm text-gray-300 mt-1">Último: 03/06</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="mt-12">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">Evolução de Desempenho</h2>
+                <div class="flex space-x-4">
+                    <button id="exportBtn" class="flex items-center text-sm bg-white/10 hover:bg-white/20 py-2 px-4 rounded-lg transition">
+                        <i data-feather="download" class="mr-2 w-4 h-4"></i> Exportar
+                    </button>
+                    <button id="importBtn" class="flex items-center text-sm bg-secondary hover:bg-green-600 py-2 px-4 rounded-lg transition">
+                        <i data-feather="upload" class="mr-2 w-4 h-4"></i> Importar
+                    </button>
+                </div>
+            </div>
+            <div class="chart-container rounded-xl p-6 border border-white/10">
+                <canvas id="progressChart" height="350"></canvas>
+            </div>
+        </div>
+
+        <!-- Records Table -->
+        <div class="mt-12 mb-16 overflow-x-auto">
+            <h2 class="text-xl font-bold mb-6">Registros Recentes</h2>
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="border-b border-white/20">
+                        <th class="py-3 text-left">Data</th>
+                        <th class="py-3 text-left">Exercício</th>
+                        <th class="py-3 text-left">Descrição</th>
+                        <th class="py-3 text-left">Valor</th>
+                        <th class="py-3 text-right">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="recordsBody">
+                    <!-- Data will be dynamically inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="recordModal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-backdrop absolute inset-0"></div>
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white/90 text-primary rounded-xl w-full max-w-md transform transition-all scale-95" data-aos="zoom-in">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold">Registro de Exercício</h3>
+                        <button id="closeModal">
+                            <i data-feather="x" class="text-gray-600"></i>
+                        </button>
+                    </div>
+                    <form id="exerciseForm">
+                        <input type="hidden" id="recordId">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Data</label>
+                                <input type="date" id="exerciseDate" required class="w-full px-4 py-2 rounded-lg border bg-white focus:border-accent focus:ring focus:ring-accent/20">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Exercício</label>
+                                <select id="exerciseType" required class="w-full px-4 py-2 rounded-lg border bg-white focus:border-accent focus:ring focus:ring-accent/20">
+                                    <option value="">Selecione</option>
+                                    <option value="abdominal">Abdominal</option>
+                                    <option value="barra">Barra</option>
+                                    <option value="corrida">Corrida</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Valor</label>
+                                <input type="number" id="exerciseValue" required class="w-full px-4 py-2 rounded-lg border bg-white focus:border-accent focus:ring focus:ring-accent/20" placeholder="Ex: 50 (reps ou km)">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Descrição</label>
+                                <textarea id="exerciseDesc" rows="3" class="w-full px-4 py-2 rounded-lg border bg-white focus:border-accent focus:ring focus:ring-accent/20" placeholder="Observações"></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-end space-x-3 mt-8">
+                            <button type="button" id="cancelBtn" class="px-4 py-2 text-gray-600 hover:text-gray-800 rounded-lg">Cancelar</button>
+                            <button type="submit" class="bg-accent hover:bg-yellow-500 text-primary font-medium px-6 py-2 rounded-lg transition">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize libraries
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize libraries
+            AOS.init({ duration: 800 });
+            feather.replace();
+            
+            // Initialize IndexedDB
+            const request = indexedDB.open('MetaTAFDB', 1);
+            
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains('exercises')) {
+                    const store = db.createObjectStore('exercises', { keyPath: 'id' });
+                    store.createIndex('date', 'date', { unique: false });
+                    store.createIndex('exercise', 'exercise', { unique: false });
+                }
+            };
+            
+            request.onsuccess = (event) => {
+                window.db = event.target.result;
+                console.log('Database initialized');
+                loadRecords();
+                setupEventListeners();
+                initChart();
+            };
+            
+            request.onerror = (event) => {
+                console.error('Database error:', event.target.error);
+            };
+        });
+
+
+        // CRUD Operations
+        function addExercise(record) {
+            if (!record.id) record.id = crypto.randomUUID();
+            
+            const transaction = window.db.transaction(['exercises'], 'readwrite');
+            const store = transaction.objectStore('exercises');
+            const request = store.add(record);
+            
+            request.onsuccess = () => {
+                loadRecords();
+                updateChart();
+                closeModal();
+            };
+            
+            request.onerror = (event) => {
+                console.error('Error adding record:', event.target.error);
+            };
+        }
+
+        function updateExercise(record) {
+            const transaction = window.db.transaction(['exercises'], 'readwrite');
+            const store = transaction.objectStore('exercises');
+            const request = store.put(record);
+            
+            request.onsuccess = () => {
+                loadRecords();
+                updateChart();
+                closeModal();
+            };
+            
+            request.onerror = (event) => {
+                console.error('Error updating record:', event.target.error);
+            };
+        }
+
+        function deleteExercise(id) {
+            const transaction = window.db.transaction(['exercises'], 'readwrite');
+            const store = transaction.objectStore('exercises');
+            const request = store.delete(id);
+            
+            request.onsuccess = () => {
+                loadRecords();
+                updateChart();
+            };
+            
+            request.onerror = (event) => {
+                console.error('Error deleting record:', event.target.error);
+            };
+        }
+
+        function getAllExercises(callback) {
+            const transaction = window.db.transaction(['exercises'], 'readonly');
+            const store = transaction.objectStore('exercises');
+            const request = store.getAll();
+            
+            request.onsuccess = () => {
+                callback(request.result);
+            };
+            
+            request.onerror = (event) => {
+                console.error('Error getting records:', event.target.error);
+                callback([]);
+            };
+        }
+
+        // UI Functions
+        function loadRecords() {
+            getAllExercises(records => {
+                const tbody = document.getElementById('recordsBody');
+                tbody.innerHTML = '';
+                
+                records.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                records.forEach(record => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'border-b border-white/10 hover:bg-white/5';
+                    tr.innerHTML = `
+                        <td class="py-4">${formatDate(record.date)}</td>
+                        <td class="py-4 capitalize">${record.exercise}</td>
+                        <td class="py-4">${record.description || '-'}</td>
+                        <td class="py-4 font-medium">${record.value} ${record.exercise === 'corrida' ? 'km' : 'reps'}</td>
+                        <td class="py-4 text-right">
+                            <button class="edit-btn mr-3 text-accent hover:text-yellow-500" data-id="${record.id}">
+                                <i data-feather="edit" class="w-4 h-4"></i>
+                            </button>
+                            <button class="delete-btn text-red-400 hover:text-red-300" data-id="${record.id}">
+                                <i data-feather="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                
+                feather.replace();
+                document.querySelectorAll('.edit-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const id = e.currentTarget.getAttribute('data-id');
+                        openEditModal(id);
+                    });
+                });
+                
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const id = e.currentTarget.getAttribute('data-id');
+                        if (confirm('Excluir este registro permanentemente?')) {
+                            deleteExercise(id);
+                        }
+                    });
+                });
+            });
+        }
+
+        function openEditModal(id) {
+            const transaction = window.db.transaction(['exercises'], 'readonly');
+            const store = transaction.objectStore('exercises');
+            const request = store.get(id);
+            
+            request.onsuccess = () => {
+                const record = request.result;
+                if (record) {
+                    document.getElementById('recordId').value = record.id;
+                    document.getElementById('exerciseDate').value = record.date;
+                    document.getElementById('exerciseType').value = record.exercise;
+                    document.getElementById('exerciseValue').value = record.value;
+                    document.getElementById('exerciseDesc').value = record.description || '';
+                    
+                    document.getElementById('recordModal').classList.remove('hidden');
+                }
+            };
+            
+            request.onerror = (event) => {
+                console.error('Error getting record:', event.target.error);
+            };
+        }
+
+        function openModal() {
+            document.getElementById('exerciseForm').reset();
+            document.getElementById('recordId').value = '';
+            document.getElementById('recordModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('recordModal').classList.add('hidden');
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        // Chart Functions
+        let progressChart;
+        function initChart() {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            
+            progressChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        createDataset('Abdominal', '#FFD369'),
+                        createDataset('Barra', '#5C8D89'),
+                        createDataset('Corrida', '#FF6B6B')
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#183462', font: { size: 14 } } }
+                    },
+                    scales: {
+                        x: { 
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: 'rgba(255,255,255,0.7)' }
+                        },
+                        y: { 
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: 'rgba(255,255,255,0.7)' }
+                        }
+                    }
+                }
+            });
+            
+            updateChart();
+        }
+
+        function createDataset(label, color) {
+            return {
+                label,
+                data: [],
+                borderColor: color,
+                backgroundColor: color + '40',
+                borderWidth: 3,
+                tension: 0.3,
+                fill: true
+            };
+        }
+
+        function updateChart() {
+            getAllExercises(records => {
+                records.sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                const dates = [...new Set(records.map(r => r.date))];
+                
+                progressChart.data.labels = dates.map(d => formatDate(d));
+                progressChart.data.datasets[0].data = aggregateData('abdominal', records, dates);
+                progressChart.data.datasets[1].data = aggregateData('barra', records, dates);
+                progressChart.data.datasets[2].data = aggregateData('corrida', records, dates);
+                
+                progressChart.update();
+            });
+        }
+
+        function aggregateData(exercise, records, dates) {
+            return dates.map(date => {
+                const matching = records.filter(r => 
+                    r.exercise === exercise && r.date === date
+                );
+                return matching.length > 0 ? 
+                    Math.max(...matching.map(m => m.value)) : 
+                    null;
+            });
+        }
+
+        // Event Handlers
+        function setupEventListeners() {
+            // Modal controls
+            document.getElementById('addBtn').addEventListener('click', openModal);
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+            document.getElementById('cancelBtn').addEventListener('click', closeModal);
+            
+            // Form submission
+            document.getElementById('exerciseForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const record = {
+                    date: document.getElementById('exerciseDate').value,
+                    exercise: document.getElementById('exerciseType').value,
+                    value: parseFloat(document.getElementById('exerciseValue').value),
+                    description: document.getElementById('exerciseDesc').value
+                };
+                
+                const id = document.getElementById('recordId').value;
+                if (id) {
+                    record.id = id;
+                    updateExercise(record);
+                } else {
+                    addExercise(record);
+                }
+            });
+            
+            // CSV Export
+            document.getElementById('exportBtn').addEventListener('click', () => {
+                getAllExercises(records => {
+                    const headers = ['id,date,exercise,value,description'];
+                    const csvContent = headers.concat(
+                        records.map(r => 
+                            `"${r.id}","${r.date}","${r.exercise}",${r.value},"${r.description || ''}"`
+                        )
+                    ).join('\n');
+                    
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `meta_taf_export_${new Date().toISOString().slice(0,10)}.csv`;
+                    link.click();
+                });
+            });
+            
+            // CSV Import
+            document.getElementById('importBtn').addEventListener('click', () => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.csv';
+                
+                input.onchange = e => {
+                    const file = e.target.files[0];
+                    const reader = new FileReader();
+                    
+                    reader.onload = event => {
+                        const text = event.target.result;
+                        const lines = text.split('\n');
+                        const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+                        
+                        const transactions = [];
+                        for (let i = 1; i < lines.length; i++) {
+                            if (!lines[i]) continue;
+                            
+                            const values = lines[i].split(',');
+                            const record = {};
+                            headers.forEach((header, index) => {
+                                let value = values[index] || '';
+                                value = value.trim().replace(/^"|"$/g, '');
+                                
+                                if (header === 'value') value = parseFloat(value);
+                                record[header] = value;
+                            });
+                            
+                            if (record.id) {
+                                transactions.push(record);
+                            }
+                        }
+                        
+                        if (transactions.length > 0) {
+                            const tx = db.transaction(['exercises'], 'readwrite');
+                            const store = tx.objectStore('exercises');
+                            
+                            transactions.forEach(record => {
+                                store.put(record);
+                            });
+                            
+                            tx.oncomplete = () => {
+                                alert(`${transactions.length} registros importados com sucesso!`);
+                                loadRecords();
+                                updateChart();
+                            };
+                        }
+                    };
+                    
+                    reader.readAsText(file);
+                };
+                
+                input.click();
+            });
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('recordModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('recordModal')) {
+                closeModal();
+            }
+        });
+
+        // Make db globally accessible for debugging
+        window.getDB = () => window.db;
+    </script>
+</body>
+</html>
