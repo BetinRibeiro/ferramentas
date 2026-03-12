@@ -1,858 +1,134 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Repositório de Ferramentas</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Painel BetinRibeiro</title>
     <style>
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-        .category-badge {
-            font-size: 0.7rem;
-            padding: 0.2rem 0.5rem;
-            border-radius: 1rem;
-        }
+        :root { --primary: #2563eb; --bg: #f8fafc; --text: #1e293b; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        h1 { text-align: center; color: var(--primary); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; max-width: 1200px; margin: 40px auto; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .card h2 { font-size: 1.1rem; margin-top: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; color: #475569; }
+        ul { list-style: none; padding: 0; }
+        li { margin: 8px 0; }
+        a { text-decoration: none; color: var(--primary); font-size: 0.95rem; transition: 0.2s; }
+        a:hover { text-decoration: underline; color: #1d4ed8; }
+        .emoji { margin-right: 8px; }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-    <header class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
-        <div class="container mx-auto px-4 py-8">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-4 md:mb-0">
-                    <h1 class="text-3xl md:text-4xl font-bold">Repositório de Ferramentas</h1>
-                    <p class="text-blue-100 mt-2">Coleção de utilitários e aplicações</p>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="relative">
-                        <input type="text" placeholder="Buscar ferramenta..." class="px-4 py-2 rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 w-64">
-                        <button class="absolute right-3 top-2 text-gray-500">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
+<body>
+
+    <h1>🚀 Central de Aplicações</h1>
+
+    <div class="grid">
+        <!-- Financeiro -->
+        <div class="card">
+            <h2>💰 Financeiro e Apostas</h2>
+            <ul>
+                <li><a href="apostas_probabilidade.html">Apostas Probabilidade</a></li>
+                <li><a href="bet_simulator.html">Simulador de Bet</a></li>
+                <li><a href="boderedo.html">Borderô</a></li>
+                <li><a href="bordero_inverso.html">Borderô Inverso</a></li>
+                <li><a href="calculo_reverso_bordero.html">Cálculo Reverso Borderô</a></li>
+                <li><a href="caculadora_margem.html">Calculadora de Margem</a></li>
+                <li><a href="calculadora_margem2.html">Calculadora de Margem 2</a></li>
+                <li><a href="calculadora_price.html">Calculadora Price</a></li>
+                <li><a href="descontoTitulo.html">Desconto de Título</a></li>
+                <li><a href="contas_fixas.html">Contas Fixas</a></li>
+                <li><a href="vinte_um.html">Jogo 21</a></li>
+            </ul>
         </div>
-    </header>
 
-    <main class="container mx-auto px-4 py-8">
-        <div class="mb-8">
-            <div class="flex flex-wrap gap-2 mb-6">
-                <button class="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition">Todas</button>
-                <button class="px-4 py-2 bg-gray-200 rounded-full hover:bg-gray-300 transition">Calculadoras</button>
-                <button class="px-4 py-2 bg-gray-200 rounded-full hover:bg-gray-300 transition">Cripto</button>
-                <button class="px-4 py-2 bg-gray-200 rounded-full hover:bg-gray-300 transition">Jogos</button>
-                <button class="px-4 py-2 bg-gray-200 rounded-full hover:bg-gray-300 transition">Utilitários</button>
-            </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                <!-- Card 1 -->
-                <a href="analisa_veracidade_texto.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Analisador de Texto</h3>
-                                <p class="text-gray-600 text-sm mt-1">Verifica a veracidade de textos</p>
-                            </div>
-                            <span class="category-badge bg-blue-100 text-blue-800">Análise</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 2 -->
-                <a href="analizador_cripto01.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Analisador Cripto 01</h3>
-                                <p class="text-gray-600 text-sm mt-1">Ferramenta de análise cripto</p>
-                            </div>
-                            <span class="category-badge bg-purple-100 text-purple-800">Cripto</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 3 -->
-                <a href="analizador_cripto02.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Analisador Cripto 02</h3>
-                                <p class="text-gray-600 text-sm mt-1">Segunda versão do analisador</p>
-                            </div>
-                            <span class="category-badge bg-purple-100 text-purple-800">Cripto</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 4 -->
-                <a href="analizador_cripto03.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Analisador Cripto 03</h3>
-                                <p class="text-gray-600 text-sm mt-1">Terceira versão do analisador</p>
-                            </div>
-                            <span class="category-badge bg-purple-100 text-purple-800">Cripto</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 5 -->
-                <a href="analizador_cripto04.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Analisador Cripto 04</h3>
-                                <p class="text-gray-600 text-sm mt-1">Quarta versão do analisador</p>
-                            </div>
-                            <span class="category-badge bg-purple-100 text-purple-800">Cripto</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 6 -->
-                <a href="analizador_cripto05.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Analisador Cripto 05</h3>
-                                <p class="text-gray-600 text-sm mt-1">Quinta versão do analisador</p>
-                            </div>
-                            <span class="category-badge bg-purple-100 text-purple-800">Cripto</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 7 -->
-                <a href="analizador_cripto06.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Analisador Cripto 06</h3>
-                                <p class="text-gray-600 text-sm mt-1">Sexta versão do analisador</p>
-                            </div>
-                            <span class="category-badge bg-purple-100 text-purple-800">Cripto</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 8 -->
-                <a href="analizador_cripto07.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Analisador Cripto 07</h3>
-                                <p class="text-gray-600 text-sm mt-1">Sétima versão do analisador</p>
-                            </div>
-                            <span class="category-badge bg-purple-100 text-purple-800">Cripto</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 9 -->
-                <a href="apostas_probabilidade.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Apostas Probabilidade</h3>
-                                <p class="text-gray-600 text-sm mt-1">Calculadora de probabilidades</p>
-                            </div>
-                            <span class="category-badge bg-green-100 text-green-800">Jogos</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 10 -->
-                <a href="arquivo_senha.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Arquivo Senha</h3>
-                                <p class="text-gray-600 text-sm mt-1">Gerenciador de senhas</p>
-                            </div>
-                            <span class="category-badge bg-red-100 text-red-800">Segurança</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 11 -->
-                <a href="bet_simulator.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Simulador de Apostas</h3>
-                                <p class="text-gray-600 text-sm mt-1">Simula resultados de apostas</p>
-                            </div>
-                            <span class="category-badge bg-green-100 text-green-800">Jogos</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 12 -->
-                <a href="boderedo.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Bordero</h3>
-                                <p class="text-gray-600 text-sm mt-1">Ferramenta de bordero</p>
-                            </div>
-                            <span class="category-badge bg-yellow-100 text-yellow-800">Financeiro</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 13 -->
-                <a href="bordero_inverso.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Bordero Inverso</h3>
-                                <p class="text-gray-600 text-sm mt-1">Cálculo de bordero inverso</p>
-                            </div>
-                            <span class="category-badge bg-yellow-100 text-yellow-800">Financeiro</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 14 -->
-                <a href="caculadora_margem.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Calculadora Margem</h3>
-                                <p class="text-gray-600 text-sm mt-1">Calculadora de margens</p>
-                            </div>
-                            <span class="category-badge bg-indigo-100 text-indigo-800">Calculadora</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Última semana</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 42 -->
-                <a href="contas_fixas.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Contas Fixas</h3>
-                                <p class="text-gray-600 text-sm mt-1">Gestão de contas fixas</p>
-                            </div>
-                            <span class="category-badge bg-yellow-100 text-yellow-800">Financeiro</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 43 -->
-                <a href="gerar_qr_uuid.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Gerador QR UUID</h3>
-                                <p class="text-gray-600 text-sm mt-1">Gerador de QR com UUID</p>
-                            </div>
-                            <span class="category-badge bg-red-100 text-red-800">Utilitário</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 44 -->
-                <a href="monitor_corrida.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Monitor Corrida</h3>
-                                <p class="text-gray-600 text-sm mt-1">Monitoramento de corridas</p>
-                            </div>
-                            <span class="category-badge bg-green-100 text-green-800">Esportes</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 15 -->
-                <a href="calculadora_fita.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Calculadora Fita</h3>
-                                <p class="text-gray-600 text-sm mt-1">Calculadora para fitas</p>
-                            </div>
-                            <span class="category-badge bg-indigo-100 text-indigo-800">Calculadora</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 16 -->
-                <a href="calculadora_margem2.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Calculadora Margem 2</h3>
-                                <p class="text-gray-600 text-sm mt-1">Segunda versão da calculadora</p>
-                            </div>
-                            <span class="category-badge bg-indigo-100 text-indigo-800">Calculadora</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Última semana</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 17 -->
-                <a href="calculadora_price.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Calculadora Price</h3>
-                                <p class="text-gray-600 text-sm mt-1">Sistema de amortização</p>
-                            </div>
-                            <span class="category-badge bg-indigo-100 text-indigo-800">Calculadora</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 18 -->
-                <a href="calculadora_racao_suino.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Calculadora Ração</h3>
-                                <p class="text-gray-600 text-sm mt-1">Para suínos</p>
-                            </div>
-                            <span class="category-badge bg-indigo-100 text-indigo-800">Calculadora</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 19 -->
-                <a href="calculo_reverso_bordero.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Cálculo Reverso</h3>
-                                <p class="text-gray-600 text-sm mt-1">Para borderos</p>
-                            </div>
-                            <span class="category-badge bg-yellow-100 text-yellow-800">Financeiro</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 20 -->
-                <a href="controle_abastecimento.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Controle Abastecimento</h3>
-                                <p class="text-gray-600 text-sm mt-1">Gestão de abastecimento</p>
-                            </div>
-                            <span class="category-badge bg-teal-100 text-teal-800">Gestão</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 21 -->
-                <a href="cronograma_obra.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Cronograma Obra</h3>
-                                <p class="text-gray-600 text-sm mt-1">Planejamento de obras</p>
-                            </div>
-                            <span class="category-badge bg-orange-100 text-orange-800">Construção</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 22 -->
-                <a href="documentacao_fabrica_simples.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Documentação Fábrica</h3>
-                                <p class="text-gray-600 text-sm mt-1">Gestão documental</p>
-                            </div>
-                            <span class="category-badge bg-teal-100 text-teal-800">Gestão</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 23 -->
-                <a href="gado_forte.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Gado Forte</h3>
-                                <p class="text-gray-600 text-sm mt-1">Gestão pecuária</p>
-                            </div>
-                            <span class="category-badge bg-emerald-100 text-emerald-800">Agro</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 24 -->
-                <a href="geolocalizacao.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Geolocalização</h3>
-                                <p class="text-gray-600 text-sm mt-1">Ferramenta de localização</p>
-                            </div>
-                            <span class="category-badge bg-blue-100 text-blue-800">GPS</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Ontem</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 25 -->
-                <a href="geolocation.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Geolocation</h3>
-                                <p class="text-gray-600 text-sm mt-1">Primeira versão</p>
-                            </div>
-                            <span class="category-badge bg-blue-100 text-blue-800">GPS</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 26 -->
-                <a href="geolocation2.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Geolocation 2</h3>
-                                <p class="text-gray-600 text-sm mt-1">Segunda versão</p>
-                            </div>
-                            <span class="category-badge bg-blue-100 text-blue-800">GPS</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Agora</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 27 -->
-                <a href="gerador_cpf.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Gerador CPF</h3>
-                                <p class="text-gray-600 text-sm mt-1">Gerador de CPFs válidos</p>
-                            </div>
-                            <span class="category-badge bg-red-100 text-red-800">Utilitário</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 28 -->
-                <a href="gestor_senha.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Gestor Senha</h3>
-                                <p class="text-gray-600 text-sm mt-1">Gerenciador de senhas</p>
-                            </div>
-                            <span class="category-badge bg-red-100 text-red-800">Segurança</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 29 -->
-                <a href="info_sistem.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Info Sistema</h3>
-                                <p class="text-gray-600 text-sm mt-1">Informações do sistema</p>
-                            </div>
-                            <span class="category-badge bg-gray-100 text-gray-800">Sistema</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 30 -->
-                <a href="memoria.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Memória</h3>
-                                <p class="text-gray-600 text-sm mt-1">Monitor de memória</p>
-                            </div>
-                            <span class="category-badge bg-gray-100 text-gray-800">Sistema</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 31 -->
-                <a href="orcamento_impressao.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Orçamento Impressão</h3>
-                                <p class="text-gray-600 text-sm mt-1">Cálculo de custos</p>
-                            </div>
-                            <span class="category-badge bg-indigo-100 text-indigo-800">Calculadora</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 32 -->
-                <a href="orcamento_obra.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Orçamento Obra</h3>
-                                <p class="text-gray-600 text-sm mt-1">Cálculo de custos</p>
-                            </div>
-                            <span class="category-badge bg-orange-100 text-orange-800">Construção</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 33 -->
-                <a href="prefeitura_exemplo.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Prefeitura Exemplo</h3>
-                                <p class="text-gray-600 text-sm mt-1">Modelo para prefeituras</p>
-                            </div>
-                            <span class="category-badge bg-teal-100 text-teal-800">Governo</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 34 -->
-                <a href="qrcode.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Gerador QR Code</h3>
-                                <p class="text-gray-600 text-sm mt-1">Criador de QR Codes</p>
-                            </div>
-                            <span class="category-badge bg-red-100 text-red-800">Utilitário</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 35 -->
-                <a href="roletes.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Rolêtes</h3>
-                                <p class="text-gray-600 text-sm mt-1">Ferramenta para rolêtes</p>
-                            </div>
-                            <span class="category-badge bg-gray-100 text-gray-800">Industrial</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 36 -->
-                <a href="sorteio.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Sorteio</h3>
-                                <p class="text-gray-600 text-sm mt-1">Ferramenta de sorteio</p>
-                            </div>
-                            <span class="category-badge bg-green-100 text-green-800">Jogos</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Card 37 -->
-                <a href="vinte_um.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Vinte e Um</h3>
-                                <p class="text-gray-600 text-sm mt-1">Jogo de cartas</p>
-                            </div>
-                            <span class="category-badge bg-green-100 text-green-800">Jogos</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                
-                <!-- Card 38 -->
-                <a href="vcf_gerador.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">VCF Gerador</h3>
-                                <p class="text-gray-600 text-sm mt-1">Gerador de Doc VCF</p>
-                            </div>
-                            <span class="category-badge bg-green-100 text-green-800">Ferramentas</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-
-                
-                <!-- Card 39 -->
-                <a href="gerenciador_cobrancas.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Gerenciador Cobrança</h3>
-                                <p class="text-gray-600 text-sm mt-1">Controle do CObrador</p>
-                            </div>
-                            <span class="category-badge bg-green-100 text-green-800">Ferramentas</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-                
-                <!-- Card 40 -->
-                <a href="gestao_clientes.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Gerenciador Clientes</h3>
-                                <p class="text-gray-600 text-sm mt-1">Controle do Clientes</p>
-                            </div>
-                            <span class="category-badge bg-green-100 text-green-800">Ferramentas</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-                
-                <!-- Card 41 -->
-                <a href="gelocalizacao_rota.html" class="card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
-                    <div class="p-5">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-bold text-lg text-gray-800">Geolocalização Rota </h3>
-                                <p class="text-gray-600 text-sm mt-1">Localização rota</p>
-                            </div>
-                            <span class="category-badge bg-green-100 text-green-800">Ferramentas</span>
-                        </div>
-                        <div class="mt-4 flex items-center text-sm text-gray-500">
-                            <i class="fas fa-calendar-alt mr-1"></i>
-                            <span>Último mês</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
+        <!-- Cripto -->
+        <div class="card">
+            <h2>₿ Analisadores Cripto</h2>
+            <ul>
+                <li><a href="analizador_cripto01.html">Analisador Cripto 01</a></li>
+                <li><a href="analizador_cripto02.html">Analisador Cripto 02</a></li>
+                <li><a href="analizador_cripto03.html">Analisador Cripto 03</a></li>
+                <li><a href="analizador_cripto04.html">Analisador Cripto 04</a></li>
+                <li><a href="analizador_cripto05.html">Analisador Cripto 05</a></li>
+                <li><a href="analizador_cripto06.html">Analisador Cripto 06</a></li>
+                <li><a href="analizador_cripto07.html">Analisador Cripto 07</a></li>
+            </ul>
         </div>
-    </main>
 
-    <footer class="bg-gray-800 text-white py-8">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row justify-between">
-                <div class="mb-6 md:mb-0">
-                    <h3 class="text-xl font-bold mb-4">Repositório de Ferramentas</h3>
-                    <p class="text-gray-400">Coleção de utilitários e aplicações para diversas finalidades.</p>
-                </div>
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
-                    <div>
-                        <h4 class="text-lg font-semibold mb-4">Categorias</h4>
-                        <ul class="space-y-2">
-                            <li><a href="#" class="text-gray-400 hover:text-white">Calculadoras</a></li>
-                            <li><a href="#" class="text-gray-400 hover:text-white">Cripto</a></li>
-                            <li><a href="#" class="text-gray-400 hover:text-white">Jogos</a></li>
-                            <li><a href="#" class="text-gray-400 hover:text-white">Utilitários</a></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 class="text-lg font-semibold mb-4">Links</h4>
-                        <ul class="space-y-2">
-                            <li><a href="#" class="text-gray-400 hover:text-white">GitHub</a></li>
-                            <li><a href="#" class="text-gray-400 hover:text-white">Documentação</a></li>
-                            <li><a href="#" class="text-gray-400 hover:text-white">Contribuir</a></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 class="text-lg font-semibold mb-4">Contato</h4>
-                        <ul class="space-y-2">
-                            <li class="text-gray-400">email@exemplo.com</li>
-                            <li class="text-gray-400">(00) 0000-0000</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-                <p>&copy; 2023 Repositório de Ferramentas. Todos os direitos reservados.</p>
-            </div>
+        <!-- Gestão -->
+        <div class="card">
+            <h2>🏢 Gestão e Vendas</h2>
+            <ul>
+                <li><a href="cadastroProdutos.html">Cadastro de Produtos</a></li>
+                <li><a href="gestao_clientes.html">Gestão de Clientes</a></li>
+                <li><a href="controle_cliente.html">Controle de Cliente</a></li>
+                <li><a href="controle_cobrador.html">Controle de Cobrador</a></li>
+                <li><a href="gerenciador_cobrancas.html">Gerenciador de Cobranças</a></li>
+                <li><a href="gerador_recibo.html">Gerador de Recibo</a></li>
+                <li><a href="ordem_servico.html">Ordem de Serviço</a></li>
+                <li><a href="orcamento_impressao.html">Orçamento Impressão</a></li>
+                <li><a href="lista_compras.html">Lista de Compras</a></li>
+            </ul>
         </div>
-    </footer>
 
-    <script>
-        // Adicione aqui qualquer funcionalidade JavaScript que desejar
-        document.addEventListener('DOMContentLoaded', function() {
-            // Exemplo: Adicionar animação aos cards ao carregar a página
-            const cards = document.querySelectorAll('.card');
-            cards.forEach((card, index) => {
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                }, index * 50);
-            });
-        });
-    </script>
+        <!-- Obra -->
+        <div class="card">
+            <h2>🏗️ Engenharia e Obra</h2>
+            <ul>
+                <li><a href="cronograma_obra.html">Cronograma de Obra</a></li>
+                <li><a href="orcamento_obra.html">Orçamento de Obra</a></li>
+                <li><a href="calculadora_fita.html">Calculadora de Fita</a></li>
+                <li><a href="roletes.html">Roletes</a></li>
+                <li><a href="documentacao_fabrica_simples.html">Doc. Fábrica</a></li>
+            </ul>
+        </div>
+
+        <!-- Geo -->
+        <div class="card">
+            <h2>📍 Localização e GPS</h2>
+            <ul>
+                <li><a href="localizacao_cidades_raio.html">Cidades por Raio</a></li>
+                <li><a href="geolocalizacao.html">Geolocalização Geral</a></li>
+                <li><a href="gelocalizacao_rota.html">Geolocalização Rota</a></li>
+                <li><a href="geolocation.html">Geolocation 1</a></li>
+                <li><a href="geolocation2.html">Geolocation 2</a></li>
+            </ul>
+        </div>
+
+        <!-- TAF -->
+        <div class="card">
+            <h2>🏃 TAF e Saúde</h2>
+            <ul>
+                <li><a href="meta_taf.html">Meta TAF</a></li>
+                <li><a href="regras_taf.html">Regras TAF</a></li>
+                <li><a href="taf_corrida.html">TAF Corrida</a></li>
+                <li><a href="taf_2.html">TAF 2</a></li>
+                <li><a href="monitor_corrida.html">Monitor de Corrida</a></li>
+                <li><a href="analizador_corporal.html">Analisador Corporal</a></li>
+                <li><a href="calculadora_racao_suino.html">Ração Suíno</a></li>
+                <li><a href="gado_forte.html">Gado Forte</a></li>
+            </ul>
+        </div>
+
+        <!-- Utils -->
+        <div class="card">
+            <h2>🛠️ Utilitários</h2>
+            <ul>
+                <li><a href="gerador_cpf.html">Gerador de CPF</a></li>
+                <li><a href="gerar_qr_uuid.html">Gerador QR UUID</a></li>
+                <li><a href="qrcode.html">QR Code</a></li>
+                <li><a href="vcf_gerador.html">Gerador VCF</a></li>
+                <li><a href="gestor_senha.html">Gestor de Senhas</a></li>
+                <li><a href="arquivo_senha.html">Arquivo de Senha</a></li>
+                <li><a href="paleta_cores.html">Paleta de Cores</a></li>
+                <li><a href="sorteio.html">Sorteio</a></li>
+                <li><a href="memoria.html">Jogo da Memória</a></li>
+                <li><a href="analisa_veracidade_texto.html">Análise de Texto</a></li>
+                <li><a href="controle_abastecimento.html">Abastecimento</a></li>
+                <li><a href="info_sistem.html">Info Sistema</a></li>
+            </ul>
+        </div>
+    </div>
+
 </body>
 </html>
