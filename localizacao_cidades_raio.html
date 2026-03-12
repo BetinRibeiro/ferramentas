@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Busca de Municípios por Raio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f7f6; padding-top: 50px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 900px; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .header-title { color: #2c3e50; font-weight: 700; margin-bottom: 30px; border-bottom: 2px solid #3498db; display: inline-block; padding-bottom: 10px; }
+        .loading { display: none; margin-top: 20px; }
+        #resultados { margin-top: 30px; }
+        .city-card { border: none; border-left: 5px solid #3498db; background: #f8f9fa; margin-bottom: 12px; transition: 0.2s; }
+        .city-card:hover { background: #eef2f7; transform: scale(1.01); }
+        .distancia-tag { font-weight: bold; color: #e67e22; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="text-center">
+        <h2 class="header-title">📍 Localizador de Municípios Vizinhos</h2>
+        <p class="text-muted">Busca oficial baseada em divisas municipais (IBGE/OSM)</p>
+    </div>
+    
+    <form id="searchForm" class="mt-4">
+        <div class="row g-3">
+            <!-- Estado -->
+            <div class="col-md-4">
+                <label class="form-label fw-bold">1. Estado</label>
+                <select id="estado" class="form-select form-select-lg" required>
+                    <option value="">Selecione...</option>
+                </select>
+            </div>
+
+            <!-- Cidade -->
+            <div class="col-md-5">
+                <label class="form-label fw-bold">2. Cidade de Origem</label>
+                <select id="cidade" class="form-select form-select-lg" disabled required>
+                    <option value="">Selecione o estado primeiro</option>
+                </select>
+            </div>
+
+            <!-- KM -->
+            <div class="col-md-3">
+                <label class="form-label fw-bold">3. Raio (km)</label>
+                <input type="number" id="raio" class="form-control form-select-lg" placeholder="Ex: 50" min="1" max="300" required>
+            </div>
+
+            <div class="col-12 mt-4">
+                <button type="submit" class="btn btn-primary btn-lg w-100" id="btnBuscar">
+                    Verificar Cidades no Raio
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <div class="loading text-center" id="loader">
+        <div class="spinner-grow text-primary" role="status"></div>
+        <p class="mt-2 text-primary fw-bold">Filtrando municípios oficiais... por favor aguarde.</p>
+    </div>
+
+    <div id="resultados"></div>
+</div>
+
+<script>
+    const estadoSelect = document.getElementById('estado');
+    const cidadeSelect = document.getElementById('cidade');
+    const searchForm = document.getElementById('searchForm');
+    const resultadosDiv = document.getElementById('resultados');
+    const loader = document.getElementById('loader');
+
+    // 1. Carregar Estados (IBGE)
+    async function carregarEstados() {
+        try {
+            const res = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=nome');
+            const estados = await res.json();
+            estados.forEach(uf => {
+                const option = new Option(uf.nome, uf.sigla);
+                estadoSelect.add(option);
+            });
+        } catch (e) { console.error("Erro ao carregar estados", e); }
+    }
+
+    // 2. Carregar Cidades (IBGE)
+    estadoSelect.addEventListener('change', async () => {
+        const uf = estadoSelect.value;
+        cidadeSelect.innerHTML = '<option value="">Carregando...</option>';
+        cidadeSelect.disabled = true;
+
+        if (!uf) return;
+
+        try {
+            const res = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`);
+            const cidades = await res.json();
+            cidadeSelect.innerHTML = '<option value="">Selecione a cidade...</option>';
+            cidades.forEach(c => {
+                const option = new Option(c.nome, c.nome);
+                cidadeSelect.add(option);
+            });
+            cidadeSelect.disabled = false;
+        } catch (e) { console.error("Erro ao carregar cidades", e); }
+    });
+
+    // 3. Busca com Filtro de Municípios
+    searchForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        resultadosDiv.innerHTML = '';
+        loader.style.display = 'block';
+
+        const cidadeNome = cidadeSelect.value;
+        const estadoSigla = estadoSelect.value;
+        const raioKm = document.getElementById('raio').value;
+
+        try {
+            // Passo A: Coordenadas da cidade selecionada
+            const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cidadeNome)},${estadoSigla},Brazil&limit=1`);
+            const geoData = await geoRes.json();
+            if (geoData.length === 0) throw new Error("Cidade origem não encontrada no mapa.");
+
+            const { lat, lon } = geoData[0];
+
+            // Passo B: Overpass API filtrando por 'admin_level=8' (Municípios no Brasil)
+            // Buscamos 'rel' (relation) que é o que define o contorno do município
+            const radiusMeters = raioKm * 1000;
+            const query = `
+                [out:json];
+                (
+                  relation["boundary"="administrative"]["admin_level"="8"](around:${radiusMeters},${lat},${lon});
+                );
+                out center;`;
+            
+            const overpassUrl = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+            const overpassRes = await fetch(overpassUrl);
+            const overpassData = await overpassRes.json();
+
+            exibirResultados(overpassData.elements, lat, lon, cidadeNome);
+        } catch (err) {
+            resultadosDiv.innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+        } finally {
+            loader.style.display = 'none';
+        }
+    });
+
+    function exibirResultados(locais, latOrigem, lonOrigem, cidadeOrigem) {
+        if (!locais || locais.length === 0) {
+            resultadosDiv.innerHTML = '<div class="alert alert-warning">Nenhum município oficial encontrado neste raio.</div>';
+            return;
+        }
+
+        // Mapear e calcular distância
+        let cidades = locais
+            .map(l => {
+                const nome = l.tags.name;
+                const dist = calcularDistancia(latOrigem, lonOrigem, l.center.lat, l.center.lon);
+                return { nome, dist };
+            })
+            // Filtro para não repetir a cidade de origem e remover nomes duplicados
+            .filter((c, index, self) => 
+                c.nome.toLowerCase() !== cidadeOrigem.toLowerCase() &&
+                index === self.findIndex((t) => t.nome === c.nome)
+            )
+            .sort((a, b) => a.dist - b.dist);
+
+        if (cidades.length === 0) {
+            resultadosDiv.innerHTML = '<div class="alert alert-info">Apenas a própria cidade foi encontrada neste raio. Tente aumentar a quilometragem.</div>';
+            return;
+        }
+
+        let html = `<h4 class="mb-4 text-secondary">Municípios encontrados num raio de ${document.getElementById('raio').value}km:</h4>`;
+        cidades.forEach(c => {
+            html += `
+                <div class="card city-card shadow-sm p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted small">MUNICÍPIO</span>
+                            <h5 class="mb-0">${c.nome}</h5>
+                        </div>
+                        <div class="text-end">
+                            <span class="distancia-tag">${c.dist.toFixed(1)} km</span>
+                            <br><small class="text-muted">em linha reta</small>
+                        </div>
+                    </div>
+                </div>`;
+        });
+        resultadosDiv.innerHTML = html;
+    }
+
+    function calcularDistancia(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    carregarEstados();
+</script>
+
+</body>
+</html>
