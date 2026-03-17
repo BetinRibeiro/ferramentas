@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rogoberto Ribeiro da Silva - Framework de Vendas</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --white: #ffffff;
+            --accent: #3b82f6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            color: var(--white);
+            padding: 4rem 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            letter-spacing: -1px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.2rem;
+            margin-top: 10px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: -40px auto 40px;
+            padding: 0 20px;
+        }
+
+        .card-grid {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .step-card {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid var(--primary);
+            transition: transform 0.2s;
+        }
+
+        .step-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .step-number {
+            font-weight: bold;
+            color: var(--primary);
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-card h2 {
+            margin: 0 0 1rem 0;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .old-way {
+            font-size: 0.8rem;
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: normal;
+        }
+
+        .section-title {
+            font-weight: bold;
+            color: var(--primary);
+            margin-top: 1.5rem;
+            display: block;
+        }
+
+        ul {
+            margin: 0.5rem 0;
+            padding-left: 1.2rem;
+        }
+
+        .objective {
+            background: #eff6ff;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+            border-left: 3px solid var(--accent);
+        }
+
+        .summary {
+            background: #1e293b;
+            color: white;
+            padding: 3rem;
+            border-radius: 12px;
+            margin-top: 4rem;
+            text-align: center;
+        }
+
+        .summary h2 { margin-bottom: 2rem; }
+
+        .summary-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            list-style: none;
+            padding: 0;
+        }
+
+        .summary-list li {
+            background: rgba(255,255,255,0.1);
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .btn-next {
+            display: inline-block;
+            background-color: var(--primary);
+            color: white;
+            padding: 15px 40px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: background 0.3s;
+            box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.39);
+        }
+
+        .btn-next:hover {
+            background-color: #1d4ed8;
+        }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.8rem; }
+            .step-card h2 { flex-direction: column; align-items: flex-start; gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Rogoberto Ribeiro da Silva</h1>
+        <p>Framework Moderno de Vendas de Software Online</p>
+    </header>
+
+    <div class="container">
+        <div class="card-grid">
+            
+            <!-- Step 1 -->
+            <div class="step-card">
+                <span class="step-number">Passo 01</span>
+                <h2>Mapeamento de Mercado <span class="old-way">Antigo: Fazer lista</span></h2>
+                <p>Identificação estratégica de segmentos e perfis de clientes ideais em vez de abordagens genéricas.</p>
+                
+                <span class="section-title">Habilidades envolvidas:</span>
+                <ul>
+                    <li>Definir ICP (Ideal Customer Profile)</li>
+                    <li>Mapear nichos específicos</li>
+                    <li>Encontrar leads em plataformas e usar dados de mercado</li>
+                </ul>
+
+                <span class="section-title">Ferramentas:</span>
+                <p>LinkedIn, Comunidades, Bases de empresas, Scraping de leads.</p>
+
+                <div class="objective">
+                    <strong>Objetivo:</strong> Criar um mapa real de oportunidades de venda.
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step-card">
+                <span class="step-number">Passo 02</span>
+                <h2>Captura de Interesse <span class="old-way">Antigo: Convite</span></h2>
+                <p>Geração de curiosidade e atenção qualificada no ambiente digital.</p>
+                
+                <span class="section-title">Estratégias:</span>
+                <ul>
+                    <li>Conteúdo educativo e posts técnicos</li>
+                    <li>Mensagens diretas estratégicas (Cold Mail/DM)</li>
+                    <li>Landing pages de conversão e anúncios segmentados</li>
+                </ul>
+
+                <div class="objective">
+                    <strong>Objetivo:</strong> Fazer o lead pensar: "Isso pode resolver meu problema".
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="step-card">
+                <span class="step-number">Passo 03</span>
+                <h2>Diagnóstico de Problema <span class="old-way">Antigo: Apresentação</span></h2>
+                <p>Entendimento profundo da dor do cliente antes de falar sobre o produto.</p>
+                
+                <span class="section-title">Perguntas Chave:</span>
+                <ul>
+                    <li>Como você resolve isso hoje?</li>
+                    <li>Quanto tempo/dinheiro você perde com esse processo?</li>
+                    <li>Qual o impacto real disso no seu negócio?</li>
+                </ul>
+
+                <div class="objective">
+                    <strong>Objetivo:</strong> Conectar o software com um problema real e latente.
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="step-card">
+                <span class="step-number">Passo 04</span>
+                <h2>Demonstração de Valor <span class="old-way">Antigo: Mostrar plano</span></h2>
+                <p>Prova prática de como a solução elimina as dores diagnosticadas.</p>
+                
+                <span class="section-title">Formatos:</span>
+                <ul>
+                    <li>Demo ao vivo personalizada</li>
+                    <li>Vídeos curtos (Loom), trials ou protótipos</li>
+                    <li>Estudos de caso e prova social</li>
+                </ul>
+
+                <div class="objective">
+                    <strong>Objetivo:</strong> Mostrar resultado prático, não apenas funcionalidades.
+                </div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="step-card">
+                <span class="step-number">Passo 05</span>
+                <h2>Conversão Estratégica <span class="old-way">Antigo: Fechamento</span></h2>
+                <p>Redução de atrito para entrada do cliente no ecossistema.</p>
+                
+                <span class="section-title">Táticas de SaaS:</span>
+                <ul>
+                    <li>Período gratuito (Freemium/Trial)</li>
+                    <li>Plano inicial "pé na porta"</li>
+                    <li>Onboarding guiado e bônus de implementação</li>
+                </ul>
+
+                <div class="objective">
+                    <strong>Objetivo:</strong> Facilitar a decisão de compra e o início do uso.
+                </div>
+            </div>
+
+            <!-- Step 6 -->
+            <div class="step-card">
+                <span class="step-number">Passo 06</span>
+                <h2>Expansão e Retenção <span class="old-way">Antigo: Duplicação</span></h2>
+                <p>Crescimento do Valor de Vida (LTV) do cliente dentro da plataforma.</p>
+                
+                <span class="section-title">Estratégias:</span>
+                <ul>
+                    <li>Upsell de planos e novas funcionalidades</li>
+                    <li>Programas de indicação</li>
+                    <li>Criação de comunidade de usuários</li>
+                </ul>
+
+                <div class="objective">
+                    <strong>Objetivo:</strong> Transformar cliente em promotor fiel da solução.
+                </div>
+            </div>
+
+        </div>
+
+        <section class="summary">
+            <h2>Resumo do Modelo</h2>
+            <ul class="summary-list">
+                <li>1. Mapeamento</li>
+                <li>2. Interesse</li>
+                <li>3. Diagnóstico</li>
+                <li>4. Valor</li>
+                <li>5. Conversão</li>
+                <li>6. Expansão</li>
+            </ul>
+        </section>
+
+        <footer>
+            <a href="two.html" class="btn-next">Ir para a Próxima Página (two.html)</a>
+        </footer>
+    </div>
+
+</body>
+</html>
