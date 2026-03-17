@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Lista de Compras</title>
+    <style>
+        :root {
+            --primary: #2ecc71;
+            --secondary: #27ae60;
+            --bg: #f4f7f6;
+            --text: #2c3e50;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding-top: 80px; /* Espaço para o header fixo */
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .total-container {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .category {
+            background: var(--white);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .category-title {
+            border-bottom: 2px solid var(--primary);
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            color: var(--secondary);
+        }
+
+        .subcategory-title {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin: 10px 0 5px 0;
+            font-style: italic;
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .item-name {
+            flex: 1;
+            font-size: 1rem;
+        }
+
+        .item-input {
+            width: 60px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .item-input:focus {
+            outline: 2px solid var(--primary);
+            border-color: transparent;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #95a5a6;
+            font-size: 0.8rem;
+        }
+
+        /* Cores por prioridade */
+        .p1 { border-left: 5px solid #e74c3c; }
+        .p2 { border-left: 5px solid #f39c12; }
+        .p3 { border-left: 5px solid #3498db; }
+        .p4 { border-left: 5px solid #9b59b6; }
+        .p5 { border-left: 5px solid #95a5a6; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Total Estimado (R$ 10,00/item)</h1>
+    <div class="total-container">R$ <span id="total-geral">0,00</span></div>
+</header>
+
+<div class="container" id="lista-compras">
+    <!-- O conteúdo será gerado pelo JavaScript -->
+</div>
+
+<footer>
+    Os valores são baseados em uma média de R$ 10,00 por unidade/pacote.
+</footer>
+
+<script>
+    const data = {
+        "Prioridade 1: Essenciais": {
+            class: "p1",
+            sub: {
+                "Grãos e Base": ["Arroz", "Feijão", "Lentilha", "Grão-de-bico", "Macarrão", "Fubá", "Farinha de trigo", "Farinha de mandioca", "Polenta", "Cuscuz"],
+                "Proteínas Básicas": ["Ovos", "Frango", "Carne moída", "Sardinha enlatada", "Atum enlatado"],
+                "Laticínios": ["Leite", "Leite em pó"],
+                "Gorduras": ["Óleo de soja", "Óleo de milho", "Azeite", "Banha"],
+                "Temperos": ["Sal", "Alho", "Cebola", "Pimenta", "Colorau", "Vinagre"],
+                "Bebidas Básicas": ["Café", "Açúcar"]
+            }
+        },
+        "Prioridade 2: Nutrição": {
+            class: "p2",
+            sub: {
+                "Proteínas Adicionais": ["Carne bovina", "Peixe", "Linguiça", "Presunto", "Peito de peru"],
+                "Laticínios": ["Queijo", "Requeijão", "Iogurte", "Creme de leite"],
+                "Legumes": ["Batata", "Cenoura", "Beterraba", "Abobrinha", "Chuchu", "Abóbora", "Berinjela"],
+                "Verduras": ["Alface", "Couve", "Espinafre", "Rúcula", "Repolho"],
+                "Frutas": ["Banana", "Maçã", "Laranja", "Mamão", "Abacaxi", "Melancia", "Manga", "Pera", "Uva"],
+                "Grãos e Cereais": ["Aveia", "Granola", "Linhaça", "Chia"]
+            }
+        },
+        "Prioridade 3: Praticidade": {
+            class: "p3",
+            sub: {
+                "Preparo Rápido": ["Molho de tomate", "Extrato de tomate", "Milho em lata", "Ervilha em lata", "Seleta de legumes"],
+                "Congelados": ["Nuggets", "Hambúrguer", "Pizza congelada", "Lasanha congelada", "Batata frita congelada"],
+                "Padaria": ["Pão francês", "Pão de forma", "Pão integral", "Torrada"],
+                "Café da Manhã": ["Cereais matinais", "Achocolatado", "Mel", "Geleia", "Manteiga", "Margarina"]
+            }
+        },
+        "Prioridade 4: Lanches e Conforto": {
+            class: "p4",
+            sub: {
+                "Doces": ["Chocolate", "Biscoito recheado", "Biscoito doce", "Bolacha salgada", "Bolo pronto", "Sorvete"],
+                "Snacks": ["Salgadinho", "Amendoim", "Castanha", "Pipoca"],
+                "Bebidas": ["Refrigerante", "Suco de caixinha", "Água de coco", "Energético"]
+            }
+        },
+        "Limpeza e Higiene": {
+            class: "p5",
+            sub: {
+                "Alta Prioridade": ["Papel higiênico", "Sabão em pó", "Sabão em barra", "Detergente", "Pasta de dente", "Escova de dente", "Shampoo", "Condicionador"],
+                "Média Prioridade": ["Desinfetante", "Água sanitária", "Amaciante", "Esponja de louça", "Sacos de lixo", "Papel toalha"],
+                "Baixa Prioridade": ["Aromatizador", "Limpador multiuso", "Lustra móveis"]
+            }
+        }
+    };
+
+    const precoMedio = 10;
+    const container = document.getElementById('lista-compras');
+    const totalDisplay = document.getElementById('total-geral');
+
+    // Carregar dados salvos
+    const savedQuantities = JSON.parse(localStorage.getItem('minhaListaCompras')) || {};
+
+    function renderList() {
+        for (const [catName, catData] of Object.entries(data)) {
+            const section = document.createElement('div');
+            section.className = `category ${catData.class}`;
+            
+            let html = `<div class="category-title">${catName}</div>`;
+            
+            for (const [subName, items] of Object.entries(catData.sub)) {
+                html += `<div class="subcategory-title">${subName}</div>`;
+                items.forEach(item => {
+                    const itemId = item.toLowerCase().replace(/\s+/g, '_');
+                    const savedValue = savedQuantities[itemId] || 0;
+                    
+                    html += `
+                        <div class="item-row">
+                            <span class="item-name">${item}</span>
+                            <input type="number" 
+                                   class="item-input" 
+                                   data-id="${itemId}" 
+                                   value="${savedValue}" 
+                                   min="0" 
+                                   onchange="updateTotal()">
+                        </div>
+                    `;
+                });
+            }
+            section.innerHTML = html;
+            container.appendChild(section);
+        }
+    }
+
+    function updateTotal() {
+        let totalItens = 0;
+        const inputs = document.querySelectorAll('.item-input');
+        const newQuantities = {};
+
+        inputs.forEach(input => {
+            const qtd = parseInt(input.value) || 0;
+            const id = input.getAttribute('data-id');
+            
+            totalItens += qtd;
+            newQuantities[id] = qtd;
+        });
+
+        const valorFinal = totalItens * precoMedio;
+        totalDisplay.innerText = valorFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+
+        // Persistir no LocalStorage
+        localStorage.setItem('minhaListaCompras', JSON.stringify(newQuantities));
+    }
+
+    // Inicialização
+    renderList();
+    updateTotal();
+</script>
+
+</body>
+</html>
