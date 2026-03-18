@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinancePro | Gestão de Contas</title>
+    
+    <!-- Favicon Inline -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .pago-row { opacity: 0.6; transition: all 0.3s ease; }
+        
+        /* Ajustes de Impressão */
+        @media print {
+            @page { margin: 1.5cm; }
+            body { background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            .glass { background: white !important; border: none !important; shadow: none !important; backdrop-filter: none !important; }
+            .container { max-width: 100% !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            .dashboard-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 10px !important; }
+            .card-print { border: 1px solid #e2e8f0 !important; padding: 10px !important; }
+            table { width: 100% !important; border-collapse: collapse !important; }
+            th, td { border: 1px solid #e2e8f0 !important; padding: 8px !important; font-size: 10pt !important; }
+            .status-text { display: inline !important; font-weight: bold; }
+            .status-check { display: none !important; }
+            .pago-row { opacity: 1 !important; background-color: #f1f5f9 !important; }
+            .print-footer { display: block !important; position: fixed; bottom: 0; font-size: 8pt; color: #64748b; }
+        }
+
+        .print-footer { display: none; }
+        .status-text { display: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen pb-20">
+
+    <!-- Header (No Print) -->
+    <nav class="bg-indigo-900 text-white p-6 shadow-xl mb-8 no-print">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2">
+                <i data-lucide="wallet" class="text-emerald-400 w-8 h-8"></i>
+                <h1 class="text-2xl font-bold tracking-tight">Finance<span class="text-emerald-400">Pro</span></h1>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="window.print()" class="flex items-center gap-2 bg-indigo-700 hover:bg-indigo-600 px-4 py-2 rounded-xl transition text-sm font-medium border border-indigo-500">
+                    <i data-lucide="printer" class="w-4 h-4"></i> Imprimir
+                </button>
+                <button onclick="document.getElementById('importInput').click()" class="flex items-center gap-2 bg-indigo-800 px-4 py-2 rounded-xl transition text-sm font-medium border border-indigo-600">
+                    <i data-lucide="upload" class="w-4 h-4"></i> Importar
+                </button>
+                <button onclick="exportarCSV()" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-xl transition text-sm font-medium shadow-lg">
+                    <i data-lucide="download" class="w-4 h-4"></i> Exportar
+                </button>
+                <input type="file" id="importInput" accept=".csv" class="hidden" onchange="importarCSV(event)">
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Especial para Impressão -->
+    <div class="hidden print:block mb-6 text-center border-b pb-4">
+        <h1 class="text-2xl font-bold text-slate-800">Relatório de Contas a Pagar</h1>
+        <p class="text-slate-500 text-sm">FinancePro - Gestão Financeira Pessoal</p>
+    </div>
+
+    <main class="container mx-auto px-4">
+        <!-- Dashboard Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 dashboard-grid">
+            <div class="glass card-print p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Total Pendente</p>
+                <h2 id="totalPendente" class="text-3xl font-black text-rose-600 tabular-nums">R$ 0,00</h2>
+            </div>
+            <div class="glass card-print p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Total Pago</p>
+                <h2 id="totalPago" class="text-3xl font-black text-emerald-600 tabular-nums">R$ 0,00</h2>
+            </div>
+            <div class="glass card-print p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Próximo Vencimento</p>
+                <h2 id="proxVencimento" class="text-xl font-bold text-slate-700 mt-2">--/--/--</h2>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Formulário (No Print) -->
+            <aside class="lg:col-span-1 no-print">
+                <form id="contaForm" class="glass p-6 rounded-2xl border border-slate-200 shadow-xl sticky top-8">
+                    <h3 class="text-lg font-bold mb-6 flex items-center gap-2 text-slate-800">
+                        <i data-lucide="plus-circle" class="text-indigo-600 w-5 h-5"></i> Nova Conta
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Descrição</label>
+                            <input type="text" id="descricao" required placeholder="Ex: Aluguel" 
+                                class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50/50">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Valor (R$)</label>
+                            <input type="number" step="0.01" id="valor" required placeholder="0,00" 
+                                class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50/50">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Vencimento</label>
+                            <input type="date" id="data" required 
+                                class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50/50">
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg flex justify-center items-center gap-2 mt-4 active:scale-95 transition">
+                            <i data-lucide="plus" class="w-5 h-5"></i> Adicionar
+                        </button>
+                    </div>
+                </form>
+            </aside>
+
+            <!-- Listagem -->
+            <section class="lg:col-span-3">
+                <div class="glass rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-100/50 print:bg-white border-b border-slate-200">
+                            <tr>
+                                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Descrição</th>
+                                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Vencimento</th>
+                                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Valor</th>
+                                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center no-print">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaContas" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                    <div id="emptyState" class="p-20 text-center no-print hidden">
+                        <p class="text-slate-400 italic">Nenhum registro encontrado.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Rodapé de Impressão -->
+    <footer class="print-footer w-full px-10 text-center">
+        Relatório gerado em <span id="dataImpressao"></span> - FinancePro
+    </footer>
+
+    <script>
+        let contas = JSON.parse(localStorage.getItem('finance_pro_v2')) || [];
+
+        function atualizarUI() {
+            localStorage.setItem('finance_pro_v2', JSON.stringify(contas));
+            renderizar();
+            lucide.createIcons();
+            document.getElementById('dataImpressao').innerText = new Date().toLocaleString('pt-BR');
+        }
+
+        document.getElementById('contaForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            contas.push({
+                id: Date.now(),
+                descricao: document.getElementById('descricao').value,
+                valor: parseFloat(document.getElementById('valor').value),
+                data: document.getElementById('data').value,
+                pago: false
+            });
+            e.target.reset();
+            atualizarUI();
+        });
+
+        function togglePago(id) {
+            contas = contas.map(c => c.id === id ? {...c, pago: !c.pago} : c);
+            atualizarUI();
+        }
+
+        function excluir(id) {
+            if(confirm('Remover esta conta?')) {
+                contas = contas.filter(c => c.id !== id);
+                atualizarUI();
+            }
+        }
+
+        function renderizar() {
+            const tbody = document.getElementById('tabelaContas');
+            tbody.innerHTML = '';
+            let pendente = 0, pago = 0, datas = [];
+
+            if (contas.length === 0) document.getElementById('emptyState').classList.remove('hidden');
+            else document.getElementById('emptyState').classList.add('hidden');
+
+            contas.sort((a, b) => new Date(a.data) - new Date(b.data)).forEach(c => {
+                c.pago ? pago += c.valor : (pendente += c.valor, datas.push(new Date(c.data)));
+
+                const tr = document.createElement('tr');
+                tr.className = `group ${c.pago ? 'pago-row' : ''}`;
+                tr.innerHTML = `
+                    <td class="px-6 py-4">
+                        <div class="status-check">
+                            <button onclick="togglePago(${c.id})" class="w-6 h-6 rounded-lg border-2 flex items-center justify-center transition ${c.pago ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg' : 'border-slate-300 text-transparent hover:text-indigo-400'}">
+                                <i data-lucide="check" class="w-4 h-4 stroke-[3px]"></i>
+                            </button>
+                        </div>
+                        <span class="status-text">${c.pago ? 'PAGO' : 'PENDENTE'}</span>
+                    </td>
+                    <td class="px-6 py-4 font-semibold text-slate-700">${c.descricao}</td>
+                    <td class="px-6 py-4 text-slate-500 text-sm">${c.data.split('-').reverse().join('/')}</td>
+                    <td class="px-6 py-4 font-bold tabular-nums">${c.valor.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}</td>
+                    <td class="px-6 py-4 text-center no-print">
+                        <button onclick="excluir(${c.id})" class="text-rose-300 hover:text-rose-600 transition-colors">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('totalPendente').innerText = pendente.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+            document.getElementById('totalPago').innerText = pago.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+            document.getElementById('proxVencimento').innerText = datas.length ? new Date(Math.min(...datas)).toLocaleDateString('pt-BR') : '--/--/--';
+        }
+
+        function exportarCSV() {
+            let csv = '\uFEFFDescricao;Valor;Data;Status\n';
+            contas.forEach(c => csv += `${c.descricao};${c.valor.toFixed(2)};${c.data};${c.pago ? 'Pago' : 'Pendente'}\n`);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `financepro-${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+        }
+
+        function importarCSV(event) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const linhas = e.target.result.split('\n');
+                for (let i = 1; i < linhas.length; i++) {
+                    const col = linhas[i].split(';');
+                    if (col.length >= 4) {
+                        contas.push({
+                            id: Date.now() + i,
+                            descricao: col[0].replace('\uFEFF', ''),
+                            valor: parseFloat(col[1]),
+                            data: col[2],
+                            pago: col[3].toLowerCase().includes('pago')
+                        });
+                    }
+                }
+                atualizarUI();
+            };
+            reader.readAsText(event.target.files[0]);
+        }
+
+        atualizarUI();
+    </script>
+</body>
+</html>
