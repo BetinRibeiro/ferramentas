@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Consórcio Familiar</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #27ae60;
+            --accent: #e74c3c; /* Cor de erro/custo */
+            --accent-sorteio: #e67e22; /* Cor de destaque do sorteio */
+            --bg: #f4f7f6;
+            --footer-bg: #ecf0f1;
+            --success: #27ae60;
+        }
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: #333; margin: 0; padding: 20px; }
+        
+        /* Estilos do Container Geral */
+        .container { max-width: 1150px; margin: 0 auto 40px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .container-sorteio { max-width: 500px; margin: 0 auto 40px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
+
+        h1 { color: var(--primary); text-align: center; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; }
+
+        /* Painel de Configuração */
+        .config-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; background: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px solid #eee; margin-bottom: 30px; }
+        .input-group { display: flex; flex-direction: column; }
+        label { font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; color: var(--primary); }
+        input { padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 1rem; }
+        
+        .btn-update { grid-column: 1 / -1; padding: 12px; background: var(--secondary); color: white; border: none; border-radius: 5px; font-size: 1.1rem; cursor: pointer; transition: background 0.3s; margin-top: 10px; }
+        .btn-update:hover { background: #219150; }
+
+        /* Estilos da Tabela */
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; border: 1px solid #ddd; }
+        th { background-color: var(--primary); color: white; padding: 12px; font-size: 0.9rem; }
+        td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; font-size: 0.95rem; }
+        tfoot tr { background-color: var(--footer-bg); font-weight: bold; border-top: 2px solid var(--primary); }
+        tfoot td { color: var(--primary); border-top: 2px solid #bdc3c7; }
+        tr:hover { background-color: #f1f1f1; }
+        .valor-bolo { font-weight: bold; color: var(--secondary); }
+        .multa { color: var(--accent); font-size: 0.85rem; }
+        .analise { font-size: 0.85rem; text-align: left; padding-left: 10px; min-width: 180px; }
+        .lucro { color: #27ae60; font-weight: bold; }
+        .custo { color: #e74c3c; font-weight: bold; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 0.8rem; background: #ddd; }
+
+        /* Estilos do Sorteador */
+        .setup-box { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px dashed #ccc; }
+        .big-number { font-size: 5rem; font-weight: bold; color: var(--accent-sorteio); margin: 20px 0; min-height: 100px; display: flex; align-items: center; justify-content: center; border: 4px double #eee; border-radius: 50%; width: 150px; height: 150px; margin: 20px auto; }
+        .btn-draw { background: var(--success); color: white; border: none; padding: 15px 30px; font-size: 1.2rem; border-radius: 50px; cursor: pointer; transition: transform 0.2s; width: 100%; font-weight: bold; }
+        .btn-draw:hover { transform: scale(1.02); }
+        .btn-draw:disabled { background: #ccc; cursor: not-allowed; }
+        .history { margin-top: 30px; text-align: left; }
+        .history h3 { font-size: 0.9rem; color: var(--primary); border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px; }
+        .drawn-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        .drawn-item { background: var(--primary); color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.9rem; }
+        .btn-reset { margin-top: 30px; background: transparent; color: #999; border: none; font-size: 0.75rem; cursor: pointer; text-decoration: underline; }
+
+        /* Info Logica */
+        .logic-info { margin-top: 40px; padding: 20px; background: #eef2f7; border-left: 5px solid var(--primary); border-radius: 4px; }
+        .logic-info h3 { margin-top: 0; color: var(--primary); }
+        .logic-info p { font-size: 0.9rem; line-height: 1.6; color: #555; }
+
+        @media print {
+            button, .config-panel, .btn-reset, .container-sorteio { display: none; }
+            .container { box-shadow: none; border: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- SEÇÃO 1: TABELA DE CONTROLE -->
+<div class="container">
+    <h1>💰 Consórcio Familiar</h1>
+    <p class="subtitle">Controle de Fluxo com Correção de Valorização</p>
+
+    <div class="config-panel">
+        <div class="input-group">
+            <label>Valor Mensal Base (R$)</label>
+            <input type="number" id="valorBase" value="1000" step="50">
+        </div>
+        <div class="input-group">
+            <label>Nº de Integrantes</label>
+            <input type="number" id="membros" value="12">
+        </div>
+        <div class="input-group">
+            <label>Correção Mensal (%)</label>
+            <input type="number" id="taxa" value="2" step="0.1">
+        </div>
+        <div class="input-group">
+            <label>Multa p/ Atraso (%)</label>
+            <input type="number" id="multa" value="10">
+        </div>
+        <div class="input-group">
+            <label>Data de Início</label>
+            <input type="date" id="dataInicio">
+        </div>
+        <button class="btn-update" onclick="gerarCronograma()">Atualizar Tabelas de Valores</button>
+    </div>
+
+    <div id="resultado" class="table-container"></div>
+
+    <div class="logic-info">
+        <h3>📊 Resumo dos Totais</h3>
+        <p>
+            • <strong>Total Individual:</strong> É a soma de todos os depósitos que uma única pessoa fará durante todo o consórcio. <br>
+            • <strong>Total do Grupo (Geral):</strong> É o volume total de dinheiro que circulará na família até o último mês. <br>
+            • <strong>Análise de Retorno:</strong> Compara o "Bolo" recebido no mês com o total que aquela pessoa terá pago ao final do plano.
+        </p>
+    </div>
+</div>
+
+<!-- SEÇÃO 2: SORTEADOR -->
+<div class="container-sorteio">
+    <h1>🎲 Sorteio Mensal</h1>
+    <p>Escolha do Contemplado</p>
+
+    <div id="setupView">
+        <div class="setup-box">
+            <label>Quantos números no total? </label>
+            <input type="number" id="totalNumerosSorteio" value="12" min="2">
+            <button onclick="iniciarConsorcioSorteio()" style="margin-top:10px; padding: 5px 10px; cursor:pointer;">Definir Grupo</button>
+        </div>
+    </div>
+
+    <div id="drawView" style="display:none;">
+        <div class="big-number" id="displaySorteado">?</div>
+        <button class="btn-draw" id="btnSortear" onclick="sortear()">SORTEAR NÚMERO</button>
+
+        <div class="history">
+            <h3>✅ Já contemplados:</h3>
+            <div id="listaSorteados" class="drawn-list"></div>
+        </div>
+
+        <div class="history">
+            <h3>⏳ Faltam ser sorteados:</h3>
+            <div id="listaRestantes" class="drawn-list" style="opacity: 0.6;"></div>
+        </div>
+
+        <button class="btn-reset" onclick="resetarSorteio()">Resetar e iniciar novo ciclo</button>
+    </div>
+</div>
+
+<script>
+    // --- LÓGICA DA TABELA DE CONSÓRCIO ---
+    document.getElementById('dataInicio').valueAsDate = new Date();
+
+    function gerarCronograma() {
+        const base = parseFloat(document.getElementById('valorBase').value);
+        const membros = parseInt(document.getElementById('membros').value);
+        const taxa = parseFloat(document.getElementById('taxa').value) / 100;
+        const multaPercent = parseFloat(document.getElementById('multa').value) / 100;
+        const dataInput = new Date(document.getElementById('dataInicio').value);
+        const f = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        let totalPagoPorPessoaNoFinal = 0;
+        for (let j = 0; j < membros; j++) {
+            totalPagoPorPessoaNoFinal += base * Math.pow((1 + taxa), j);
+        }
+
+        let somaTotalBoloGeral = 0;
+        let html = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mês</th>
+                        <th>Vencimento</th>
+                        <th>Parcela Individual</th>
+                        <th>Bolo do Mês (Crédito)</th>
+                        <th>Com Multa (Atraso)</th>
+                        <th>Retorno (Recebido vs Pago)</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        for (let i = 0; i < membros; i++) {
+            let parcelaAtual = base * Math.pow((1 + taxa), i);
+            let boloMensal = parcelaAtual * membros;
+            let valorComMulta = parcelaAtual * (1 + multaPercent);
+            somaTotalBoloGeral += boloMensal;
+
+            let diferenca = boloMensal - totalPagoPorPessoaNoFinal;
+            let classeCor = diferenca >= 0 ? 'lucro' : 'custo';
+            let labelAnalise = diferenca >= 0 ? 'Rendimento:' : 'Custo Empréstimo:';
+
+            let dataVenc = new Date(dataInput);
+            dataVenc.setMonth(dataInput.getMonth() + i);
+
+            html += `
+                <tr>
+                    <td><span class="badge">${i + 1}º Mês</span></td>
+                    <td>${dataVenc.toLocaleDateString('pt-BR')}</td>
+                    <td>${f(parcelaAtual)}</td>
+                    <td class="valor-bolo">${f(boloMensal)}</td>
+                    <td class="multa">${f(valorComMulta)}</td>
+                    <td class="analise ${classeCor}">
+                        <small>${labelAnalise}</small><br>
+                        ${f(diferenca)}
+                    </td>
+                </tr>
+            `;
+        }
+
+        html += `
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2">TOTAIS DO CICLO</td>
+                        <td>${f(totalPagoPorPessoaNoFinal)}</td>
+                        <td>${f(somaTotalBoloGeral)}</td>
+                        <td>---</td>
+                        <td>---</td>
+                    </tr>
+                </tfoot>
+            </table>`;
+            
+        document.getElementById('resultado').innerHTML = html;
+    }
+
+    // --- LÓGICA DO SORTEADOR ---
+    let disponiveis = [];
+    let sorteados = [];
+
+    function iniciarConsorcioSorteio() {
+        const total = parseInt(document.getElementById('totalNumerosSorteio').value);
+        disponiveis = [];
+        sorteados = [];
+        for (let i = 1; i <= total; i++) { disponiveis.push(i); }
+        document.getElementById('setupView').style.display = 'none';
+        document.getElementById('drawView').style.display = 'block';
+        atualizarTelaSorteio();
+        salvarSorteio();
+    }
+
+    function sortear() {
+        if (disponiveis.length === 0) return;
+        const btn = document.getElementById('btnSortear');
+        const display = document.getElementById('displaySorteado');
+        btn.disabled = true;
+        display.style.color = "#ccc";
+
+        let giros = 0;
+        let intervalo = setInterval(() => {
+            let numFake = disponiveis[Math.floor(Math.random() * disponiveis.length)];
+            display.innerText = numFake;
+            giros++;
+
+            if (giros > 15) {
+                clearInterval(intervalo);
+                const index = Math.floor(Math.random() * disponiveis.length);
+                const escolhido = disponiveis.splice(index, 1)[0];
+                sorteados.push(escolhido);
+                display.innerText = escolhido;
+                display.style.color = "var(--accent-sorteio)";
+                btn.disabled = false;
+                atualizarTelaSorteio();
+                salvarSorteio();
+            }
+        }, 100);
+    }
+
+    function atualizarTelaSorteio() {
+        const listaS = document.getElementById('listaSorteados');
+        listaS.innerHTML = sorteados.map(n => `<span class="drawn-item">${n}</span>`).join('');
+        const listaR = document.getElementById('listaRestantes');
+        listaR.innerHTML = disponiveis.map(n => `<span class="drawn-item" style="background:#bbb">${n}</span>`).join('');
+        if (disponiveis.length === 0) {
+            document.getElementById('btnSortear').innerText = "CICLO FINALIZADO";
+            document.getElementById('btnSortear').disabled = true;
+        }
+    }
+
+    function salvarSorteio() {
+        localStorage.setItem('consorcio_sorteio_v2', JSON.stringify({ disponiveis, sorteados }));
+    }
+
+    function resetarSorteio() {
+        if (confirm("Deseja apagar o histórico de sorteio?")) {
+            localStorage.removeItem('consorcio_sorteio_v2');
+            location.reload();
+        }
+    }
+
+    // Inicialização ao carregar página
+    window.onload = function() {
+        gerarCronograma();
+        const salvos = localStorage.getItem('consorcio_sorteio_v2');
+        if (salvos) {
+            const data = JSON.parse(salvos);
+            disponiveis = data.disponiveis;
+            sorteados = data.sorteados;
+            atualizarTelaSorteio();
+            document.getElementById('setupView').style.display = 'none';
+            document.getElementById('drawView').style.display = 'block';
+        }
+    };
+</script>
+
+</body>
+</html>
