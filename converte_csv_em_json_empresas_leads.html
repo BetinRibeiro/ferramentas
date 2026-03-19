@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV to JSON Converter | Micro-SaaS Tool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white p-8 rounded-xl shadow-lg max-w-md w-full">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Conversor de Leads</h1>
+        
+        <div class="space-y-4">
+            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
+                <input type="file" id="csvFile" accept=".csv" class="hidden">
+                <label for="csvFile" class="cursor-pointer block">
+                    <span class="text-blue-600 font-semibold">Clique para selecionar</span> o CSV<br>
+                    <span class="text-xs text-gray-400">Padrão: CNPJ, Razão Social, Telefone...</span>
+                </label>
+            </div>
+
+            <button id="convertBtn" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition disabled:bg-gray-400" disabled>
+                Converter e Baixar JSON
+            </button>
+
+            <div id="status" class="text-sm text-center text-gray-600 hidden">
+                Processando <span id="rowCount">0</span> linhas...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('csvFile');
+        const convertBtn = document.getElementById('convertBtn');
+        const statusDiv = document.getElementById('status');
+        const rowCountSpan = document.getElementById('rowCount');
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) convertBtn.disabled = false;
+        });
+
+        convertBtn.addEventListener('click', () => {
+            const file = fileInput.files[0];
+            convertBtn.disabled = true;
+            statusDiv.classList.remove('hidden');
+
+            // PapaParse é ideal para 30k+ linhas
+            Papa.parse(file, {
+                header: true, // Usa a primeira linha (CNPJ, RAZAO SOCIAL...) como chaves
+                skipEmptyLines: true,
+                dynamicTyping: true, // Converte números automaticamente
+                complete: function(results) {
+                    const jsonData = results.data;
+                    rowCountSpan.innerText = jsonData.length;
+                    
+                    downloadJSON(jsonData, file.name.replace('.csv', '.json'));
+                    
+                    setTimeout(() => {
+                        alert(`Sucesso! ${jsonData.length} linhas processadas.`);
+                        convertBtn.disabled = false;
+                        statusDiv.classList.add('hidden');
+                    }, 500);
+                },
+                error: function(err) {
+                    alert("Erro ao processar arquivo: " + err.message);
+                }
+            });
+        });
+
+        function downloadJSON(data, filename) {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
