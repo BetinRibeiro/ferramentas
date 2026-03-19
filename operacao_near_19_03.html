@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard NEAR - Execução 19/Mar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0a0a0c; }
+        .card { background: #141417; border: 1px solid #27272a; }
+        .near-brand { color: #00ff94; }
+    </style>
+</head>
+<body class="text-gray-200 p-6 md:p-12">
+
+    <div class="max-w-4xl mx-auto">
+        <!-- HEADER -->
+        <header class="mb-10 border-b border-gray-800 pb-6 flex justify-between items-end">
+            <div>
+                <h1 class="text-3xl font-bold text-white">Monitoramento <span class="near-brand">NEAR</span></h1>
+                <p class="text-gray-500 text-sm mt-1">Log de Operação em Tempo Real | 19 de Março</p>
+            </div>
+            <div class="text-right text-xs text-gray-500 uppercase tracking-widest">
+                Network: NEAR Mainnet
+            </div>
+        </header>
+
+        <!-- STATUS ATUAL DA CARTEIRA -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="card p-6 rounded-2xl">
+                <p class="text-gray-500 text-xs uppercase font-bold">Saldo em Dólar (USDC)</p>
+                <p class="text-2xl font-bold mt-1 text-blue-400">$1.004,32</p>
+                <p class="text-[10px] text-gray-600 mt-1 italic">Pronto para próximas entradas</p>
+            </div>
+            <div class="card p-6 rounded-2xl border-l-4 border-l-green-500">
+                <p class="text-gray-500 text-xs uppercase font-bold">Total NEAR Acumulado</p>
+                <p class="text-2xl font-bold mt-1 text-white">42.0388 <span class="near-brand text-sm">NEAR</span></p>
+                <p class="text-[10px] text-gray-500 mt-1">(5.81 ant. + 36.22 hoje)</p>
+            </div>
+            <div class="card p-6 rounded-2xl">
+                <p class="text-gray-500 text-xs uppercase font-bold">Preço Médio de Compra</p>
+                <p class="text-2xl font-bold mt-1 text-yellow-500">$1,3802</p>
+                <p class="text-[10px] text-gray-600 mt-1 italic">Ponto de equilíbrio (Breakeven)</p>
+            </div>
+        </div>
+
+        <!-- EXPLICAÇÃO DA ÚLTIMA TROCA -->
+        <section class="card p-6 rounded-2xl mb-8">
+            <h2 class="text-lg font-bold mb-4 flex items-center gap-2 text-white">
+                <span class="w-2 h-2 bg-green-500 rounded-full"></span> 
+                Última Execução (Log Técnico)
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                    <p class="text-gray-500 text-xs">Vendido</p>
+                    <p class="font-mono">50.00 USDC</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-xs">Comprado</p>
+                    <p class="font-mono">36.2261 NEAR</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-xs">Taxa de Rede</p>
+                    <p class="font-mono text-green-500">0.005 USDC</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-xs">Preço por Moeda</p>
+                    <p class="font-mono text-white">$1,3802</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRÓXIMOS PASSOS: ESTRATÉGIA DOS $1.000 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- ALVOS DE COMPRA -->
+            <div class="bg-blue-900/10 border border-blue-900/30 p-6 rounded-2xl">
+                <h3 class="text-blue-400 font-bold mb-4 flex items-center gap-2">
+                    📉 Onde comprar mais?
+                </h3>
+                <ul class="space-y-4 text-sm">
+                    <li class="flex justify-between border-b border-blue-900/20 pb-2">
+                        <span>Entrada Principal (30%)</span>
+                        <span class="font-bold text-white">$300,00 em $1,35</span>
+                    </li>
+                    <li class="flex justify-between border-b border-blue-900/20 pb-2">
+                        <span>Entrada de Recuo (40%)</span>
+                        <span class="font-bold text-white">$400,00 em $1,28</span>
+                    </li>
+                    <li class="flex justify-between">
+                        <span>Fundo de Pânico (Restante)</span>
+                        <span class="font-bold text-white">Aguardar BTC < $64k</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- ALVOS DE VENDA -->
+            <div class="bg-green-900/10 border border-green-900/30 p-6 rounded-2xl">
+                <h3 class="text-green-400 font-bold mb-4 flex items-center gap-2">
+                    🚀 Onde realizar lucro?
+                </h3>
+                <ul class="space-y-4 text-sm">
+                    <li class="flex justify-between border-b border-green-900/20 pb-2">
+                        <span>Alvo Curto (+26%)</span>
+                        <span class="font-bold text-white">Vender em $1,75</span>
+                    </li>
+                    <li class="flex justify-between border-b border-green-900/20 pb-2">
+                        <span>Alvo Médio (+52%)</span>
+                        <span class="font-bold text-white">Vender em $2,10</span>
+                    </li>
+                    <li class="flex justify-between">
+                        <span>Lucro Projetado (Total)</span>
+                        <span class="font-bold text-green-400">+$450,00 a $550,00</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <footer class="mt-10 text-center text-gray-600 text-[10px] uppercase tracking-[0.2em]">
+            Análise e Gerenciamento Realizado com Sucesso em 19/Mar/2026
+        </footer>
+    </div>
+
+</body>
+</html>
