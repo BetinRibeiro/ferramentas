@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JTBD Context Extractor | Mental Model</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧩</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .force-slider { -webkit-appearance: none; width: 100%; height: 8px; border-radius: 5px; background: #e2e8f0; outline: none; }
+        .force-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #4f46e5; cursor: pointer; border: 2px solid white; }
+        .step-content { display: none; }
+        .step-content.active { display: block; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+
+    <!-- Nav -->
+    <nav class="bg-white border-b border-slate-200 py-4 px-6 mb-8 shadow-sm">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">🧩</span>
+                <span class="font-bold text-xl tracking-tight text-indigo-900">JTBD <span class="text-indigo-500 font-light">Extractor</span></span>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="saveToLocal()" class="text-sm bg-indigo-50 text-indigo-700 px-4 py-2 rounded-lg font-semibold hover:bg-indigo-100 transition">
+                    <i class="fa-solid fa-floppy-disk mr-2"></i>Salvar Progresso
+                </button>
+                <button onclick="resetTool()" class="text-sm text-red-500 hover:text-red-700 font-medium">Resetar</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-4 pb-20">
+        
+        <!-- Stepper -->
+        <div class="flex justify-between mb-12 relative">
+            <div class="absolute top-1/2 left-0 w-full h-0.5 bg-slate-200 -z-10 translate-y-[-50%]"></div>
+            <div class="step-indicator w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold ring-4 ring-white" data-step="1">1</div>
+            <div class="step-indicator w-10 h-10 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold ring-4 ring-white" data-step="2">2</div>
+            <div class="step-indicator w-10 h-10 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold ring-4 ring-white" data-step="3">3</div>
+            <div class="step-indicator w-10 h-10 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold ring-4 ring-white" data-step="4">4</div>
+        </div>
+
+        <!-- Módulo 1: O Inquisidor -->
+        <section id="step1" class="step-content active bg-white p-8 rounded-3xl shadow-xl border border-slate-100">
+            <h2 class="text-3xl font-bold mb-2 flex items-center gap-3">
+                <span class="text-indigo-600">01.</span> O Inquisidor de Contexto
+            </h2>
+            <p class="text-slate-500 mb-8 font-light">Não foque no produto, foque no momento da luta.</p>
+
+            <div class="space-y-8">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">A Situação (O Gatilho)</label>
+                    <textarea id="situation" placeholder="Ex: 'Quando eu recebo um novo pedido e percebo que não tenho mais espaço na planilha...'" 
+                    class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none h-32 transition"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">A Motivação (A Dor que Empurra)</label>
+                    <textarea id="motivation" placeholder="O que você está tentando resolver hoje que gera frustração?" 
+                    class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none h-32 transition"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">O Resultado (A Vitória)</label>
+                    <textarea id="result" placeholder="Como sua vida estará melhor após o trabalho ser concluído com sucesso?" 
+                    class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none h-32 transition"></textarea>
+                </div>
+            </div>
+        </section>
+
+        <!-- Módulo 2: Matriz de 3 Camadas -->
+        <section id="step2" class="step-content bg-white p-8 rounded-3xl shadow-xl border border-slate-100">
+            <h2 class="text-3xl font-bold mb-2 flex items-center gap-3">
+                <span class="text-indigo-600">02.</span> Dimensões do Job
+            </h2>
+            <p class="text-slate-500 mb-8 font-light">Categorize a natureza do desejo do usuário.</p>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div class="w-12 h-12 bg-blue-100 text-blue-600 flex items-center justify-center rounded-xl mb-4 text-xl">⚙️</div>
+                    <h3 class="font-bold mb-2">Funcional</h3>
+                    <p class="text-xs text-slate-500 mb-4 italic text-balance leading-relaxed">A tarefa prática que precisa ser feita.</p>
+                    <textarea id="dimFunctional" class="w-full p-3 text-sm border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 h-24" placeholder="Ex: Automatizar o backup de dados."></textarea>
+                </div>
+                <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div class="w-12 h-12 bg-pink-100 text-pink-600 flex items-center justify-center rounded-xl mb-4 text-xl">❤️</div>
+                    <h3 class="font-bold mb-2">Emocional</h3>
+                    <p class="text-xs text-slate-500 mb-4 italic text-balance leading-relaxed">Como ele quer se sentir durante o processo.</p>
+                    <textarea id="dimEmotional" class="w-full p-3 text-sm border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-pink-500 h-24" placeholder="Ex: Sentir tranquilidade de que nada será perdido."></textarea>
+                </div>
+                <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div class="w-12 h-12 bg-amber-100 text-amber-600 flex items-center justify-center rounded-xl mb-4 text-xl">👥</div>
+                    <h3 class="font-bold mb-2">Social</h3>
+                    <p class="text-xs text-slate-500 mb-4 italic text-balance leading-relaxed">Como ele quer ser visto pelos outros.</p>
+                    <textarea id="dimSocial" class="w-full p-3 text-sm border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500 h-24" placeholder="Ex: Ser visto como um gestor organizado."></textarea>
+                </div>
+            </div>
+        </section>
+
+        <!-- Módulo 3: Balança de Forças -->
+        <section id="step3" class="step-content bg-white p-8 rounded-3xl shadow-xl border border-slate-100">
+            <h2 class="text-3xl font-bold mb-2">03. Simulador de Forças</h2>
+            <p class="text-slate-500 mb-8">Por que o cliente trocaria o hábito atual pela sua solução?</p>
+
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <!-- Inputs de Força -->
+                <div class="space-y-6">
+                    <div class="p-4 bg-green-50 rounded-xl">
+                        <label class="block text-sm font-bold text-green-800 mb-2">PUSH: Insatisfação Atual (0-10)</label>
+                        <input type="range" id="pushForce" min="0" max="10" value="5" class="force-slider" oninput="updateBalance()">
+                    </div>
+                    <div class="p-4 bg-blue-50 rounded-xl">
+                        <label class="block text-sm font-bold text-blue-800 mb-2">PULL: Atração da Nova Solução (0-10)</label>
+                        <input type="range" id="pullForce" min="0" max="10" value="5" class="force-slider" oninput="updateBalance()">
+                    </div>
+                    <div class="p-4 bg-gray-100 rounded-xl opacity-60">
+                        <label class="block text-sm font-bold text-slate-800 mb-2">HABIT: Peso do Hábito (- 0-10)</label>
+                        <input type="range" id="habitForce" min="0" max="10" value="5" class="force-slider" oninput="updateBalance()">
+                    </div>
+                    <div class="p-4 bg-red-50 rounded-xl">
+                        <label class="block text-sm font-bold text-red-800 mb-2">ANXIETY: Medo da Mudança (- 0-10)</label>
+                        <input type="range" id="anxietyForce" min="0" max="10" value="5" class="force-slider" oninput="updateBalance()">
+                    </div>
+                </div>
+
+                <!-- Visual da Balança -->
+                <div class="text-center p-8 bg-slate-900 rounded-[3rem] text-white">
+                    <h4 class="text-indigo-400 font-bold uppercase text-xs mb-4">Propensão de Contratação</h4>
+                    <div id="propensityScore" class="text-7xl font-black mb-4">0</div>
+                    <div id="propensityLabel" class="text-sm font-medium px-4 py-2 rounded-full inline-block">Calculando...</div>
+                    
+                    <div class="mt-8 pt-8 border-t border-slate-700">
+                        <p class="text-xs text-slate-400 mb-4 uppercase">Quem deve ser "demitido"?</p>
+                        <input id="currentSolution" type="text" placeholder="Ex: Planilha de Excel antiga" 
+                        class="bg-transparent border-b border-slate-600 text-center w-full focus:outline-none focus:border-indigo-400 pb-2">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Módulo 4: Output / Job Story -->
+        <section id="step4" class="step-content bg-white p-8 rounded-3xl shadow-xl border border-slate-100">
+            <h2 class="text-3xl font-bold mb-6">04. Resultado: O Job Story</h2>
+            
+            <div class="bg-indigo-900 text-white p-10 rounded-3xl mb-8 relative">
+                <i class="fa-solid fa-quote-left absolute top-6 left-6 text-indigo-700 text-4xl"></i>
+                <div id="finalStory" class="text-2xl font-light italic leading-relaxed text-indigo-50">
+                    Preencha os campos para gerar sua história...
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="p-6 bg-slate-50 rounded-2xl">
+                    <h4 class="font-bold text-indigo-900 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Risco de UX
+                    </h4>
+                    <p id="uxRisk" class="text-sm text-slate-600">O sistema identificará riscos baseados no hábito atual.</p>
+                </div>
+                <div class="p-6 bg-indigo-50 rounded-2xl">
+                    <h4 class="font-bold text-indigo-900 mb-3">Próximo Passo Recomendado</h4>
+                    <p id="nextAction" class="text-sm text-indigo-700">Aguardando dados...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Botões de Navegação -->
+        <div class="mt-12 flex justify-between items-center">
+            <button id="prevBtn" onclick="changeStep(-1)" class="px-8 py-3 font-bold text-slate-500 hover:text-slate-800 transition invisible">Anterior</button>
+            <button id="nextBtn" onclick="changeStep(1)" class="px-10 py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition">Próximo Passo <i class="fa-solid fa-arrow-right ml-2"></i></button>
+        </div>
+
+    </main>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 4;
+
+        function changeStep(n) {
+            if (n === 1 && currentStep < totalSteps) {
+                currentStep++;
+            } else if (n === -1 && currentStep > 1) {
+                currentStep--;
+            }
+
+            updateUI();
+        }
+
+        function updateUI() {
+            // Update steps visibility
+            document.querySelectorAll('.step-content').forEach((el, i) => {
+                el.classList.toggle('active', i + 1 === currentStep);
+            });
+
+            // Update indicators
+            document.querySelectorAll('.step-indicator').forEach((el, i) => {
+                const stepIdx = i + 1;
+                if (stepIdx < currentStep) {
+                    el.classList.replace('bg-slate-200', 'bg-green-500');
+                    el.classList.replace('bg-indigo-600', 'bg-green-500');
+                    el.innerHTML = '<i class="fa-solid fa-check"></i>';
+                } else if (stepIdx === currentStep) {
+                    el.classList.replace('bg-slate-200', 'bg-indigo-600');
+                    el.classList.replace('bg-green-500', 'bg-indigo-600');
+                    el.classList.add('text-white');
+                    el.innerHTML = stepIdx;
+                } else {
+                    el.classList.replace('bg-indigo-600', 'bg-slate-200');
+                    el.classList.replace('bg-green-500', 'bg-slate-200');
+                    el.classList.add('text-slate-500');
+                    el.innerHTML = stepIdx;
+                }
+            });
+
+            // Button controls
+            document.getElementById('prevBtn').style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+            const nextBtn = document.getElementById('nextBtn');
+            if (currentStep === totalSteps) {
+                nextBtn.innerHTML = 'Finalizar Análise <i class="fa-solid fa-flag-checkered ml-2"></i>';
+                generateFinalReport();
+            } else {
+                nextBtn.innerHTML = 'Próximo Passo <i class="fa-solid fa-arrow-right ml-2"></i>';
+            }
+
+            saveToLocal();
+        }
+
+        function updateBalance() {
+            const push = parseInt(document.getElementById('pushForce').value);
+            const pull = parseInt(document.getElementById('pullForce').value);
+            const habit = parseInt(document.getElementById('habitForce').value);
+            const anxiety = parseInt(document.getElementById('anxietyForce').value);
+
+            const score = (push + pull) - (habit + anxiety);
+            const scoreDisplay = document.getElementById('propensityScore');
+            const label = document.getElementById('propensityLabel');
+
+            scoreDisplay.innerText = score > 0 ? `+${score}` : score;
+
+            if (score > 5) {
+                label.innerText = "Alta Propensão de Troca";
+                label.className = "text-sm font-medium px-4 py-2 rounded-full inline-block bg-green-500 text-white";
+            } else if (score > 0) {
+                label.innerText = "Propensão Moderada";
+                label.className = "text-sm font-medium px-4 py-2 rounded-full inline-block bg-blue-500 text-white";
+            } else {
+                label.innerText = "Resistência Crítica";
+                label.className = "text-sm font-medium px-4 py-2 rounded-full inline-block bg-red-500 text-white";
+            }
+        }
+
+        function generateFinalReport() {
+            const sit = document.getElementById('situation').value || "...";
+            const mot = document.getElementById('motivation').value || "...";
+            const res = document.getElementById('result').value || "...";
+            const competitor = document.getElementById('currentSolution').value || "nada";
+
+            // Build Story
+            const story = `Quando <span class="text-indigo-300 font-bold">${sit}</span>, eu quero <span class="text-indigo-300 font-bold">${mot}</span>, para que eu possa <span class="text-indigo-300 font-bold">${res}</span>.`;
+            document.getElementById('finalStory').innerHTML = story;
+
+            // Analysis Logic
+            const habit = parseInt(document.getElementById('habitForce').value);
+            const riskEl = document.getElementById('uxRisk');
+            const actionEl = document.getElementById('nextAction');
+
+            if (habit > 7) {
+                riskEl.innerText = `Risco Alto: O hábito com "${competitor}" é muito forte. Seu sistema precisa ser 10x mais rápido ou intuitivo no início para não ser abandonado.`;
+            } else {
+                riskEl.innerText = `O caminho está livre. Foque em entregar o resultado esperado de forma superior ao uso de ${competitor}.`;
+            }
+
+            actionEl.innerText = `Crie funcionalidades que resolvam especificamente o aspecto: "${document.getElementById('dimFunctional').value || 'Tarefa Funcional'}"`;
+        }
+
+        // Persistência
+        function saveToLocal() {
+            const data = {
+                situation: document.getElementById('situation').value,
+                motivation: document.getElementById('motivation').value,
+                result: document.getElementById('result').value,
+                dimFunctional: document.getElementById('dimFunctional').value,
+                dimEmotional: document.getElementById('dimEmotional').value,
+                dimSocial: document.getElementById('dimSocial').value,
+                forces: {
+                    push: document.getElementById('pushForce').value,
+                    pull: document.getElementById('pullForce').value,
+                    habit: document.getElementById('habitForce').value,
+                    anxiety: document.getElementById('anxietyForce').value,
+                },
+                currentSolution: document.getElementById('currentSolution').value,
+                currentStep: currentStep
+            };
+            localStorage.setItem('jtbd_tool_data', JSON.stringify(data));
+        }
+
+        function loadFromLocal() {
+            const saved = localStorage.getItem('jtbd_tool_data');
+            if (saved) {
+                const data = JSON.parse(saved);
+                document.getElementById('situation').value = data.situation || '';
+                document.getElementById('motivation').value = data.motivation || '';
+                document.getElementById('result').value = data.result || '';
+                document.getElementById('dimFunctional').value = data.dimFunctional || '';
+                document.getElementById('dimEmotional').value = data.dimEmotional || '';
+                document.getElementById('dimSocial').value = data.dimSocial || '';
+                document.getElementById('pushForce').value = data.forces.push || 5;
+                document.getElementById('pullForce').value = data.forces.pull || 5;
+                document.getElementById('habitForce').value = data.forces.habit || 5;
+                document.getElementById('anxietyForce').value = data.forces.anxiety || 5;
+                document.getElementById('currentSolution').value = data.currentSolution || '';
+                currentStep = data.currentStep || 1;
+                updateBalance();
+                updateUI();
+            }
+        }
+
+        function resetTool() {
+            if (confirm("Deseja apagar todos os dados desta análise?")) {
+                localStorage.removeItem('jtbd_tool_data');
+                location.reload();
+            }
+        }
+
+        window.onload = loadFromLocal;
+    </script>
+</body>
+</html>
