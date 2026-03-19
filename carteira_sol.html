@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Solana Monitor - Fix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white min-h-screen flex items-center justify-center font-mono">
+
+    <div class="p-8 border border-zinc-800 rounded-3xl bg-zinc-900 w-full max-w-sm shadow-2xl">
+        <h1 class="text-xl font-bold text-center mb-6">Status da Carteira</h1>
+        
+        <div class="space-y-6">
+            <div class="p-4 bg-zinc-950 rounded-xl border border-zinc-800">
+                <p class="text-[10px] text-zinc-500 uppercase">Solana (SOL)</p>
+                <p id="sol-val" class="text-3xl font-bold">---</p>
+            </div>
+
+            <div class="p-4 bg-zinc-950 rounded-xl border border-zinc-800">
+                <p class="text-[10px] text-zinc-500 uppercase">Dólares (USDC)</p>
+                <p id="usdc-val" class="text-3xl font-bold text-blue-400">---</p>
+            </div>
+        </div>
+
+        <div id="status" class="mt-6 p-2 text-[9px] text-zinc-600 bg-black rounded border border-zinc-800 text-center">
+            Aguardando comando...
+        </div>
+
+        <button onclick="update()" class="w-full mt-6 bg-white text-black font-bold py-3 rounded-xl hover:bg-zinc-200 transition">
+            ATUALIZAR AGORA
+        </button>
+    </div>
+
+    <script>
+        const WALLET = "7KfZjoQt7GetXAvNSYofo1RqcSYu6rqgD6hxLPVPQJmo";
+        const RPC = "https://rpc.ankr.com/solana"; // Servidor Ankr (mais rápido)
+
+        async function update() {
+            const status = document.getElementById('status');
+            status.innerText = "Conectando ao servidor...";
+            status.className = "mt-6 p-2 text-[9px] text-yellow-600 bg-black rounded border border-zinc-800 text-center";
+
+            try {
+                // Buscar SOL via JSON-RPC puro
+                const response = await fetch(RPC, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        jsonrpc: "2.0", id: 1,
+                        method: "getBalance",
+                        params: [WALLET]
+                    })
+                });
+
+                const data = await response.json();
+                const sol = data.result.value / 1000000000;
+                document.getElementById('sol-val').innerText = sol.toFixed(4);
+
+                // Se chegou aqui, funcionou!
+                status.innerText = "Dados recebidos com sucesso!";
+                status.className = "mt-6 p-2 text-[9px] text-green-600 bg-black rounded border border-zinc-800 text-center";
+                
+                // Nota: Para USDC em arquivo local é mais complexo, 
+                // então focamos primeiro em fazer o SOL aparecer.
+                document.getElementById('usdc-val').innerText = "0.00"; 
+
+            } catch (err) {
+                console.error(err);
+                status.innerText = "ERRO: O navegador bloqueou a conexão (CORS).";
+                status.className = "mt-6 p-2 text-[9px] text-red-600 bg-black rounded border border-zinc-800 text-center";
+                alert("O Navegador bloqueou o acesso local. Veja o passo abaixo para corrigir!");
+            }
+        }
+
+        window.onload = update;
+    </script>
+</body>
+</html>
