@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Data Manager</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        customDark: '#183462',
+                        whatsappGreen: '#22c55e',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Estilização da barra de rolagem para um visual mais tecnológico */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #183462; border-radius: 10px; }
+        
+        /* Loader Overlay */
+        #loader {
+            backdrop-filter: blur(4px);
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-customDark text-white shadow-xl">
+        <div class="max-w-7xl mx-auto px-4 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-white/10 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-10V4m0 10V4m-4 10h.01" />
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold tracking-tight">Gerenciador de Empresas</h1>
+            </div>
+            <div id="totalCount" class="bg-white/20 px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm border border-white/30">
+                Total: 0
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Controls -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8 flex flex-col md:flex-row gap-6 items-end">
+            <div class="w-full md:w-1/3">
+                <label class="block text-sm font-bold text-customDark mb-2 uppercase tracking-wider">Importar JSON</label>
+                <input type="file" id="fileInput" accept=".json" 
+                    class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-customDark file:text-white hover:file:bg-blue-900 transition-all cursor-pointer border border-slate-200 rounded-lg p-1">
+            </div>
+            
+            <div class="w-full md:flex-1">
+                <label class="block text-sm font-bold text-customDark mb-2 uppercase tracking-wider">Busca Inteligente</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </span>
+                    <input type="text" id="searchInput" placeholder="Pesquisar em todas as colunas..." 
+                        class="pl-10 block w-full rounded-lg border border-slate-200 bg-white py-3 px-4 shadow-sm focus:border-customDark focus:ring-1 focus:ring-customDark sm:text-sm outline-none transition-all">
+                </div>
+            </div>
+        </div>
+
+        <!-- Loader -->
+        <div id="loader" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+            <div class="bg-white p-8 rounded-2xl shadow-2xl flex flex-col items-center border border-slate-100">
+                <div class="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-customDark mb-4"></div>
+                <span class="font-bold text-customDark">Processando Base de Dados...</span>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table id="dataTable" class="w-full text-sm text-left border-collapse">
+                    <thead class="bg-slate-50 border-b border-slate-200">
+                        <tr>
+                            <th class="px-6 py-4 font-bold text-customDark uppercase tracking-wider text-xs">CNPJ / Razão Social</th>
+                            <th class="px-6 py-4 font-bold text-customDark uppercase tracking-wider text-xs">Localização</th>
+                            <th class="px-6 py-4 font-bold text-customDark uppercase tracking-wider text-xs">Atividade (CNAE)</th>
+                            <th class="px-6 py-4 font-bold text-customDark uppercase tracking-wider text-xs">Contato</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 italic-links">
+                        <!-- Conteúdo via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex flex-col sm:flex-row justify-between items-center mt-8 gap-4">
+            <button id="prevBtn" class="w-full sm:w-auto px-6 py-2.5 bg-white border border-slate-200 rounded-xl font-bold text-customDark hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed shadow-sm transition-all flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Anterior
+            </button>
+            
+            <span id="pageIndicator" class="bg-customDark text-white px-6 py-2 rounded-xl font-bold text-sm shadow-md">
+                Página 1
+            </span>
+            
+            <button id="nextBtn" class="w-full sm:w-auto px-6 py-2.5 bg-white border border-slate-200 rounded-xl font-bold text-customDark hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed shadow-sm transition-all flex items-center justify-center gap-2">
+                Próximo
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+        </div>
+    </main>
+
+<script>
+    const DB_NAME = 'BusinessDB';
+    const DB_VERSION = 1;
+    const STORE_NAME = 'companies';
+    let db;
+    let currentPage = 1;
+    const rowsPerPage = 100;
+    let currentSearch = "";
+
+    // MANTIDA LÓGICA ORIGINAL DO INDEXEDDB
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+    request.onupgradeneeded = (e) => {
+        db = e.target.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+            db.createObjectStore(STORE_NAME, { keyPath: "CNPJ" });
+        }
+    };
+
+    request.onsuccess = (e) => {
+        db = e.target.result;
+        render();
+    };
+
+    // MANTIDA LÓGICA ORIGINAL DE PROCESSAMENTO
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        document.getElementById('loader').classList.remove('hidden');
+
+        reader.onload = async (event) => {
+            try {
+                const data = JSON.parse(event.target.result);
+                await importData(data);
+                this.value = '';
+            } catch (err) {
+                alert("Erro ao processar JSON: " + err.message);
+            } finally {
+                document.getElementById('loader').classList.add('hidden');
+            }
+        };
+        reader.readAsText(file);
+    });
+
+    async function importData(items) {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction([STORE_NAME], "readwrite");
+            const store = transaction.objectStore(STORE_NAME);
+            items.forEach(item => store.put(item));
+            transaction.oncomplete = () => {
+                currentPage = 1;
+                render();
+                resolve();
+            };
+            transaction.onerror = () => reject(transaction.error);
+        });
+    }
+
+    // MANTIDA LÓGICA ORIGINAL DE BUSCA (TODAS AS COLUNAS)
+    async function fetchData() {
+        return new Promise((resolve) => {
+            const transaction = db.transaction([STORE_NAME], "readonly");
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.getAll();
+
+            request.onsuccess = () => {
+                let data = request.result;
+
+                if (currentSearch) {
+                    const s = currentSearch.toLowerCase();
+                    data = data.filter(item => {
+                        return Object.values(item).some(val => 
+                            val !== null && val !== undefined && val.toString().toLowerCase().includes(s)
+                        );
+                    });
+                }
+
+                const total = data.length;
+                const start = (currentPage - 1) * rowsPerPage;
+                const paginatedData = data.slice(start, start + rowsPerPage);
+                resolve({ items: paginatedData, total });
+            };
+        });
+    }
+
+    // RENDERIZAÇÃO ATUALIZADA APENAS COM TAILWIND (SEM ALTERAR DADOS)
+    async function render() {
+        const { items, total } = await fetchData();
+        const tbody = document.querySelector('#dataTable tbody');
+        const totalCountEl = document.getElementById('totalCount');
+        
+        tbody.innerHTML = items.map(item => {
+            const enderecoCompleto = `${item.LOGRADOURO || ''}, ${item.NUMERO || 'SN'} - ${item.BAIRRO || ''}, ${item.CIDADE || ''}/${item.UF || ''}`;
+            const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(enderecoCompleto)}`;
+            const foneLimpo = item.TELEFONE ? item.TELEFONE.replace(/\D/g, '') : '';
+            const foneLink = foneLimpo ? `https://wa.me/55${foneLimpo}` : null;
+
+            return `
+            <tr class="hover:bg-slate-50 transition-colors">
+                <td class="px-6 py-4">
+                    <div class="font-black text-customDark text-sm">${item.CNPJ}</div>
+                    <div class="text-xs text-slate-500 font-medium max-w-xs truncate">${item["RAZAO SOCIAL"]}</div>
+                </td>
+                <td class="px-6 py-4">
+                    <a href="${mapsUrl}" target="_blank" class="flex items-start gap-2 text-customDark hover:text-blue-700 font-semibold group transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-0.5 text-slate-400 group-hover:text-customDark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span class="leading-tight">${enderecoCompleto}</span>
+                    </a>
+                </td>
+                <td class="px-6 py-4 text-xs">
+                    <span class="inline-block px-2 py-1 bg-slate-100 rounded font-bold text-slate-600 mb-1">${item.CNAE}</span>
+                    <p class="text-slate-500 leading-snug">${item["DESC CNAE"]}</p>
+                </td>
+                 <td>
+                    ${foneLink ? 
+                        `<a href="${foneLink}" target="_blank" class="link-action link-whatsapp bg-whatsappGreen/10 text-whatsappGreen">
+                            💬 ${item.TELEFONE}
+                        </a>` : 
+                        '<span class="text-slate-300 font-medium italic">Privado</span>'
+                    }
+                </td>
+            </tr>
+            `;
+        }).join('');
+
+        totalCountEl.textContent = `Total: ${total}`;
+        updatePaginationControls(total);
+    }
+
+    // MANTIDA LÓGICA ORIGINAL DE UI
+    function updatePaginationControls(total) {
+        const maxPage = Math.ceil(total / rowsPerPage) || 1;
+        document.getElementById('pageIndicator').textContent = `Página ${currentPage} de ${maxPage}`;
+        document.getElementById('prevBtn').disabled = currentPage === 1;
+        document.getElementById('nextBtn').disabled = currentPage >= maxPage;
+    }
+
+    document.getElementById('prevBtn').onclick = () => {
+        if (currentPage > 1) { currentPage--; render(); window.scrollTo(0, 0); }
+    };
+
+    document.getElementById('nextBtn').onclick = () => {
+        currentPage++; render(); window.scrollTo(0, 0);
+    };
+
+    let searchTimeout;
+    document.getElementById('searchInput').oninput = (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            currentSearch = e.target.value;
+            currentPage = 1;
+            render();
+        }, 400);
+    };
+</script>
+</body>
+</html>
