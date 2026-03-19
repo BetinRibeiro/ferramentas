@@ -1,0 +1,818 @@
+<html lang="pt-br"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWOT Pro - Analisador Estratégico</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @media print {
+            .no-print { display: none; }
+            .print-only { display: block; }
+            body { background: white; }
+            .card { border: 1px solid #ddd; break-inside: avoid; }
+        }
+        .swot-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .impact-1 { opacity: 0.6; }
+        .impact-5 { font-weight: bold; }
+    </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.container{width:100%}@media (min-width: 640px){.container{max-width:640px}}@media (min-width: 768px){.container{max-width:768px}}@media (min-width: 1024px){.container{max-width:1024px}}@media (min-width: 1280px){.container{max-width:1280px}}@media (min-width: 1536px){.container{max-width:1536px}}.mx-auto{margin-left:auto;margin-right:auto}.mb-12{margin-bottom:3rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.mb-2{margin-bottom:0.5rem}.mt-1{margin-top:0.25rem}.mt-1\.5{margin-top:0.375rem}.flex{display:flex}.grid{display:grid}.h-4{height:1rem}.h-1{height:0.25rem}.h-5{height:1.25rem}.min-h-screen{min-height:100vh}.w-4{width:1rem}.w-full{width:100%}.w-2{width:0.5rem}.w-5{width:1.25rem}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-between{justify-content:space-between}.gap-2{gap:0.5rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.gap-1{gap:0.25rem}.gap-3{gap:0.75rem}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.rounded-2xl{border-radius:1rem}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.rounded{border-radius:0.25rem}.rounded-full{border-radius:9999px}.border{border-width:1px}.border-b-2{border-bottom-width:2px}.border-b{border-bottom-width:1px}.border-l-4{border-left-width:4px}.border-amber-100{--tw-border-opacity:1;border-color:rgb(254 243 199 / var(--tw-border-opacity, 1))}.border-blue-100{--tw-border-opacity:1;border-color:rgb(219 234 254 / var(--tw-border-opacity, 1))}.border-emerald-100{--tw-border-opacity:1;border-color:rgb(209 250 229 / var(--tw-border-opacity, 1))}.border-red-100{--tw-border-opacity:1;border-color:rgb(254 226 226 / var(--tw-border-opacity, 1))}.border-slate-300{--tw-border-opacity:1;border-color:rgb(203 213 225 / var(--tw-border-opacity, 1))}.border-amber-500{--tw-border-opacity:1;border-color:rgb(245 158 11 / var(--tw-border-opacity, 1))}.border-blue-500{--tw-border-opacity:1;border-color:rgb(59 130 246 / var(--tw-border-opacity, 1))}.border-emerald-500{--tw-border-opacity:1;border-color:rgb(16 185 129 / var(--tw-border-opacity, 1))}.border-gray-300{--tw-border-opacity:1;border-color:rgb(209 213 219 / var(--tw-border-opacity, 1))}.border-red-500{--tw-border-opacity:1;border-color:rgb(239 68 68 / var(--tw-border-opacity, 1))}.border-slate-800{--tw-border-opacity:1;border-color:rgb(30 41 59 / var(--tw-border-opacity, 1))}.bg-gray-50{--tw-bg-opacity:1;background-color:rgb(249 250 251 / var(--tw-bg-opacity, 1))}.bg-amber-50{--tw-bg-opacity:1;background-color:rgb(255 251 235 / var(--tw-bg-opacity, 1))}.bg-blue-50{--tw-bg-opacity:1;background-color:rgb(239 246 255 / var(--tw-bg-opacity, 1))}.bg-blue-600{--tw-bg-opacity:1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.bg-emerald-50{--tw-bg-opacity:1;background-color:rgb(236 253 245 / var(--tw-bg-opacity, 1))}.bg-red-50{--tw-bg-opacity:1;background-color:rgb(254 242 242 / var(--tw-bg-opacity, 1))}.bg-slate-800{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.bg-slate-900{--tw-bg-opacity:1;background-color:rgb(15 23 42 / var(--tw-bg-opacity, 1))}.bg-transparent{background-color:transparent}.bg-amber-100{--tw-bg-opacity:1;background-color:rgb(254 243 199 / var(--tw-bg-opacity, 1))}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254 / var(--tw-bg-opacity, 1))}.bg-emerald-100{--tw-bg-opacity:1;background-color:rgb(209 250 229 / var(--tw-bg-opacity, 1))}.bg-red-100{--tw-bg-opacity:1;background-color:rgb(254 226 226 / var(--tw-bg-opacity, 1))}.bg-slate-300{--tw-bg-opacity:1;background-color:rgb(203 213 225 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-8{padding:2rem}.p-3{padding:0.75rem}.p-6{padding:1.5rem}.px-4{padding-left:1rem;padding-right:1rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-8{padding-top:2rem;padding-bottom:2rem}.pb-3{padding-bottom:0.75rem}.text-center{text-align:center}.font-sans{font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.uppercase{text-transform:uppercase}.leading-relaxed{line-height:1.625}.tracking-tight{letter-spacing:-0.025em}.tracking-wider{letter-spacing:0.05em}.text-amber-700{--tw-text-opacity:1;color:rgb(180 83 9 / var(--tw-text-opacity, 1))}.text-blue-400{--tw-text-opacity:1;color:rgb(96 165 250 / var(--tw-text-opacity, 1))}.text-blue-700{--tw-text-opacity:1;color:rgb(29 78 216 / var(--tw-text-opacity, 1))}.text-emerald-700{--tw-text-opacity:1;color:rgb(4 120 87 / var(--tw-text-opacity, 1))}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity, 1))}.text-red-700{--tw-text-opacity:1;color:rgb(185 28 28 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-yellow-500{--tw-text-opacity:1;color:rgb(234 179 8 / var(--tw-text-opacity, 1))}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.outline-none{outline:2px solid transparent;outline-offset:2px}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.hover\:bg-blue-700:hover{--tw-bg-opacity:1;background-color:rgb(29 78 216 / var(--tw-bg-opacity, 1))}.focus\:border-blue-500:focus{--tw-border-opacity:1;border-color:rgb(59 130 246 / var(--tw-border-opacity, 1))}.focus\:ring-blue-500:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(59 130 246 / var(--tw-ring-opacity, 1))}@media (min-width: 768px){.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.md\:p-8{padding:2rem}}</style></head>
+<body class="bg-gray-50 min-h-screen font-sans">
+
+    <!-- Navegação / Header -->
+    <nav class="bg-slate-800 text-white p-4 shadow-lg no-print">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="layout-dashboard" aria-hidden="true" class="lucide lucide-layout-dashboard"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
+                <h1 class="text-xl font-bold tracking-tight">SWOT<span class="text-blue-400">Pro</span></h1>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="exportPDF()" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="download" aria-hidden="true" class="lucide lucide-download w-4 h-4"><path d="M12 15V3"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5"></path></svg> Exportar
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-4 md:p-8">
+        
+        <!-- Introdução e Título do Projeto -->
+        <div class="mb-8 no-print">
+            <input type="text" id="projectTitle" onchange="saveProjectName()" placeholder="Nome do Projeto / Empresa..." class="bg-transparent text-3xl font-bold text-slate-800 border-b-2 border-slate-300 focus:border-blue-500 outline-none w-full py-2">
+        </div>
+
+       
+
+        <!-- Matriz SWOT (Visual) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            <!-- FORÇAS -->
+            <div class="bg-emerald-50 p-5 rounded-xl border border-emerald-100">
+                <div class="flex items-center gap-2 mb-4 text-emerald-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trending-up" aria-hidden="true" class="lucide lucide-trending-up"><path d="M16 7h6v6"></path><path d="m22 7-8.5 8.5-5-5L2 17"></path></svg>
+                    <h2 class="font-bold uppercase tracking-wider">Forças</h2>
+                </div>
+                <div id="list-strength" class="space-y-2">
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                border-emerald-500
+                                
+                                
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Desenvolvimento de sistemas sob medida (alto valor percebido)</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                border-emerald-500
+                                
+                                
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Capacidade de resolver problemas reais de clientes</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                border-emerald-500
+                                
+                                
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Transformação de processos manuais (Excel → sistema)</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                border-emerald-500
+                                
+                                
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Relacionamento próximo com o cliente (atendimento personalizado)</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                border-emerald-500
+                                
+                                
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Flexibilidade e rapidez (menos burocracia que empresas grandes)</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                border-emerald-500
+                                
+                                
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Conhecimento prático do negócio do cliente</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                border-emerald-500
+                                
+                                
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Possibilidade de fidelização (cliente depende do sistema)</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                border-emerald-500
+                                
+                                
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Baixo custo operacional (dependendo da estrutura)</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+            </div>
+
+            <!-- FRAQUEZAS -->
+            <div class="bg-red-50 p-5 rounded-xl border border-red-100">
+                <div class="flex items-center gap-2 mb-4 text-red-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trending-down" aria-hidden="true" class="lucide lucide-trending-down"><path d="M16 17h6v-6"></path><path d="m22 17-8.5-8.5-5 5L2 7"></path></svg>
+                    <h2 class="font-bold uppercase tracking-wider">Fraquezas</h2>
+                </div>
+                <div id="list-weakness" class="space-y-2">
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                border-red-500
+                                
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Dependência de você (centralização técnica)</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                border-red-500
+                                
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Dificuldade de escalar (cada projeto é único)</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                border-red-500
+                                
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Falta de padronização dos sistemas</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                border-red-500
+                                
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Suporte pode consumir muito tempo</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                border-red-500
+                                
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Pouca previsibilidade de receita</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                border-red-500
+                                
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Falta de marca forte ou posicionamento claro</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                border-red-500
+                                
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Processo comercial pouco estruturado</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                border-red-500
+                                
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Risco de retrabalho (mudanças constantes do cliente)</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+            </div>
+
+            <!-- OPORTUNIDADES -->
+            <div class="bg-blue-50 p-5 rounded-xl border border-blue-100">
+                <div class="flex items-center gap-2 mb-4 text-blue-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="lightbulb" aria-hidden="true" class="lucide lucide-lightbulb"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path><path d="M9 18h6"></path><path d="M10 22h4"></path></svg>
+                    <h2 class="font-bold uppercase tracking-wider">Oportunidades</h2>
+                </div>
+                <div id="list-opportunity" class="space-y-2">
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                
+                                border-blue-500
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Pequenas empresas ainda usam Excel → grande demanda</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                
+                                border-blue-500
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Crescimento da digitalização de negócios</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                
+                                border-blue-500
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Nichos específicos (contabilidade, logística, vendas, etc.)</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                
+                                border-blue-500
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Possibilidade de transformar sistemas em SaaS (produto escalável)</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                
+                                border-blue-500
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Integração com APIs (WhatsApp, pagamentos, automação)</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                
+                                border-blue-500
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Uso de IA para agregar valor aos sistemas</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                
+                                border-blue-500
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Parcerias com contadores, agências, consultores</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                
+                                border-blue-500
+                                
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Mercado carente de soluções simples e práticas</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+            </div>
+
+            <!-- AMEAÇAS -->
+            <div class="bg-amber-50 p-5 rounded-xl border border-amber-100">
+                <div class="flex items-center gap-2 mb-4 text-amber-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="alert-triangle" aria-hidden="true" class="lucide lucide-alert-triangle"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+                    <h2 class="font-bold uppercase tracking-wider">Ameaças</h2>
+                </div>
+                <div id="list-threat" class="space-y-2">
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                
+                                
+                                border-amber-500
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Plataformas prontas (ex: ERPs baratos)</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                
+                                
+                                border-amber-500
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Ferramentas no-code/low-code</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                
+                                
+                                border-amber-500
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Concorrência com freelancers mais baratos</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                
+                                
+                                border-amber-500
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Clientes que não valorizam software personalizado</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                
+                                
+                                border-amber-500
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Inadimplência de clientes</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                
+                                
+                                border-amber-500
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Mudanças tecnológicas rápidas</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                
+                                
+                                border-amber-500
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Dependência de poucos clientes grandes</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                
+                                
+                                
+                                border-amber-500
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">Expectativas irreais dos clientes</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div><div class="w-2 h-1 bg-slate-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+            </div>
+        </div>
+
+        <!-- Seção de Insights Automáticos (Cruzamento) -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="zap" aria-hidden="true" class="lucide lucide-zap text-yellow-500"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"></path></svg> Análise Cruzada e Insights
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="insightsGrid">
+                <div class="bg-emerald-100 p-6 rounded-xl border shadow-sm">
+                    <div class="flex items-center gap-2 mb-2 font-bold text-slate-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trending-up" aria-hidden="true" class="lucide lucide-trending-up w-5 h-5"><path d="M16 7h6v6"></path><path d="m22 7-8.5 8.5-5-5L2 17"></path></svg>
+                        Estratégia Ofensiva
+                    </div>
+                    <p class="text-slate-700 text-sm leading-relaxed">Use sua força em <b>Desenvolvimento de sistemas sob medida (alto valor percebido)</b> para aproveitar a oportunidade de <b>Pequenas empresas ainda usam Excel → grande demanda</b>.</p>
+                </div>
+            
+                <div class="bg-amber-100 p-6 rounded-xl border shadow-sm">
+                    <div class="flex items-center gap-2 mb-2 font-bold text-slate-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shield" aria-hidden="true" class="lucide lucide-shield w-5 h-5"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>
+                        Estratégia de Confronto
+                    </div>
+                    <p class="text-slate-700 text-sm leading-relaxed">Minimize o impacto de <b>Plataformas prontas (ex: ERPs baratos)</b> utilizando sua força em <b>Desenvolvimento de sistemas sob medida (alto valor percebido)</b>.</p>
+                </div>
+            
+                <div class="bg-blue-100 p-6 rounded-xl border shadow-sm">
+                    <div class="flex items-center gap-2 mb-2 font-bold text-slate-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="refresh-cw" aria-hidden="true" class="lucide lucide-refresh-cw w-5 h-5"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg>
+                        Estratégia de Reforço
+                    </div>
+                    <p class="text-slate-700 text-sm leading-relaxed">Corrija sua fraqueza em <b>Dependência de você (centralização técnica)</b> para não perder a oportunidade de <b>Pequenas empresas ainda usam Excel → grande demanda</b>.</p>
+                </div>
+            
+                <div class="bg-red-100 p-6 rounded-xl border shadow-sm">
+                    <div class="flex items-center gap-2 mb-2 font-bold text-slate-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="skull" aria-hidden="true" class="lucide lucide-skull w-5 h-5"><path d="m12.5 17-.5-1-.5 1h1z"></path><path d="M15 22a1 1 0 0 0 1-1v-1a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20v1a1 1 0 0 0 1 1z"></path><circle cx="15" cy="12" r="1"></circle><circle cx="9" cy="12" r="1"></circle></svg>
+                        Estratégia Defensiva
+                    </div>
+                    <p class="text-slate-700 text-sm leading-relaxed">Alerta máximo: Sua fraqueza em <b>Dependência de você (centralização técnica)</b> torna você vulnerável a <b>Plataformas prontas (ex: ERPs baratos)</b>.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Plano de Ação Simples -->
+        <section class="bg-slate-900 text-white p-8 rounded-2xl shadow-xl">
+            <h2 class="text-xl font-bold mb-4">Próximos Passos (Plano de Ação)</h2>
+            <div id="actionPlan" class="space-y-4">
+                <div class="flex items-start gap-3 border-b border-slate-800 pb-3">
+                    <input type="checkbox" class="mt-1.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <p class="text-sm">Lançar iniciativa para conectar Desenvolvimento de sistemas sob medida (alto valor percebido) com Pequenas empresas ainda usam Excel → grande demanda.</p>
+                </div>
+            
+                <div class="flex items-start gap-3 border-b border-slate-800 pb-3">
+                    <input type="checkbox" class="mt-1.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <p class="text-sm">Criar barreira competitiva contra Plataformas prontas (ex: ERPs baratos) baseada em Desenvolvimento de sistemas sob medida (alto valor percebido).</p>
+                </div>
+            
+                <div class="flex items-start gap-3 border-b border-slate-800 pb-3">
+                    <input type="checkbox" class="mt-1.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <p class="text-sm">Treinamento ou contratação para resolver Dependência de você (centralização técnica) visando Pequenas empresas ainda usam Excel → grande demanda.</p>
+                </div>
+            
+                <div class="flex items-start gap-3 border-b border-slate-800 pb-3">
+                    <input type="checkbox" class="mt-1.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <p class="text-sm">Plano de contingência urgente para mitigar riscos de Dependência de você (centralização técnica) vs Plataformas prontas (ex: ERPs baratos).</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-8 text-gray-400 text-sm no-print">
+        SWOT Pro - Ferramenta de Estratégia Local-First
+    </footer>
+
+    <script>
+        // --- Estado da Aplicação ---
+        let state = {
+            projectName: "Minha Análise Estratégica",
+            items: []
+        };
+
+        // --- Inicialização ---
+        function init() {
+            const saved = localStorage.getItem('swot_data');
+            if (saved) {
+                state = JSON.parse(saved);
+                document.getElementById('projectTitle').value = state.projectName;
+            }
+            render();
+            lucide.createIcons();
+        }
+
+        // --- Persistência ---
+        function save() {
+            localStorage.setItem('swot_data', JSON.stringify(state));
+            render();
+        }
+
+        function saveProjectName() {
+            state.projectName = document.getElementById('projectTitle').value;
+            save();
+        }
+
+        function clearAll() {
+            if(confirm("Deseja apagar todos os dados?")) {
+                state.items = [];
+                save();
+            }
+        }
+
+        // --- Lógica de Negócio ---
+        function addItem() {
+            const desc = document.getElementById('itemDescription').value;
+            const cat = document.getElementById('itemCategory').value;
+            const impact = document.getElementById('itemImpact').value;
+
+            if (!desc) return alert("Descreva o item!");
+
+            const newItem = {
+                id: Date.now(),
+                category: cat,
+                description: desc,
+                impact: parseInt(impact)
+            };
+
+            state.items.push(newItem);
+            document.getElementById('itemDescription').value = "";
+            save();
+        }
+
+        function deleteItem(id) {
+            state.items = state.items.filter(item => item.id !== id);
+            save();
+        }
+
+        // --- Renderização ---
+        function render() {
+            const categories = ['strength', 'weakness', 'opportunity', 'threat'];
+            
+            categories.forEach(cat => {
+                const container = document.getElementById(`list-${cat}`);
+                container.innerHTML = "";
+                
+                state.items
+                    .filter(i => i.category === cat)
+                    .sort((a, b) => b.impact - a.impact)
+                    .forEach(item => {
+                        container.innerHTML += `
+                            <div class="bg-white p-3 rounded shadow-sm border-l-4 flex justify-between items-center group
+                                ${cat === 'strength' ? 'border-emerald-500' : ''}
+                                ${cat === 'weakness' ? 'border-red-500' : ''}
+                                ${cat === 'opportunity' ? 'border-blue-500' : ''}
+                                ${cat === 'threat' ? 'border-amber-500' : ''}
+                            ">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-800">${item.description}</p>
+                                    <div class="flex gap-1 mt-1">
+                                        ${Array(item.impact).fill(0).map(() => '<div class="w-2 h-1 bg-slate-300 rounded-full"></div>').join('')}
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        `;
+                    });
+            });
+
+            generateInsights();
+            lucide.createIcons();
+        }
+
+        function generateInsights() {
+            const strengths = state.items.filter(i => i.category === 'strength');
+            const weaknesses = state.items.filter(i => i.category === 'weakness');
+            const opportunities = state.items.filter(i => i.category === 'opportunity');
+            const threats = state.items.filter(i => i.category === 'threat');
+
+            const insightsGrid = document.getElementById('insightsGrid');
+            const actionPlan = document.getElementById('actionPlan');
+            
+            insightsGrid.innerHTML = "";
+            actionPlan.innerHTML = "";
+
+            // 1. Estratégia Ofensiva (Força + Oportunidade)
+            if (strengths.length && opportunities.length) {
+                const s = strengths[0].description;
+                const o = opportunities[0].description;
+                addInsightCard("Estratégia Ofensiva", `Use sua força em <b>${s}</b> para aproveitar a oportunidade de <b>${o}</b>.`, "bg-emerald-100", "trending-up");
+                addAction(`Lançar iniciativa para conectar ${s} com ${o}.`);
+            }
+
+            // 2. Estratégia de Confronto (Força + Ameaça)
+            if (strengths.length && threats.length) {
+                const s = strengths[0].description;
+                const t = threats[0].description;
+                addInsightCard("Estratégia de Confronto", `Minimize o impacto de <b>${t}</b> utilizando sua força em <b>${s}</b>.`, "bg-amber-100", "shield");
+                addAction(`Criar barreira competitiva contra ${t} baseada em ${s}.`);
+            }
+
+            // 3. Estratégia de Reforço (Fraqueza + Oportunidade)
+            if (weaknesses.length && opportunities.length) {
+                const w = weaknesses[0].description;
+                const o = opportunities[0].description;
+                addInsightCard("Estratégia de Reforço", `Corrija sua fraqueza em <b>${w}</b> para não perder a oportunidade de <b>${o}</b>.`, "bg-blue-100", "refresh-cw");
+                addAction(`Treinamento ou contratação para resolver ${w} visando ${o}.`);
+            }
+
+            // 4. Estratégia Defensiva (Fraqueza + Ameaça)
+            if (weaknesses.length && threats.length) {
+                const w = weaknesses[0].description;
+                const t = threats[0].description;
+                addInsightCard("Estratégia Defensiva", `Alerta máximo: Sua fraqueza em <b>${w}</b> torna você vulnerável a <b>${t}</b>.`, "bg-red-100", "skull");
+                addAction(`Plano de contingência urgente para mitigar riscos de ${w} vs ${t}.`);
+            }
+
+            if (state.items.length === 0) {
+                insightsGrid.innerHTML = "<p class='text-gray-400 italic'>Adicione dados para gerar insights estratégicos...</p>";
+            }
+        }
+
+        function addInsightCard(title, text, color, icon) {
+            const insightsGrid = document.getElementById('insightsGrid');
+            insightsGrid.innerHTML += `
+                <div class="${color} p-6 rounded-xl border shadow-sm">
+                    <div class="flex items-center gap-2 mb-2 font-bold text-slate-800">
+                        <i data-lucide="${icon}" class="w-5 h-5"></i>
+                        ${title}
+                    </div>
+                    <p class="text-slate-700 text-sm leading-relaxed">${text}</p>
+                </div>
+            `;
+        }
+
+        function addAction(text) {
+            const actionPlan = document.getElementById('actionPlan');
+            actionPlan.innerHTML += `
+                <div class="flex items-start gap-3 border-b border-slate-800 pb-3">
+                    <input type="checkbox" class="mt-1.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <p class="text-sm">${text}</p>
+                </div>
+            `;
+        }
+
+        function exportPDF() {
+            window.print();
+        }
+
+        // Inicializar
+        init();
+    </script>
+
+
+
+</body></html>
