@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Trading Intelligence - SOLUSDT</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #080a0c;
+            --card: #121519;
+            --card-hover: #191d24;
+            --primary: #fcd535;
+            --primary-dark: #e2be2d;
+            --success: #0ecb81;
+            --danger: #f6465d;
+            --warning: #ffb619;
+            --text: #ffffff;
+            --text-dim: #848e9c;
+            --border: #2b3139;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 15px;
+            line-height: 1.5;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: left;
+            margin-bottom: 24px;
+            padding: 0 5px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(90deg, var(--primary), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--text-dim);
+            margin: 5px 0 0 0;
+            font-size: 0.9rem;
+        }
+
+        /* Controls / Toolbar */
+        .controls {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 16px;
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 15px;
+            align-items: flex-end;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        select {
+            background: #1e2329;
+            border: 1px solid var(--border);
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            width: 100%;
+            transition: border-color 0.2s;
+            appearance: none;
+        }
+
+        select:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        button {
+            background: var(--primary);
+            color: #000;
+            font-weight: 700;
+            border: none;
+            padding: 13px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card);
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Score Display */
+        .score-display {
+            text-align: center;
+        }
+
+        .score-value {
+            font-size: 4.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin: 10px 0;
+            display: block;
+            letter-spacing: -2px;
+        }
+
+        .verdict-label {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .indicator-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .indicator-item:last-child { border: none; }
+
+        .analysis-text {
+            line-height: 1.6;
+            font-size: 0.95rem;
+            color: var(--text-dim);
+        }
+
+        .analysis-text b { color: var(--text); }
+
+        .risk-card h4 {
+            margin: 0 0 15px 0;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+        }
+
+        canvas { 
+            width: 100% !important; 
+            height: 300px !important; 
+        }
+
+        /* Responsividade Mobile */
+        @media (max-width: 900px) {
+            .dashboard { grid-template-columns: 1fr; }
+            .controls { 
+                grid-template-columns: 1fr; 
+                padding: 15px;
+            }
+            .header h1 { font-size: 1.5rem; }
+            button { width: 100%; margin-top: 5px; }
+            .score-value { font-size: 3.5rem; }
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 10px; }
+            .card { padding: 16px; }
+            canvas { height: 250px !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Trading Intelligence</h1>
+        <p>Estratégia Avançada EMA 8 + RSI + Volume</p>
+    </div>
+
+    <div class="controls">
+        <div class="control-group">
+            <label>Ativo</label>
+            <select id="symbol">
+                <option value="SOLUSDT" selected>SOL / USDT (Solana)</option>
+                <option value="BTCUSDT">BTC / USDT (Bitcoin)</option>
+                <option value="ETHUSDT">ETH / USDT (Ethereum)</option>
+                <option value="BNBUSDT">BNB / USDT (Binance Coin)</option>
+                <option value="ADAUSDT">ADA / USDT (Cardano)</option>
+                <option value="DOTUSDT">DOT / USDT (Polkadot)</option>
+                <option value="MATICUSDT">MATIC / USDT (Polygon)</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>Tempo Gráfico</label>
+            <select id="interval">
+                <option value="1h">1 Hora</option>
+                <option value="4h">4 Horas</option>
+                <option value="1d">1 Dia</option>
+                <option value="1w" selected>1 Semana</option>
+            </select>
+        </div>
+
+        <button onclick="runAnalysis()">Analisar Agora</button>
+    </div>
+
+    <div class="dashboard">
+        <div class="main-content">
+            <div class="card">
+                <canvas id="priceChart"></canvas>
+            </div>
+            <div class="card">
+                <canvas id="rsiChart"></canvas>
+            </div>
+            
+            <!-- Relatório movido para dentro do fluxo principal em telas grandes -->
+            <div class="card report-card">
+                <h3 style="margin-top:0; font-size: 1.1rem; color: var(--primary);">Relatório de Cenário Atual</h3>
+                <div id="fullReport" class="analysis-text">Aguardando início da análise...</div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="card score-display" style="margin-bottom:20px;">
+                <label>Score de Confiança</label>
+                <span id="scoreValue" class="score-value">--</span>
+                <div id="verdictLabel" class="verdict-label">AGUARDANDO</div>
+                
+                <div id="detailsList" style="margin-top:20px; text-align:left;">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+
+            <div class="card risk-card">
+                <h4 style="color: var(--primary);">GESTÃO DE RISCO</h4>
+                <div id="riskContent" class="analysis-text" style="font-size:0.85rem;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let priceChart, rsiChart;
+
+    // --- LÓGICA DE INDICADORES (MANTIDA INALTERADA) ---
+    function calculateEMA(data, period) {
+        const k = 2 / (period + 1);
+        let emaArray = [data[0]];
+        for (let i = 1; i < data.length; i++) {
+            emaArray.push(data[i] * k + emaArray[i - 1] * (1 - k));
+        }
+        return emaArray;
+    }
+
+    function calculateRSI(data, period = 14) {
+        let rsi = Array(data.length).fill(null);
+        let gains = 0, losses = 0;
+        for (let i = 1; i <= period; i++) {
+            let diff = data[i] - data[i - 1];
+            if (diff >= 0) gains += diff; else losses -= diff;
+        }
+        let avgGain = gains / period;
+        let avgLoss = losses / period;
+        rsi[period] = 100 - (100 / (1 + avgGain / avgLoss));
+        for (let i = period + 1; i < data.length; i++) {
+            let diff = data[i] - data[i - 1];
+            let gain = diff > 0 ? diff : 0;
+            let loss = diff < 0 ? -diff : 0;
+            avgGain = (avgGain * (period - 1) + gain) / period;
+            avgLoss = (avgLoss * (period - 1) + loss) / period;
+            rsi[i] = 100 - (100 / (1 + avgGain / avgLoss));
+        }
+        return rsi;
+    }
+
+    async function runAnalysis() {
+        const symbol = document.getElementById('symbol').value;
+        const interval = document.getElementById('interval').value;
+        const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=100`;
+
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            const closes = data.map(d => parseFloat(d[4]));
+            const volumes = data.map(d => parseFloat(d[5]));
+            const labels = data.map(d => new Date(d[0]).toLocaleDateString());
+            const ema8 = calculateEMA(closes, 8);
+            const rsi = calculateRSI(closes, 14);
+
+            const lastPrice = closes[closes.length - 1];
+            const lastEMA = ema8[ema8.length - 1];
+            const lastRSI = rsi[rsi.length - 1];
+            const lastVol = volumes[volumes.length - 1];
+            const avgVol = volumes.slice(-20).reduce((a, b) => a + b, 0) / 20;
+
+            processLogic(lastPrice, lastEMA, lastRSI, lastVol, avgVol, symbol);
+            renderCharts(labels, closes, ema8, rsi);
+        } catch (e) {
+            console.error("Erro na API", e);
+        }
+    }
+
+    function processLogic(price, ema, rsiVal, vol, avgVol, symbol) {
+        let score = 0;
+        let logs = [];
+
+        if (price > ema) {
+            score += 5;
+            logs.push({ label: "Tendência (EMA 8)", val: "ALTA", pts: "+5", color: "var(--success)" });
+        } else {
+            logs.push({ label: "Tendência (EMA 8)", val: "BAIXA", pts: "0", color: "var(--danger)" });
+        }
+
+        if (rsiVal > 40 && rsiVal < 70) {
+            score += 3;
+            logs.push({ label: "Força (RSI)", val: "SAUDÁVEL", pts: "+3", color: "var(--success)" });
+        } else if (rsiVal >= 70) {
+            logs.push({ label: "Força (RSI)", val: "EXAUSTO", pts: "0", color: "var(--warning)" });
+        } else {
+            logs.push({ label: "Força (RSI)", val: "FRACO", pts: "0", color: "var(--danger)" });
+        }
+
+        if (vol > avgVol) {
+            score += 2;
+            logs.push({ label: "Volume", val: "ALTO", pts: "+2", color: "var(--success)" });
+        } else {
+            logs.push({ label: "Volume", val: "BAIXO", pts: "0", color: "var(--text-dim)" });
+        }
+
+        updateDashboard(score, logs, price, ema, rsiVal, symbol);
+    }
+
+    function updateDashboard(score, logs, price, ema, rsiVal, symbol) {
+        const scoreEl = document.getElementById('scoreValue');
+        const verdictEl = document.getElementById('verdictLabel');
+        const detailsEl = document.getElementById('detailsList');
+        const riskEl = document.getElementById('riskContent');
+        const reportEl = document.getElementById('fullReport');
+
+        scoreEl.innerText = score;
+        scoreEl.style.color = score >= 8 ? 'var(--success)' : (score >= 5 ? 'var(--warning)' : 'var(--danger)');
+
+        if (score >= 8) {
+            verdictEl.innerText = "COMPRA FORTE";
+            verdictEl.style.background = "var(--success)";
+            verdictEl.style.color = "white";
+        } else if (score >= 5) {
+            verdictEl.innerText = "NEUTRO / AGUARDAR";
+            verdictEl.style.background = "var(--warning)";
+            verdictEl.style.color = "black";
+        } else {
+            verdictEl.innerText = "EVITAR / VENDA";
+            verdictEl.style.background = "var(--danger)";
+            verdictEl.style.color = "white";
+        }
+
+        detailsEl.innerHTML = logs.map(l => `
+            <div class="indicator-item">
+                <span>${l.label}</span>
+                <b style="color:${l.color}">${l.pts}</b>
+            </div>
+        `).join('');
+
+        const stopLoss = ema.toFixed(2);
+        const dist = (((price / ema) - 1) * 100).toFixed(2);
+        riskEl.innerHTML = `
+            <div class="indicator-item"><span>Mão Sugerida:</span><b>${score >= 8 ? '100%' : (score >= 5 ? '40%' : '0%')}</b></div>
+            <div class="indicator-item"><span>Stop Loss:</span><b>$${stopLoss}</b></div>
+            <div class="indicator-item"><span>Dist. EMA 8:</span><b>${dist}%</b></div>
+            <div class="indicator-item"><span>Risco Máx:</span><b>1%</b></div>
+        `;
+
+        reportEl.innerHTML = `
+            O par <b>${symbol}</b> apresenta um Score de Confiança de <b>${score}/10</b>. 
+            O preço está atualmente <b>${price > ema ? 'acima' : 'abaixo'}</b> da EMA 8. 
+            RSI em <b>${rsiVal.toFixed(2)}</b> (${rsiVal > 70 ? 'Sobrecompra' : (rsiVal < 30 ? 'Sobrevenda' : 'Normal')}).<br><br>
+            <b>Estratégia:</b> ${score >= 8 ? 'Cenário de alta probabilidade. Confluência confirmada.' : (score >= 5 ? 'Aguarde confirmação de candle ou volume para entrar.' : 'Risco elevado. Probabilidade matemática desfavorável.')}
+        `;
+    }
+
+    function renderCharts(labels, closes, ema8, rsi) {
+        if (priceChart) priceChart.destroy();
+        if (rsiChart) rsiChart.destroy();
+
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { intersect: false, mode: 'index' },
+            plugins: { 
+                legend: { position: 'top', align: 'end', labels: { color: '#848e9c', font: { size: 10, weight: '600' }, usePointStyle: true } }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: '#848e9c', font: { size: 10 } } },
+                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#848e9c', font: { size: 10 } } }
+            }
+        };
+
+        priceChart = new Chart(document.getElementById('priceChart'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    { label: 'Preço', data: closes, borderColor: '#38bdf8', borderWidth: 2, pointRadius: 0, fill: true, backgroundColor: 'rgba(56, 189, 248, 0.05)' },
+                    { label: 'EMA 8', data: ema8, borderColor: '#fcd535', borderWidth: 1.5, borderDash: [5, 5], pointRadius: 0 }
+                ]
+            },
+            options: commonOptions
+        });
+
+        rsiChart = new Chart(document.getElementById('rsiChart'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    { label: 'RSI 14', data: rsi, borderColor: '#a855f7', borderWidth: 2, pointRadius: 0 },
+                    { label: 'Zonas', data: Array(labels.length).fill(70), borderColor: 'rgba(246, 70, 93, 0.2)', borderWidth: 1, pointRadius: 0, borderDash: [2, 2] },
+                    { label: '', data: Array(labels.length).fill(30), borderColor: 'rgba(14, 203, 129, 0.2)', borderWidth: 1, pointRadius: 0, borderDash: [2, 2] }
+                ]
+            },
+            options: { ...commonOptions, scales: { ...commonOptions.scales, y: { min: 0, max: 100, ticks: { stepSize: 20, color: '#848e9c' } } } }
+        });
+    }
+
+    window.onload = runAnalysis;
+</script>
+
+</body>
+</html>
