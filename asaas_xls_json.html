@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor Excel para JSON</title>
+    <!-- Importando a biblioteca SheetJS via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 { color: #2c3e50; }
+        input[type="file"] {
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            width: 100%;
+            border-radius: 4px;
+        }
+        pre {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            max-height: 500px;
+            font-size: 13px;
+        }
+        .btn-download {
+            display: none;
+            background-color: #27ae60;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 10px;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-download:hover { background-color: #219150; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Conversor .xlsx para JSON</h2>
+    <p>Selecione um arquivo Excel para visualizar os dados em formato JSON.</p>
+    
+    <input type="file" id="fileUploader" accept=".xlsx, .xls, .csv" />
+    
+    <button id="downloadBtn" class="btn-download">Baixar JSON</button>
+
+    <h3>Resultado:</h3>
+    <pre id="jsonResult">O resultado aparecerá aqui...</pre>
+</div>
+
+<script>
+    document.getElementById('fileUploader').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+
+            // Pegamos apenas a primeira planilha (aba) do arquivo
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+
+            // Converte para JSON
+            const json = XLSX.utils.sheet_to_json(worksheet, {raw: true});
+
+            // Exibe na tela
+            const jsonStr = JSON.stringify(json, null, 4);
+            document.getElementById('jsonResult').textContent = jsonStr;
+
+            // Habilita o botão de download
+            prepareDownload(jsonStr);
+        };
+
+        reader.readAsArrayBuffer(file);
+    });
+
+    function prepareDownload(jsonStr) {
+        const btn = document.getElementById('downloadBtn');
+        btn.style.display = 'inline-block';
+        
+        btn.onclick = function() {
+            const blob = new Blob([jsonStr], {type: "application/json"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "dados.json";
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+    }
+</script>
+
+</body>
+</html>
