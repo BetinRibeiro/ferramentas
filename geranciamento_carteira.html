@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Dashboard Pro - Backup & Sync</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .target-reached { animation: pulse 2s infinite; background-color: rgba(16, 185, 129, 0.2); }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen pb-10">
+
+    <div class="container mx-auto p-4 max-w-7xl">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-gray-700 pb-6 gap-4">
+            <div>
+                <h1 class="text-4xl font-black text-yellow-500 tracking-tighter">
+                    <i class="fa-solid fa-wallet mr-2"></i>CRYPTO MANAGER
+                </h1>
+                <p class="text-gray-400 text-sm">Controle de Investimentos & Backup JSON</p>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <!-- Botões de Import/Export -->
+                <div class="flex gap-2 mr-4 border-r border-gray-700 pr-4">
+                    <button onclick="exportJSON()" class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-2 rounded border border-gray-600 transition">
+                        <i class="fa-solid fa-download mr-1"></i> Exportar JSON
+                    </button>
+                    <label class="text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-2 rounded border border-gray-600 cursor-pointer transition">
+                        <i class="fa-solid fa-upload mr-1"></i> Importar JSON
+                        <input type="file" id="importFile" class="hidden" accept=".json" onchange="importJSON(event)">
+                    </label>
+                </div>
+
+                <div class="text-right">
+                    <div id="status-api" class="text-xs text-green-400 font-mono">● BINANCE LIVE</div>
+                    <div id="last-update" class="text-xs text-gray-500 italic">Atualizando...</div>
+                </div>
+                <button onclick="fetchPrices()" class="bg-gray-700 hover:bg-gray-600 p-2 rounded-full transition">
+                    <i class="fa-solid fa-rotate"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Totais -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-gray-800 p-5 rounded-2xl shadow-xl border border-gray-700">
+                <p class="text-gray-400 text-xs font-bold uppercase mb-1">Custo Total Investido</p>
+                <h2 id="total-investido" class="text-2xl font-bold text-blue-400">$ 0.00</h2>
+            </div>
+            <div class="bg-gray-800 p-5 rounded-2xl shadow-xl border border-gray-700">
+                <p class="text-gray-400 text-xs font-bold uppercase mb-1">Valor Atual Mercado</p>
+                <h2 id="valor-atual" class="text-2xl font-bold text-yellow-500">$ 0.00</h2>
+            </div>
+            <div class="bg-gray-800 p-5 rounded-2xl shadow-xl border border-gray-700">
+                <p class="text-gray-400 text-xs font-bold uppercase mb-1">Lucro/Prejuízo Real</p>
+                <h2 id="lucro-total" class="text-2xl font-bold font-mono">$ 0.00</h2>
+            </div>
+            <div class="bg-gray-800 p-5 rounded-2xl shadow-xl border border-gray-700">
+                <p class="text-gray-400 text-xs font-bold uppercase mb-1">Retorno %</p>
+                <h2 id="lucro-percent" class="text-2xl font-bold font-mono">0.00%</h2>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Coluna Form (1/4) -->
+            <div class="lg:col-span-1">
+                <div class="bg-gray-800 p-6 rounded-2xl shadow-xl border border-gray-700">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fa-solid fa-plus-circle mr-2 text-yellow-500"></i>Nova Operação
+                    </h3>
+                    <form id="crypto-form" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Operação</label>
+                            <select id="type" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 outline-none focus:ring-2 focus:ring-yellow-500">
+                                <option value="BUY">COMPRAR (Entrada)</option>
+                                <option value="SELL">VENDER (Saída)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Criptomoeda</label>
+                            <input list="crypto-list" id="symbol" placeholder="Ex: BTC" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 outline-none focus:ring-2 focus:ring-yellow-500 uppercase">
+                            <datalist id="crypto-list"></datalist>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Valor (USD)</label>
+                                <input type="number" id="usdValue" step="any" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Preço Unit.</label>
+                                <input type="number" id="price" step="any" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 outline-none">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Preço Alvo</label>
+                            <input type="number" id="target" step="any" class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 outline-none">
+                        </div>
+                        <button type="submit" class="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-black py-4 rounded-lg transition-all shadow-lg active:scale-95">
+                            REGISTRAR
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Coluna Dashboard (3/4) -->
+            <div class="lg:col-span-3 space-y-6">
+                <!-- Portfólio -->
+                <div class="bg-gray-800 rounded-2xl shadow-xl border border-gray-700 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-xs uppercase text-gray-500 bg-gray-900/50">
+                                    <th class="p-4">Ativo</th>
+                                    <th class="p-4">Saldo</th>
+                                    <th class="p-4">P. Médio</th>
+                                    <th class="p-4">Preço Binance</th>
+                                    <th class="p-4">Total Atual</th>
+                                    <th class="p-4">Alvo</th>
+                                    <th class="p-4">Lucro/Prej</th>
+                                </tr>
+                            </thead>
+                            <tbody id="portfolio-body" class="divide-y divide-gray-700"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Histórico -->
+                <div class="bg-gray-800 rounded-2xl shadow-xl border border-gray-700 overflow-hidden text-xs">
+                    <div class="p-4 bg-gray-750 border-b border-gray-700">
+                        <h3 class="font-bold uppercase text-sm tracking-widest text-gray-400">Histórico</h3>
+                    </div>
+                    <div class="max-h-64 overflow-y-auto">
+                        <table class="w-full text-left">
+                            <thead class="sticky top-0 bg-gray-900 text-gray-500 uppercase">
+                                <tr>
+                                    <th class="p-3">Data</th>
+                                    <th class="p-3">Tipo</th>
+                                    <th class="p-3">Moeda</th>
+                                    <th class="p-3">Qtd</th>
+                                    <th class="p-3">Total</th>
+                                    <th class="p-3">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-body" class="divide-y divide-gray-700/50 text-gray-400"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const topCoins = ["BTC", "ETH", "BNB", "SOL", "XRP", "ADA", "DOGE", "SHIB", "DOT", "MATIC", "TRX", "LTC", "LINK", "AVAX", "NEAR", "STX", "FTM", "RNDR", "INJ", "TIA", "SEI", "SUI", "ALGO", "PEPE", "AAVE", "IMX", "KAS", "MKR", "GALA", "SAND", "MANA", "ORDI", "PENDLE"];
+
+        let transactions = JSON.parse(localStorage.getItem('crypto_txs_v2')) || [];
+        let currentPrices = {};
+
+        // Inicializa datalist
+        const datalist = document.getElementById('crypto-list');
+        topCoins.sort().forEach(coin => {
+            let opt = document.createElement('option');
+            opt.value = coin;
+            datalist.appendChild(opt);
+        });
+
+        const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+
+        // --- FUNÇÕES DE IMPORT / EXPORT ---
+        
+        function exportJSON() {
+            if (transactions.length === 0) return alert("Não há dados para exportar.");
+            
+            const dataStr = JSON.stringify(transactions, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `crypto_backup_${new Date().toISOString().slice(0,10)}.json`;
+            
+            let linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (Array.isArray(importedData)) {
+                        if (confirm(`Deseja importar ${importedData.length} transações? Isso substituirá seus dados atuais.`)) {
+                            transactions = importedData;
+                            saveAndRender();
+                            alert("Dados importados com sucesso!");
+                        }
+                    } else {
+                        alert("Formato de arquivo inválido. Deve ser uma lista de transações.");
+                    }
+                } catch (err) {
+                    alert("Erro ao ler o arquivo JSON.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // --- LÓGICA DO SISTEMA ---
+
+        document.getElementById('crypto-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const symbol = document.getElementById('symbol').value.toUpperCase().trim();
+            const type = document.getElementById('type').value;
+            const usdValue = parseFloat(document.getElementById('usdValue').value);
+            const price = parseFloat(document.getElementById('price').value);
+            const target = parseFloat(document.getElementById('target').value) || 0;
+            
+            if(!symbol || isNaN(usdValue) || isNaN(price)) return alert("Dados inválidos");
+
+            transactions.push({
+                id: Date.now(),
+                date: new Date().toLocaleString(),
+                type, symbol, usdValue, price, target,
+                quantity: usdValue / price
+            });
+
+            saveAndRender();
+            e.target.reset();
+        });
+
+        function deleteTx(id) {
+            if(confirm("Excluir?")) {
+                transactions = transactions.filter(t => t.id !== id);
+                saveAndRender();
+            }
+        }
+
+        async function fetchPrices() {
+            const symbols = [...new Set(transactions.map(t => t.symbol))];
+            if(symbols.length === 0) return;
+
+            try {
+                const res = await fetch('https://api.binance.com/api/v3/ticker/price');
+                const data = await res.json();
+                symbols.forEach(s => {
+                    const find = data.find(item => item.symbol === s + 'USDT');
+                    if(find) currentPrices[s] = parseFloat(find.price);
+                });
+                document.getElementById('last-update').innerText = "Atualizado: " + new Date().toLocaleTimeString();
+                render();
+            } catch (err) { console.error(err); }
+        }
+
+        function saveAndRender() {
+            localStorage.setItem('crypto_txs_v2', JSON.stringify(transactions));
+            render();
+            fetchPrices();
+        }
+
+        function render() {
+            const historyBody = document.getElementById('history-body');
+            const portfolioBody = document.getElementById('portfolio-body');
+            historyBody.innerHTML = '';
+            portfolioBody.innerHTML = '';
+
+            let balances = {};
+            let totalInitialCost = 0;
+
+            transactions.slice().reverse().forEach(tx => {
+                if(!balances[tx.symbol]) balances[tx.symbol] = { qty: 0, cost: 0, target: tx.target || 0 };
+                
+                if(tx.type === 'BUY') {
+                    balances[tx.symbol].qty += tx.quantity;
+                    balances[tx.symbol].cost += tx.usdValue;
+                } else {
+                    balances[tx.symbol].qty -= tx.quantity;
+                    balances[tx.symbol].cost -= tx.usdValue;
+                }
+
+                historyBody.innerHTML += `
+                    <tr>
+                        <td class="p-3">${tx.date.split(',')[0]}</td>
+                        <td class="p-3 font-bold ${tx.type === 'BUY' ? 'text-blue-400' : 'text-orange-400'}">${tx.type}</td>
+                        <td class="p-3 text-white font-bold">${tx.symbol}</td>
+                        <td class="p-3">${tx.quantity.toFixed(4)}</td>
+                        <td class="p-3">${fmt.format(tx.usdValue)}</td>
+                        <td class="p-3"><button onclick="deleteTx(${tx.id})"><i class="fa-solid fa-trash"></i></button></td>
+                    </tr>
+                `;
+            });
+
+            let currentMarketValueTotal = 0;
+
+            Object.keys(balances).forEach(symbol => {
+                const b = balances[symbol];
+                if(b.qty <= 0.0001) return;
+
+                const priceNow = currentPrices[symbol] || 0;
+                const valueNow = b.qty * priceNow;
+                const profit = valueNow - b.cost;
+                const isTargetReached = b.target > 0 && priceNow >= b.target;
+
+                currentMarketValueTotal += valueNow;
+                totalInitialCost += b.cost;
+
+                portfolioBody.innerHTML += `
+                    <tr class="${isTargetReached ? 'target-reached' : ''}">
+                        <td class="p-4 font-black text-yellow-500">${symbol}</td>
+                        <td class="p-4">${b.qty.toFixed(6)}</td>
+                        <td class="p-4">${fmt.format(b.cost / b.qty)}</td>
+                        <td class="p-4 font-mono font-bold">${fmt.format(priceNow)}</td>
+                        <td class="p-4 font-bold text-white">${fmt.format(valueNow)}</td>
+                        <td class="p-4 ${isTargetReached ? 'text-green-400 font-bold' : 'text-gray-500'}">${b.target > 0 ? fmt.format(b.target) : '--'}</td>
+                        <td class="p-4 font-bold ${profit >= 0 ? 'text-green-400' : 'text-red-400'}">${fmt.format(profit)}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('total-investido').innerText = fmt.format(totalInitialCost);
+            document.getElementById('valor-atual').innerText = fmt.format(currentMarketValueTotal);
+            const lucroTotal = currentMarketValueTotal - totalInitialCost;
+            document.getElementById('lucro-total').innerText = fmt.format(lucroTotal);
+            document.getElementById('lucro-total').className = `text-2xl font-bold font-mono ${lucroTotal >= 0 ? 'text-green-400' : 'text-red-400'}`;
+            const perc = totalInitialCost > 0 ? (lucroTotal / totalInitialCost) * 100 : 0;
+            document.getElementById('lucro-percent').innerText = perc.toFixed(2) + "%";
+            document.getElementById('lucro-percent').className = `text-2xl font-bold font-mono ${perc >= 0 ? 'text-green-400' : 'text-red-400'}`;
+        }
+
+        setInterval(fetchPrices, 30000);
+        fetchPrices();
+    </script>
+</body>
+</html>
