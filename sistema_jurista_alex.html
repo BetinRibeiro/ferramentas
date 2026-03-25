@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Financeiro Pro</title>
+    <!-- Favicon Base64 (Ícone de Moeda) -->
+    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAX0lEQVQ4y2P8//8/AyUYIxInEqMGjBqA7AIs6v6D8H9idv8nptv/ifn2f0IOYGFgYGBgZGRkYGFhYWBmZmaAsYmKif8TchC6Yf9R9f9R9f9RZP8fVf8fBv6P6v8DAL89GAtS9YmXAAAAAElFTkSuQmCC">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#183462',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #183462; border-radius: 10px; }
+        .status-badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 999px; font-weight: bold; text-transform: uppercase; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans text-gray-800 pb-20">
+
+    <!-- Header -->
+    <header class="bg-primary text-white p-4 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                📊 Finanças
+            </h1>
+            <button onclick="exportarCSV()" class="bg-white/20 hover:bg-white/30 text-xs px-3 py-2 rounded-lg transition">
+                📤 Exportar CSV
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 space-y-6">
+        
+        <!-- Grid de Resumo -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 border-blue-500">
+                <p class="text-gray-500 text-xs">A Receber</p>
+                <p id="resumo-total-receber" class="text-lg font-bold text-gray-800">R$ 0,00</p>
+            </div>
+            <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 border-green-500">
+                <p class="text-gray-500 text-xs">Total Recebido</p>
+                <p id="resumo-total-recebido" class="text-lg font-bold text-gray-800">R$ 0,00</p>
+            </div>
+            <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 border-purple-500">
+                <p class="text-gray-500 text-xs">No Mês</p>
+                <p id="resumo-mes" class="text-lg font-bold text-gray-800">R$ 0,00</p>
+            </div>
+            <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 border-emerald-500">
+                <p class="text-gray-500 text-xs">Quitados</p>
+                <p id="resumo-quitados" class="text-lg font-bold text-gray-800">0</p>
+            </div>
+            <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 border-gray-400">
+                <p class="text-gray-500 text-xs">Inativos</p>
+                <p id="resumo-inativos" class="text-lg font-bold text-gray-800">0</p>
+            </div>
+        </div>
+
+        <!-- Gráfico -->
+        <div class="bg-white p-4 rounded-xl shadow-sm">
+            <canvas id="financeChart" height="150"></canvas>
+        </div>
+
+        <!-- Lista de Registros -->
+        <div class="space-y-4">
+            <div class="flex justify-between items-center px-1">
+                <h2 class="font-bold text-lg">Registros</h2>
+                <span id="contador-registros" class="text-xs text-gray-500">0 itens</span>
+            </div>
+            
+            <div id="lista-registros" class="space-y-3">
+                <!-- Itens injetados via JS -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Botão Flutuante (Add) -->
+    <button onclick="toggleModal(true)" class="fixed bottom-6 right-6 bg-primary text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-3xl z-40 active:scale-95 transition-transform">
+        +
+    </button>
+
+    <!-- Modal de Cadastro -->
+    <div id="modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white w-full max-w-md rounded-2xl overflow-hidden shadow-2xl">
+            <div class="bg-primary p-4 text-white flex justify-between">
+                <h3 class="font-bold">Novo Registro</h3>
+                <button onclick="toggleModal(false)">✕</button>
+            </div>
+            <form id="finance-form" class="p-4 space-y-4">
+                <input type="hidden" id="entry-id">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1">NOME</label>
+                    <input type="text" id="nome" required class="w-full border rounded-lg p-2 focus:ring-2 ring-primary outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">TIPO</label>
+                        <select id="tipo" class="w-full border rounded-lg p-2 outline-none">
+                            <option value="cliente">Cliente (Receita)</option>
+                            <option value="fornecedor">Fornecedor (Despesa)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">VENCIMENTO</label>
+                        <input type="date" id="vencimento" required class="w-full border rounded-lg p-2 outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">VALOR TOTAL</label>
+                        <input type="number" id="valor" step="0.01" required class="w-full border rounded-lg p-2 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">VALOR PAGO/REC.</label>
+                        <input type="number" id="recebido" step="0.01" value="0" class="w-full border rounded-lg p-2 outline-none">
+                    </div>
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="toggleModal(false)" class="flex-1 py-3 bg-gray-200 rounded-lg font-bold">Cancelar</button>
+                    <button type="submit" class="flex-1 py-3 bg-primary text-white rounded-lg font-bold shadow-lg">Salvar</button>
+                </div>
+                <button type="button" id="btn-deletar" onclick="removerRegistro()" class="w-full text-red-500 text-xs font-bold hidden py-2">EXCLUIR REGISTRO</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURAÇÃO DO BANCO DE DADOS (IndexedDB) ---
+        let db;
+        const request = indexedDB.open("FinanceiroDB", 1);
+
+        request.onupgradeneeded = (e) => {
+            db = e.target.result;
+            if (!db.objectStoreNames.contains("registros")) {
+                db.createObjectStore("registros", { keyPath: "id" });
+            }
+        };
+
+        request.onsuccess = (e) => {
+            db = e.target.result;
+            carregarDados();
+        };
+
+        // --- LÓGICA DE NEGÓCIO ---
+        const form = document.getElementById('finance-form');
+        let chartInstance = null;
+
+        function toggleModal(show, id = null) {
+            const modal = document.getElementById('modal');
+            const btnDeletar = document.getElementById('btn-deletar');
+            form.reset();
+            document.getElementById('entry-id').value = "";
+            
+            if (show) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                if (id) {
+                    btnDeletar.classList.remove('hidden');
+                    preencherFormulario(id);
+                } else {
+                    btnDeletar.classList.add('hidden');
+                    document.getElementById('vencimento').valueAsDate = new Date();
+                }
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('entry-id').value || crypto.randomUUID();
+            
+            const registro = {
+                id: id,
+                nome: document.getElementById('nome').value,
+                tipo: document.getElementById('tipo').value,
+                valor: parseFloat(document.getElementById('valor').value),
+                recebido: parseFloat(document.getElementById('recebido').value),
+                vencimento: document.getElementById('vencimento').value,
+                criado_em: new Date().toISOString()
+            };
+
+            const tx = db.transaction("registros", "readwrite");
+            tx.objectStore("registros").put(registro);
+            tx.oncomplete = () => {
+                toggleModal(false);
+                carregarDados();
+            };
+        };
+
+        async function carregarDados() {
+            const tx = db.transaction("registros", "readonly");
+            const store = tx.objectStore("registros");
+            const data = await new Promise(resolve => {
+                const req = store.getAll();
+                req.onsuccess = () => resolve(req.result);
+            });
+
+            renderizarResumo(data);
+            renderizarLista(data);
+            atualizarGrafico(data);
+        }
+
+        function getStatus(item) {
+            const hoje = new Date().toISOString().split('T')[0];
+            if (item.tipo === 'fornecedor') return { label: 'Fornecedor', color: 'bg-blue-100 text-blue-700' };
+            if (item.recebido >= item.valor) return { label: 'Quitado', color: 'bg-green-100 text-green-700' };
+            if (item.vencimento < hoje) return { label: 'Atrasado', color: 'bg-red-100 text-red-700' };
+            if (item.valor > 0 && item.recebido === 0 && item.vencimento > hoje) return { label: 'Ativo', color: 'bg-yellow-100 text-yellow-700' };
+            return { label: 'Inativo', color: 'bg-gray-100 text-gray-700' };
+        }
+
+        function renderizarResumo(data) {
+            const hoje = new Date();
+            const mesAtual = hoje.getMonth();
+            const anoAtual = hoje.getFullYear();
+
+            let aReceber = 0;
+            let recebidoTotal = 0;
+            let mesValor = 0;
+            let quitados = 0;
+            let inativos = 0;
+
+            data.forEach(item => {
+                const statusObj = getStatus(item);
+                if (item.tipo === 'cliente') {
+                    aReceber += (item.valor - item.recebido);
+                    recebidoTotal += item.recebido;
+                    
+                    const dataVenc = new Date(item.vencimento);
+                    if (dataVenc.getMonth() === mesAtual && dataVenc.getFullYear() === anoAtual) {
+                        mesValor += item.valor;
+                    }
+                    if (statusObj.label === 'Quitado') quitados++;
+                    if (statusObj.label === 'Inativo') inativos++;
+                }
+            });
+
+            document.getElementById('resumo-total-receber').innerText = `R$ ${aReceber.toLocaleString('pt-BR')}`;
+            document.getElementById('resumo-total-recebido').innerText = `R$ ${recebidoTotal.toLocaleString('pt-BR')}`;
+            document.getElementById('resumo-mes').innerText = `R$ ${mesValor.toLocaleString('pt-BR')}`;
+            document.getElementById('resumo-quitados').innerText = quitados;
+            document.getElementById('resumo-inativos').innerText = inativos;
+            document.getElementById('contador-registros').innerText = `${data.length} itens`;
+        }
+
+        function renderizarLista(data) {
+            const container = document.getElementById('lista-registros');
+            container.innerHTML = "";
+
+            data.sort((a, b) => new Date(a.vencimento) - new Date(b.vencimento)).forEach(item => {
+                const status = getStatus(item);
+                const restante = item.valor - item.recebido;
+                
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-xl shadow-sm border-l-4 " + 
+                                 (item.tipo === 'fornecedor' ? 'border-blue-500' : (status.label === 'Atrasado' ? 'border-red-500' : 'border-gray-200'));
+                
+                card.onclick = () => toggleModal(true, item.id);
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <h3 class="font-bold text-gray-800">${item.nome}</h3>
+                            <span class="status-badge ${status.color}">${status.label}</span>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs text-gray-400 italic">${item.vencimento.split('-').reverse().join('/')}</p>
+                            <p class="font-bold text-primary">R$ ${item.valor.toLocaleString('pt-BR')}</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-gray-50 text-xs">
+                        <div class="text-green-600 font-medium text-center bg-green-50 rounded py-1">
+                            Recebido: R$ ${item.recebido.toLocaleString('pt-BR')}
+                        </div>
+                        <div class="text-orange-600 font-medium text-center bg-orange-50 rounded py-1">
+                            Restante: R$ ${restante.toLocaleString('pt-BR')}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function atualizarGrafico(data) {
+            const ctx = document.getElementById('financeChart').getContext('2d');
+            
+            let totalA = 0; // A receber
+            let totalB = 0; // Recebido
+
+            data.forEach(item => {
+                if(item.tipo === 'cliente') {
+                    totalA += (item.valor - item.recebido);
+                    totalB += item.recebido;
+                }
+            });
+
+            if (chartInstance) chartInstance.destroy();
+
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['A Receber', 'Recebido'],
+                    datasets: [{
+                        data: [totalA, totalB],
+                        backgroundColor: ['#f87171', '#10b981'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        async function preencherFormulario(id) {
+            const tx = db.transaction("registros", "readonly");
+            const req = tx.objectStore("registros").get(id);
+            req.onsuccess = () => {
+                const item = req.result;
+                document.getElementById('entry-id').value = item.id;
+                document.getElementById('nome').value = item.nome;
+                document.getElementById('tipo').value = item.tipo;
+                document.getElementById('valor').value = item.valor;
+                document.getElementById('recebido').value = item.recebido;
+                document.getElementById('vencimento').value = item.vencimento;
+            };
+        }
+
+        async function removerRegistro() {
+            const id = document.getElementById('entry-id').value;
+            if (confirm("Deseja realmente excluir este registro?")) {
+                const tx = db.transaction("registros", "readwrite");
+                tx.objectStore("registros").delete(id);
+                tx.oncomplete = () => {
+                    toggleModal(false);
+                    carregarDados();
+                };
+            }
+        }
+
+        async function exportarCSV() {
+            const tx = db.transaction("registros", "readonly");
+            const req = tx.objectStore("registros").getAll();
+            
+            req.onsuccess = () => {
+                const data = req.result;
+                if (data.length === 0) return alert("Nenhum dado para exportar");
+
+                const headers = "id,nome,tipo,valor,recebido,vencimento,criado_em\n";
+                const csvContent = data.map(i => 
+                    `${i.id},"${i.nome}",${i.tipo},${i.valor},${i.recebido},${i.vencimento},${i.criado_em}`
+                ).join("\n");
+
+                const blob = new Blob([headers + csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", `financeiro_${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+        }
+    </script>
+</body>
+</html>
