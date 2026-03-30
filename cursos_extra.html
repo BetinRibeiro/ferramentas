@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Especializações - Rogoberto Ribeiro da Silva</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛠️</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%232563eb'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-family='sans-serif' font-size='60' fill='white' font-weight='bold'>P</text></svg>">
+   
+    <style>
+        :root {
+            --police-navy: #0a1931;
+            --police-blue: #185adb;
+            --gold: #ffc947;
+            --light: #f4f6f9;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            color: #333;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--police-navy);
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+        }
+
+        header h1 {
+            margin: 0;
+            color: var(--police-navy);
+            font-size: 2rem;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            color: var(--police-blue);
+            font-weight: bold;
+            margin-top: 5px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        /* Estilo da nova seção de Carga Horária Total */
+        .total-container {
+            background-color: var(--police-navy);
+            color: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid var(--gold);
+        }
+
+        .total-label {
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        .total-valor {
+            font-size: 1.5rem;
+            color: var(--gold);
+            font-weight: 800;
+        }
+
+        .competencia-group {
+            margin-bottom: 35px;
+        }
+
+        .competencia-header {
+            background: var(--police-navy);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px 4px 0 0;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .competencia-header i {
+            color: var(--gold);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #e1e4e8;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: #555;
+            text-align: left;
+            padding: 12px 15px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            border-bottom: 2px solid #e1e4e8;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            font-size: 0.9rem;
+        }
+
+        .col-nome { width: 40%; font-weight: 600; color: #2c3e50; }
+        .col-carga { width: 10%; text-align: center; }
+        .col-periodo { width: 10%; text-align: center; }
+        .col-aplicacao { width: 40%; color: #666; font-size: 0.85rem; line-height: 1.4; }
+
+        .badge {
+            background: #e1e8f5;
+            color: var(--police-navy);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .periodo-tag {
+            color: #e67e22;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            table, thead, tbody, th, td, tr { display: block; }
+            th { display: none; }
+            td { position: relative; padding-left: 40%; border-bottom: 1px solid #eee; }
+            td:before { content: attr(data-label); position: absolute; left: 15px; font-weight: bold; color: var(--police-navy); }
+            .col-nome, .col-carga, .col-periodo, .col-aplicacao { width: auto; text-align: left; }
+            .total-container { flex-direction: column; text-align: center; gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Rogoberto Ribeiro da Silva</h1>
+        <div class="subtitle">Especialista em Tecnologia Aplicada à Segurança Pública</div>
+    </header>
+
+    <!-- Resumo da Carga Horária -->
+    <div class="total-container">
+        <div class="total-label">
+            <i class="fas fa-graduation-cap"></i> Carga Horária Total das Especializações
+        </div>
+        <div class="total-valor" id="soma-total">0h</div>
+    </div>
+
+    <div id="grid-competencias">
+        <!-- Renderizado via JS -->
+    </div>
+</div>
+
+<script>
+const especializacoes = [
+    {
+        trilha: "Argumentação E Análise De Discurso 120h",
+        cursos: [
+            { nome: "Teoria Da Argumentação Jurídica", carga: "60h", periodo: "2025/2", aplicacao: "Fundamentação Lógica Para Elaboração De Relatórios Técnicos E Peças De Inteligência." },
+            { nome: "Análise Do Discurso", carga: "60h", periodo: "2025/2", aplicacao: "Técnicas De Interpretação De Depoimentos E Comunicações Para Suporte À Investigação." }
+        ]
+    },
+    {
+        trilha: "Análise De Dados Com Python 40h",
+        cursos: [
+            { nome: "Introdução À Linguagem Python", carga: "15h", periodo: "2025/2", aplicacao: "Desenvolvimento De Scripts Para Automação De Tarefas E Cruzamento De Bases De Dados." },
+            { nome: "Introdução À Análise De Dados Com Python", carga: "15h", periodo: "2025/2", aplicacao: "Extração De Indicadores De Performance E Estatísticas De Ocorrências." },
+            { nome: "Estruturas De Dados Em Python", carga: "10h", periodo: "2025/2", aplicacao: "Otimização De Algoritmos Para Busca Rápida Em Sistemas De Inteligência." }
+        ]
+    },
+    {
+        trilha: "Coaching E Liderança 80h",
+        cursos: [
+            { nome: "Comunicação Assertiva E Negociação", carga: "20h", periodo: "2026/1", aplicacao: "Mediação De Conflitos E Negociação Em Situações De Crise Na Segurança Pública." },
+            { nome: "Liderança E Desenvolvimento De Equipes", carga: "20h", periodo: "2026/1", aplicacao: "Gestão De Efetivo E Formação De Lideranças Em Unidades Operacionais." },
+            { nome: "Gestão De Metas E Indicadores De Performance", carga: "20h", periodo: "2026/1", aplicacao: "Controle De Índices De Produtividade E Redução De Criminalidade Baseada Em Metas." },
+            { nome: "Autocoaching", carga: "20h", periodo: "2026/1", aplicacao: "Desenvolvimento De Inteligência Emocional E Resiliência Para Atuação Sob Pressão." }
+        ]
+    },
+    {
+        trilha: "Psicologia Aplicada Ao Direito Penal 120h",
+        cursos: [
+            { nome: "Teoria Jurídica Do Direito Penal", carga: "60h", periodo: "2026/1", aplicacao: "Análise Técnica De Tipificações Penais Aplicada Ao Policiamento Ostensivo E Judiciário." },
+            { nome: "Psicologia Aplicada Ao Direito", carga: "60h", periodo: "2026/1", aplicacao: "Estudo Do Comportamento Criminal E Vitimologia Para Abordagens Mais Eficazes." }
+        ]
+    },
+    {
+        trilha: "Gestão Da Qualidade Na Produção De Bens E Serviços 120h",
+        cursos: [
+            { nome: "Gestão De Operações E Serviços", carga: "60h", periodo: "2026/1", aplicacao: "Otimização Do Fluxo De Processos Internos E Logística De Segurança." },
+            { nome: "Gerenciamento E Controle De Qualidade", carga: "60h", periodo: "2026/1", aplicacao: "Auditoria E Melhoria Contínua De Procedimentos Operacionais Padrão (Pop)." }
+        ]
+    },
+    {
+        trilha: "Relações Sociais E Comportamento Humano 120h",
+        cursos: [
+            { nome: "Psicologia Do Desenvolvimento", carga: "60h", periodo: "2026/1", aplicacao: "Análise De Perfis Comportamentais E Ciclos De Vida Para Otimizar O Atendimento A Vítimas Vulneráveis E Compreender A Gênese Do Crime." },
+            { nome: "Psicologia Aplicada À Saúde", carga: "60h", periodo: "2026/1", aplicacao: "Gestão De Estresse Operacional E Primeiros Socorros Psicológicos Em Situações De Crise E Eventos Críticos Na Segurança Pública." }
+        ]
+    },
+    {
+        trilha: "Tecnologia, Direito Digital E Propriedade Intelectual 120h",
+        cursos: [
+            { nome: "Tecnologias De Informação Aplicadas Ao Direito", carga: "60h", periodo: "2026/1", aplicacao: "Uso De Ferramentas Tecnológicas Para Otimização Da Cadeia De Custódia Digital E Gestão De Provas Em Inquéritos Policiais." },
+            { nome: "Direito Eletrônico", carga: "60h", periodo: "2026/1", aplicacao: "Aplicação Dos Marcos Legais Digitais Na Investigação De Crimes Cibernéticos E Proteção De Dados Em Ambientes Virtuais." }
+        ]
+    },
+    {
+        trilha: "Governança, Direito E Orçamento No Setor Público 120h",
+        cursos: [
+            { nome: "Orçamento Público", carga: "60h", periodo: "2026/1", aplicacao: "Compreensão Dos Ciclos Orçamentários Estaduais Para Gestão De Recursos, Manutenção De Equipamentos E Planejamento De Investimentos Em Unidades Policiais." },
+            { nome: "Economia Política", carga: "60h", periodo: "2026/1", aplicacao: "Análise Do Contexto Socioeconômico Para Entendimento Das Dinâmicas Criminais E Impacto Das Políticas Públicas Na Redução Da Violência." }
+        ]
+    }
+];
+
+    const container = document.getElementById('grid-competencias');
+    let totalGeral = 0;
+
+    especializacoes.forEach(grupo => {
+        // Extrai o número da string da trilha (ex: "120h" -> 120)
+        const cargaTrilha = parseInt(grupo.trilha.match(/\d+/)[0]);
+        totalGeral += cargaTrilha;
+
+        let tableRows = grupo.cursos.map(c => `
+            <tr>
+                <td data-label="Curso" class="col-nome">${c.nome}</td>
+                <td data-label="Carga" class="col-carga"><span class="badge">${c.carga}</span></td>
+                <td data-label="Período" class="col-periodo"><span class="periodo-tag">${c.periodo}</span></td>
+                <td data-label="Aplicação" class="col-aplicacao">${c.aplicacao}</td>
+            </tr>
+        `).join('');
+
+        container.innerHTML += `
+            <div class="competencia-group">
+                <div class="competencia-header">
+                    <i class="fas fa-shield-alt"></i> ${grupo.trilha}
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Especialidade</th>
+                            <th style="text-align:center">Carga</th>
+                            <th style="text-align:center">Período</th>
+                            <th>Aplicação Prática na Segurança</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    });
+
+    // Atualiza o valor total no cabeçalho
+    document.getElementById('soma-total').innerText = totalGeral + " Horas";
+</script>
+
+</body>
+</html>
