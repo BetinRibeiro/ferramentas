@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Salário Policial Pro</title>
+    <style>
+        :root {
+            --bg-color: #09090b;
+            --card-bg: #18181b;
+            --card-border: #27272a;
+            --text-primary: #f4f4f5;
+            --text-secondary: #a1a1aa;
+            --accent-color: #22c55e;
+            --danger-color: #ef4444;
+            --highlight: #f59e0b;
+            --tab-bg: #27272a;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Header Estilo App */
+        .app-header {
+            width: 100%;
+            padding: 24px 16px;
+            background: linear-gradient(to bottom, #111, var(--bg-color));
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        h2 { margin: 0; font-size: 1.5rem; letter-spacing: -0.025em; color: var(--text-primary); }
+        .sub-title { color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px; }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 12px;
+        }
+
+        /* Tabela Estilizada */
+        .table-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid var(--card-border);
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #212124;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+            padding: 16px 8px;
+            text-align: center;
+        }
+
+        td {
+            padding: 14px 8px;
+            text-align: center;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        tr:last-child td { border-bottom: none; }
+
+        tr:active {
+            background-color: #27272a;
+        }
+
+        .cat-cell { font-weight: 800; color: var(--highlight); }
+        .ref-cell { color: var(--text-secondary); font-weight: 500; }
+
+        /* Modal / Bottom Sheet */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            border-radius: 24px 24px 0 0;
+            padding: 24px;
+            padding-bottom: env(safe-area-inset-bottom, 24px);
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        /* Indicador de puxar no modal (estilo iOS) */
+        .modal-handle {
+            width: 40px;
+            height: 4px;
+            background: #3f3f46;
+            border-radius: 2px;
+            margin: -12px auto 20px auto;
+        }
+
+        /* Segmented Control (Abas) */
+        .tabs {
+            display: flex;
+            background: var(--tab-bg);
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 8px 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+
+        .tab-btn.active {
+            background: #3f3f46;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .section-title {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin: 20px 0 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            font-size: 0.95rem;
+        }
+
+        .total-box {
+            background-color: #111;
+            padding: 16px;
+            border-radius: 16px;
+            margin-top: 8px;
+            border: 1px solid var(--card-border);
+        }
+
+        .net-salary {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--accent-color);
+        }
+
+        .rule-note {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 24px;
+            line-height: 1.5;
+            background: #111;
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            background: var(--highlight);
+            color: #000;
+        }
+
+        @media (min-width: 601px) {
+            .modal-content {
+                bottom: 50%;
+                left: 50%;
+                transform: translate(-50%, 50%);
+                border-radius: 24px;
+                animation: fadeIn 0.2s ease-out;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translate(-50%, 55%); }
+                to { opacity: 1; transform: translate(-50%, 50%); }
+            }
+            .modal-handle { display: none; }
+        }
+
+        /* Estilo para valores positivos/negativos */
+        .val-plus { color: var(--accent-color); font-weight: 500; }
+        .val-minus { color: var(--danger-color); font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="app-header">
+        <h2>Simulador Salarial</h2>
+        <div class="sub-title">Toque na referência para detalhar</div>
+    </div>
+
+    <div class="container">
+        <div class="table-card">
+            <table id="salaryTable">
+                <thead>
+                    <tr>
+                        <th>Cat.</th>
+                        <th>Ref.</th>
+                        <th>Ago/25</th>
+                        <th>Set/25</th>
+                        <th>OIP</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Preenchido por JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal estilo Bottom Sheet -->
+    <div id="salaryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-handle" onclick="closeModal()"></div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; font-size: 1.2rem;" id="modalTitle">Detalhamento</h3>
+                <span id="modalBadge" class="badge"></span>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(0)">Até Ago/25</button>
+                <button class="tab-btn" onclick="switchTab(1)">Set/25</button>
+                <button class="tab-btn" onclick="switchTab(2)">OIP Negoc.</button>
+            </div>
+            
+            <div id="modalBody">
+                <!-- Conteúdo JS -->
+            </div>
+
+            <div class="rule-note">
+                <strong>Informações:</strong> Alimentação (R$ 330,00) e Interiorização (R$ 600,00) não possuem descontos tributários. Cálculos de IRRF e Previdência são aproximados.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const data = [
+            {cat: 'A', ref: 'IV', v1: 13628.51, v2: 13764.79, v3: 17591.41},
+            {cat: 'A', ref: 'III', v1: 12060.63, v2: 12181.23, v3: 15992.19},
+            {cat: 'A', ref: 'II', v1: 11824.15, v2: 11942.39, v3: 15678.62},
+            {cat: 'A', ref: 'I', v1: 11592.30, v2: 11708.22, v3: 15371.20},
+            {cat: 'B', ref: 'VII', v1: 10538.46, v2: 10643.84, v3: 13973.82},
+            {cat: 'B', ref: 'VI', v1: 10331.81, v2: 10435.13, v3: 13699.82},
+            {cat: 'B', ref: 'V', v1: 10129.23, v2: 10230.52, v3: 13431.20},
+            {cat: 'B', ref: 'IV', v1: 9930.63, v2: 10029.94, v3: 13167.84},
+            {cat: 'B', ref: 'III', v1: 9735.91, v2: 9833.27, v3: 12909.65},
+            {cat: 'B', ref: 'II', v1: 9545.00, v2: 9640.45, v3: 12656.52},
+            {cat: 'B', ref: 'I', v1: 9357.86, v2: 9451.44, v3: 12408.35},
+            {cat: 'C', ref: 'VII', v1: 8507.03, v2: 8592.10, v3: 11280.32},
+            {cat: 'C', ref: 'VI', v1: 8340.33, v2: 8423.73, v3: 11059.13},
+            {cat: 'C', ref: 'V', v1: 8176.79, v2: 8258.56, v3: 10842.29},
+            {cat: 'C', ref: 'IV', v1: 8016.45, v2: 8096.62, v3: 10629.69},
+            {cat: 'C', ref: 'III', v1: 7859.27, v2: 7937.87, v3: 10421.27},
+            {cat: 'C', ref: 'II', v1: 7705.17, v2: 7782.22, v3: 10216.93},
+            {cat: 'C', ref: 'I', v1: 7554.09, v2: 7629.63, v3: 10016.60},
+            {cat: 'D', ref: 'II', v1: 6867.35, v2: 6936.02, v3: 9106.00},
+            {cat: 'D', ref: 'I', v1: 6732.71, v2: 6800.03, v3: 8927.45}
+        ];
+
+        let currentSelectedItem = null;
+        let currentTabIndex = 2;
+
+        function formatCurrency(val) {
+            return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function calcIRRF(base) {
+            if (base <= 2259.20) return 0;
+            if (base <= 2826.65) return (base * 0.075) - 169.44;
+            if (base <= 3751.05) return (base * 0.15) - 381.44;
+            if (base <= 4664.68) return (base * 0.225) - 662.77;
+            return (base * 0.275) - 896.00;
+        }
+
+        const tableBody = document.getElementById('tableBody');
+        data.forEach((item, index) => {
+            const row = document.createElement('tr');
+            row.onclick = () => openModal(item);
+            
+            let catCell = '';
+            const firstOfCat = data.findIndex(d => d.cat === item.cat) === index;
+            const countOfCat = data.filter(d => d.cat === item.cat).length;
+            
+            if(firstOfCat) {
+                catCell = `<td rowspan="${countOfCat}" class="cat-cell">${item.cat}</td>`;
+            }
+
+            row.innerHTML = `
+                ${catCell}
+                <td class="ref-cell">${item.ref}</td>
+                <td style="font-size: 12px">${formatCurrency(item.v1).replace('R$', '')}</td>
+                <td style="font-size: 12px">${formatCurrency(item.v2).replace('R$', '')}</td>
+                <td style="color: var(--highlight); font-weight: 600;">${formatCurrency(item.v3).replace('R$', '')}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+        const modal = document.getElementById('salaryModal');
+
+        function openModal(item) {
+            currentSelectedItem = item;
+            document.getElementById('modalBadge').innerText = `CAT ${item.cat} • REF ${item.ref}`;
+            modal.style.display = "block";
+            document.body.style.overflow = "hidden"; // Travar scroll
+            switchTab(2);
+        }
+
+        function switchTab(index) {
+            currentTabIndex = index;
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+            renderModalContent();
+        }
+
+        function renderModalContent() {
+            if (!currentSelectedItem) return;
+
+            let baseSal = [currentSelectedItem.v1, currentSelectedItem.v2, currentSelectedItem.v3][currentTabIndex];
+
+            const alimentacao = 330;
+            const interiorizacao = 600;
+            const previdencia = baseSal * 0.14;
+            const irrf = calcIRRF(baseSal - previdencia);
+            const totalDescontos = previdencia + irrf;
+            const baseLiquida = baseSal - totalDescontos;
+
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = `
+                <div class="item">
+                    <span style="color: var(--text-secondary)">Vencimento Base</span>
+                    <strong>${formatCurrency(baseSal)}</strong>
+                </div>
+                <div class="item">
+                    <span style="color: var(--text-secondary)">Auxílio Alimentação</span>
+                    <span class="val-plus">+ ${formatCurrency(alimentacao)}</span>
+                </div>
+                
+                <div class="section-title">Deduções Estimadas</div>
+                <div class="item">
+                    <span style="color: var(--text-secondary)">Previdência (14%)</span>
+                    <span class="val-minus">- ${formatCurrency(previdencia)}</span>
+                </div>
+                <div class="item">
+                    <span style="color: var(--text-secondary)">Imposto de Renda</span>
+                    <span class="val-minus">- ${formatCurrency(irrf)}</span>
+                </div>
+
+                <div class="section-title">Líquido Final</div>
+                
+                <div class="total-box">
+                    <div class="item" style="padding:0;">
+                        <span>Capital / RMF</span>
+                        <span class="net-salary">${formatCurrency(baseLiquida + alimentacao)}</span>
+                    </div>
+                </div>
+
+                <div class="total-box" style="margin-top: 12px; border-color: var(--highlight);">
+                    <div class="item" style="padding:0; margin-bottom: 4px;">
+                        <span style="font-size: 0.8rem">Com Interiorização</span>
+                        <span style="color: var(--highlight); font-weight: 800; font-size: 1.3rem;">${formatCurrency(baseLiquida + alimentacao + interiorizacao)}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function closeModal() {
+            modal.style.display = "none";
+            document.body.style.overflow = "auto";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) closeModal();
+        }
+    </script>
+</body>
+</html>
