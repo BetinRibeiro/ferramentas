@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório Acadêmico - Rogoberto Silva</title>
+    <style>
+        :root {
+            --blue-dark: #1e3a8a;
+            --blue-medium: #3b82f6;
+            --blue-light: #eff6ff;
+            --border-color: #cbd5e1;
+            --text-main: #1e293b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            background-color: #f8fafc;
+        }
+
+        /* Configuração de Página A4 */
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 15mm;
+            margin: 10mm auto;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+        }
+
+        header {
+            border-bottom: 3px solid var(--blue-dark);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        header h1 {
+            color: var(--blue-dark);
+            margin: 0;
+            font-size: 22pt;
+            text-transform: uppercase;
+        }
+
+        .student-info {
+            font-size: 10pt;
+            text-align: right;
+        }
+
+        h2 {
+            background-color: var(--blue-dark);
+            color: white;
+            padding: 8px 12px;
+            font-size: 14pt;
+            border-radius: 4px;
+            margin-top: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 9.5pt;
+        }
+
+        th {
+            background-color: #dbeafe;
+            color: var(--blue-dark);
+            font-weight: bold;
+            text-transform: uppercase;
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: left;
+        }
+
+        td {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            line-height: 1.4;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f1f5f9;
+        }
+
+        .score {
+            font-weight: bold;
+            color: var(--blue-dark);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 8pt;
+            font-weight: bold;
+            background: #e2e8f0;
+        }
+
+        .status-aprovado { color: #15803d; font-weight: bold; }
+        .status-aproveitamento { color: var(--blue-medium); }
+
+        /* Regras para Impressão */
+        @media print {
+            body { background: white; }
+            .page {
+                margin: 0;
+                box-shadow: none;
+                width: 100%;
+            }
+            .no-print { display: none; }
+            
+            table { page-break-inside: auto; }
+            tr { page-break-inside: avoid; page-break-after: auto; }
+            thead { display: table-header-group; }
+            
+            h2 { -webkit-print-color-adjust: exact; }
+            th { -webkit-print-color-adjust: exact; }
+        }
+
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+
+        .btn-print {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: var(--blue-dark);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <button class="btn-print no-print" onclick="window.print()">Imprimir PDF / A4</button>
+
+    <div class="page">
+        <header>
+            <div>
+                <h1>Dashboard Acadêmico</h1>
+                <span style="color: var(--blue-medium)">Curso: Análise e Desenvolvimento de Sistemas</span>
+            </div>
+            <div class="student-info">
+                <strong>Aluno:</strong> Rogoberto Silva<br>
+                <strong>Data de Emissão:</strong> 23/05/2024
+            </div>
+        </header>
+
+        <h2>1. METAS DO SEMESTRE ATUAL</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Disciplina</th>
+                    <th style="width: 80px">Conquistado</th>
+                    <th style="width: 80px">Máximo</th>
+                    <th style="width: 100px">Prova Presencial</th>
+                    <th>Composição da Nota</th>
+                </tr>
+            </thead>
+            <tbody id="table-metas">
+                <!-- Inserido via JS -->
+            </tbody>
+        </table>
+
+        <h2>2. HISTÓRICO ESCOLAR COMPLETO</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Disciplina</th>
+                    <th style="text-align: center">Média</th>
+                    <th>Situação</th>
+                    <th style="text-align: center">Carga Horária</th>
+                </tr>
+            </thead>
+            <tbody id="table-historico">
+                <!-- Inserido via JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const dadosMetas = [
+            { nome: "DESENVOLVIMENTO RESPONSIVO", conquistado: 11000, max: 11000, itens: "Portfólio, AVA, Engajamento, Prova", prova: "CONCLUIDO" },
+            { nome: "DESENVOLVIMENTO MOBILE", conquistado: 11000, max: 11000, itens: "Portfólio, AVA, Engajamento, Prova", prova: "CONCLUIDO" },
+            { nome: "SISTEMAS DISTRIBUÍDOS", conquistado: 4800, max: 11000, itens: "Portfólio, AVA, Engajamento", prova: "25/04/2026" },
+            { nome: "PRIVACIDADE E PROTEÇÃO DE DADOS", conquistado: 5000, max: 10000, itens: "AVA, Engajamento", prova: "09/05/2026" },
+            { nome: "SISTEMAS OPERACIONAIS", conquistado: 7000, max: 12000, itens: "Portfólio, AVA, Engajamento", prova: "09/05/2026" },
+            { nome: "ENGENHARIA DE SOFTWARE", conquistado: 6500, max: 12000, itens: "AVA, Engajamento", prova: "09/05/2026" },
+            { nome: "GREEN IT", conquistado: 6500, max: 10000, itens: "AVA, Engajamento", prova: "09/05/2026" },
+            { nome: "PROJETO DE EXTENSÃO I", conquistado: 10000, max: 10000, itens: "Portfólio Único", prova: "N/A" },
+            { nome: "PROJETO DE EXTENSÃO II", conquistado: 10000, max: 10000, itens: "Portfólio Único", prova: "N/A" }
+        ];
+
+        const historicoDados = [
+            { nome: "PROJETO INTEGRADO SÍNTESE", nota: "10", status: "APROVADO", ch: "70h" },
+            { nome: "ARQUITETURA E ORG. DE COMPUTADORES", nota: "8.4", status: "APROVEITAMENTO", ch: "60h" },
+            { nome: "INTERFACE E USABILIDADE", nota: "6.7", status: "APROVEITAMENTO", ch: "60h" },
+            { nome: "PROJETO DE SOFTWARE", nota: "8.5", status: "APROVADO", ch: "60h" },
+            { nome: "REDES DE COMPUTADORES", nota: "9.1", status: "APROVEITAMENTO", ch: "60h" },
+            { nome: "SEGURANÇA E AUDITORIA DE SISTEMAS", nota: "10", status: "APROVADO", ch: "60h" },
+            { nome: "PROJETO INTEGRADO INOVAÇÃO", nota: "10", status: "APROVADO", ch: "70h" },
+            { nome: "ALGORITMOS E PROG. ESTRUTURADA", nota: "5.0", status: "APROVEITAMENTO", ch: "60h" },
+            { nome: "ANÁLISE E MODELAGEM DE SISTEMAS", nota: "10", status: "APROVADO", ch: "60h" },
+            { nome: "LINGUAGEM DE PROGRAMAÇÃO", nota: "9.3", status: "APROVEITAMENTO", ch: "60h" },
+            { nome: "LÓGICA E MATEMÁTICA COMPUTACIONAL", nota: "7.3", status: "APROVEITAMENTO", ch: "60h" },
+            { nome: "ANÁLISE ORIENTADA A OBJETOS", nota: "9.0", status: "APROVEITAMENTO", ch: "60h" },
+            { nome: "LINGUAGEM ORIENTADA A OBJETOS", nota: "7.0", status: "APROVEITAMENTO", ch: "60h" },
+            { nome: "MODELAGEM DE DADOS", nota: "8.3", status: "APROVEITAMENTO", ch: "60h" },
+            { nome: "COMPUTAÇÃO EM NUVEM", nota: "10", status: "APROVADO", ch: "60h" },
+            { nome: "DESENVOLVIMENTO EM JAVASCRIPT", nota: "10", status: "APROVADO", ch: "60h" },
+            { nome: "FRAMEWORKS PARA DESENV. SOFTWARE", nota: "10", status: "APROVADO", ch: "60h" },
+            { nome: "PROG. E DESENV. DE BANCO DE DADOS", nota: "8.4", status: "APROVEITAMENTO", ch: "60h" },
+            { nome: "PROGRAMAÇÃO WEB", nota: "10", status: "APROVADO", ch: "60h" },
+            { nome: "QUALIDADE E AUTOMAÇÃO DE TESTES", nota: "10", status: "APROVADO", ch: "60h" },
+            { nome: "PROJETO INTEGRADO INTERDISCIPLINAR", nota: "10", status: "APROVADO", ch: "70h" },
+            { nome: "SOCIEDADE BRASILEIRA E CIDADANIA", nota: "7.25", status: "APROVEITAMENTO", ch: "60h" },
+            { nome: "ATIVIDADES COMPLEMENTARES", nota: "OK", status: "CONCLUÍDO", ch: "100h" }
+        ];
+
+        const renderMetas = () => {
+            const container = document.getElementById('table-metas');
+            dadosMetas.forEach(d => {
+                container.innerHTML += `
+                    <tr>
+                        <td><strong>${d.nome}</strong></td>
+                        <td class="score">${d.conquistado.toLocaleString()}</td>
+                        <td>${d.max.toLocaleString()}</td>
+                        <td><span class="badge">${d.prova}</span></td>
+                        <td style="font-size: 8pt; color: #64748b">${d.itens}</td>
+                    </tr>
+                `;
+            });
+        };
+
+        const renderHistorico = () => {
+            const container = document.getElementById('table-historico');
+            historicoDados.forEach(h => {
+                const statusClass = h.status === 'APROVADO' ? 'status-aprovado' : 'status-aproveitamento';
+                container.innerHTML += `
+                    <tr>
+                        <td>${h.nome}</td>
+                        <td style="text-align: center" class="score">${h.nota}</td>
+                        <td class="${statusClass}">${h.status}</td>
+                        <td style="text-align: center">${h.ch}</td>
+                    </tr>
+                `;
+            });
+        };
+
+        renderMetas();
+        renderHistorico();
+    </script>
+</body>
+</html>
