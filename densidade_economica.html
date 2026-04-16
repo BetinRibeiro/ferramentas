@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Juazeiro do Norte - Densidade Econômica</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --secondary-blue: #0056b3;
+            --light-blue: #e6f2ff;
+            --accent-blue: #007bff;
+            --text-dark: #333;
+            --gray: #666;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            color: var(--text-dark);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 40px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        header {
+            border-bottom: 3px solid var(--primary-blue);
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title h1 {
+            margin: 0;
+            color: var(--primary-blue);
+            font-size: 28px;
+            text-transform: uppercase;
+        }
+
+        .header-title p {
+            margin: 5px 0 0;
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .badge-city {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: var(--light-blue);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid var(--secondary-blue);
+        }
+
+        .card small {
+            display: block;
+            color: var(--secondary-blue);
+            font-weight: bold;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .card span {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th {
+            background-color: var(--primary-blue);
+            color: white;
+            text-align: left;
+            padding: 12px;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
+        .rank {
+            font-weight: bold;
+            color: var(--secondary-blue);
+            width: 50px;
+        }
+
+        .units {
+            text-align: right;
+            font-weight: bold;
+            color: var(--primary-blue);
+            white-space: nowrap;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 11px;
+            color: #999;
+            text-align: center;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        /* Estilos para Impressão */
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; max-width: 100%; width: 100%; padding: 0; }
+            .no-print { display: none; }
+            th { background-color: #003366 !important; color: white !important; -webkit-print-color-adjust: exact; }
+            .card { background-color: #e6f2ff !important; -webkit-print-color-adjust: exact; border-left: 5px solid #0056b3 !important; }
+            .badge-city { background-color: #003366 !important; color: white !important; -webkit-print-color-adjust: exact; }
+            tr:nth-child(even) { background-color: #fafafa !important; -webkit-print-color-adjust: exact; }
+        }
+
+        .btn-print {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <center class="no-print">
+        <button class="btn-print" onclick="window.print()">Imprimir Relatório</button>
+    </center>
+
+    <div class="container">
+        <header>
+            <div class="header-title">
+                <h1>Análise de Densidade Econômica</h1>
+                <p>Top 100 Atividades por Cidade | Big Data & Mineração</p>
+            </div>
+            <div class="badge-city">
+                JUAZEIRO DO NORTE / CE
+            </div>
+        </header>
+
+        <div class="summary">
+            <div class="card">
+                <small>Principal Atividade</small>
+                <span>Comércio de Vestuário</span>
+            </div>
+            <div class="card">
+                <small>Total Top 100</small>
+                <span>21.458 Unidades</span>
+            </div>
+            <div class="card">
+                <small>Foco Regional</small>
+                <span>Comércio e Serviços</span>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Pos.</th>
+                    <th>Atividade Econômica (CNAE)</th>
+                    <th style="text-align: right;">Volume de Unidades</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <!-- Os dados serão inseridos aqui via script para facilitar a leitura -->
+            </tbody>
+        </table>
+
+        <div class="footer">
+            Relatório gerado em Juazeiro do Norte, CE - Dados baseados em registros de empresas ativas.
+        </div>
+    </div>
+
+    <script>
+        const data = [
+            ["1º", "Comércio varejista de artigos do vestuário e acessórios", "1320 UNIDADES"],
+            ["2º", "Comércio varejista de mercadorias em geral, com predominância de produtos alimentícios - minimercados, mercearias e armazéns", "847 UNIDADES"],
+            ["3º", "Promoção de vendas", "824 UNIDADES"],
+            ["4º", "Cabeleireiros, manicure e pedicure", "766 UNIDADES"],
+            ["5º", "Lanchonetes, casas de chá, de sucos e similares", "657 UNIDADES"],
+            ["6º", "Restaurantes e similares", "509 UNIDADES"],
+            ["7º", "Construção de edifícios", "436 UNIDADES"],
+            ["8º", "Comércio varejista de cosméticos, produtos de perfumaria e de higiene pessoal", "420 UNIDADES"],
+            ["9º", "Fornecimento de alimentos preparados preponderantemente para consumo domiciliar", "399 UNIDADES"],
+            ["10º", "Atividade médica ambulatorial restrita a consultas", "353 UNIDADES"],
+            ["11º", "Serviço de táxi", "350 UNIDADES"],
+            ["12º", "Comércio varejista de materiais de construção em geral", "328 UNIDADES"],
+            ["13º", "Atividades de estética e outros serviços de cuidados com a beleza", "321 UNIDADES"],
+            ["14º", "Serviços de malote não realizados pelo Correio Nacional", "321 UNIDADES"],
+            ["15º", "Treinamento em desenvolvimento profissional e gerencial", "318 UNIDADES"],
+            ["16º", "Transporte rodoviário de carga, exceto produtos perigosos e mudanças, municipal.", "312 UNIDADES"],
+            ["17º", "Comércio varejista de bebidas", "305 UNIDADES"],
+            ["18º", "Comércio a varejo de peças e acessórios novos para veículos automotores", "301 UNIDADES"],
+            ["19º", "Outras atividades de ensino não especificadas anteriormente", "297 UNIDADES"],
+            ["20º", "Comércio varejista de outros produtos não especificados anteriormente", "296 UNIDADES"],
+            ["21º", "Comércio varejista de suvenires, bijuterias e artesanatos", "284 UNIDADES"],
+            ["22º", "Comércio varejista de produtos alimentícios em geral ou especializado em produtos alimentícios não especificados anteriormente", "272 UNIDADES"],
+            ["23º", "Serviço de transporte de passageiros - locação de automóveis com motorista", "272 UNIDADES"],
+            ["24º", "Comércio varejista de calçados", "265 UNIDADES"],
+            ["25º", "Atividades de associações de defesa de direitos sociais", "251 UNIDADES"],
+            ["26º", "Preparação de documentos e serviços especializados de apoio administrativo não especificados anteriormente", "247 UNIDADES"],
+            ["27º", "Comercio varejista de artigos de armarinho", "243 UNIDADES"],
+            ["28º", "Obras de alvenaria", "234 UNIDADES"],
+            ["29º", "Serviços de entrega rápida", "226 UNIDADES"],
+            ["30º", "Transporte rodoviário de carga, exceto produtos perigosos e mudanças, intermunicipal, interestadual e internacional", "225 UNIDADES"],
+            ["31º", "Instalação e manutenção elétrica", "224 UNIDADES"],
+            ["32º", "Serviços de organização de feiras, congressos, exposições e festas", "213 UNIDADES"],
+            ["33º", "Comércio varejista de artigos de óptica", "207 UNIDADES"],
+            ["34º", "Fabricação de produtos de padaria e confeitaria com predominância de produção própria", "206 UNIDADES"],
+            ["35º", "Comércio a varejo de peças e acessórios novos para motocicletas e motonetas", "203 UNIDADES"],
+            ["36º", "Comércio varejista de animais vivos e de artigos e alimentos para animais de estimação", "198 UNIDADES"],
+            ["37º", "Serviços ambulantes de alimentação", "195 UNIDADES"],
+            ["38º", "Comércio varejista de artigos de joalheria", "188 UNIDADES"],
+            ["39º", "Serviços combinados de escritório e apoio administrativo", "185 UNIDADES"],
+            ["40º", "Atividades de organizações religiosas ou filosóficas", "182 UNIDADES"],
+            ["41º", "Atividades de atendimento em pronto-socorro e unidades hospitalares para atendimento a urgências", "173 UNIDADES"],
+            ["42º", "Atividade odontológica", "170 UNIDADES"],
+            ["43º", "Serviços de manutenção e reparação mecânica de veículos automotores", "167 UNIDADES"],
+            ["44º", "Atividades de pós-produção cinematográfica, de vídeos e de programas de televisão não especificadas anteriormente", "161 UNIDADES"],
+            ["45º", "Serviços advocatícios", "161 UNIDADES"],
+            ["46º", "Reparação e manutenção de computadores e de equipamentos periféricos", "154 UNIDADES"],
+            ["47º", "Comércio varejista de produtos farmacêuticos, sem manipulação de fórmulas", "152 UNIDADES"],
+            ["48º", "Comércio varejista de outros artigos de uso pessoal e doméstico não especificados anteriormente", "144 UNIDADES"],
+            ["49º", "Comércio varejista especializado de equipamentos de telefonia e comunicação", "142 UNIDADES"],
+            ["50º", "Atividades de contabilidade", "140 UNIDADES"],
+            ["51º", "Serviços de engenharia", "134 UNIDADES"],
+            ["52º", "Lojas de variedades, exceto lojas de departamentos ou magazines", "132 UNIDADES"],
+            ["53º", "Fabricação de móveis com predominância de madeira", "129 UNIDADES"],
+            ["54º", "Incorporação de empreendimentos imobiliários", "125 UNIDADES"],
+            ["55º", "Comércio varejista de carnes - açougues", "124 UNIDADES"],
+            ["56º", "Bares e outros estabelecimentos especializados em servir bebidas, com entretenimento", "123 UNIDADES"],
+            ["57º", "Fabricação de calçados de materiais não especificados anteriormente", "123 UNIDADES"],
+            ["58º", "Serviços domésticos", "121 UNIDADES"],
+            ["59º", "Comércio varejista especializado de equipamentos e suprimentos de informática", "118 UNIDADES"],
+            ["60º", "Comércio varejista de móveis", "118 UNIDADES"],
+            ["61º", "Comércio varejista de hortifrutigranjeiros", "117 UNIDADES"],
+            ["62º", "Atividades de condicionamento físico", "115 UNIDADES"],
+            ["63º", "Bares e outros estabelecimentos especializados em servir bebidas, sem entretenimento", "108 UNIDADES"],
+            ["64º", "Ensino fundamental", "107 UNIDADES"],
+            ["65º", "Instalação e manutenção de sistemas centrais de ar condicionado, de ventilação e refrigeração", "107 UNIDADES"],
+            ["66º", "Comércio varejista de artigos de papelaria", "105 UNIDADES"],
+            ["67º", "Serviços de lavagem, lubrificação e polimento de veículos automotores", "102 UNIDADES"],
+            ["68º", "Comércio varejista de combustíveis para veículos automotores", "101 UNIDADES"],
+            ["69º", "Comercio varejista de artigos de cama, mesa e banho", "100 UNIDADES"],
+            ["70º", "Condomínios prediais", "100 UNIDADES"],
+            ["71º", "Padaria e confeitaria com predominância de revenda", "97 UNIDADES"],
+            ["72º", "Holdings de instituições não-financeiras", "96 UNIDADES"],
+            ["73º", "Atividades de cobranças e informações cadastrais", "96 UNIDADES"],
+            ["74º", "Atividades de fisioterapia", "94 UNIDADES"],
+            ["75º", "Atividades de consultoria em gestão empresarial, exceto consultoria técnica específica", "94 UNIDADES"],
+            ["76º", "Produção musical", "94 UNIDADES"],
+            ["77º", "Comércio varejista especializado de eletrodomésticos e equipamentos de áudio e vídeo", "90 UNIDADES"],
+            ["78º", "Atividades de produção de fotografias, exceto aérea e submarina", "88 UNIDADES"],
+            ["79º", "Comércio varejista de ferragens e ferramentas", "87 UNIDADES"],
+            ["80º", "Laboratórios clínicos", "85 UNIDADES"],
+            ["81º", "Confecção de peças de vestuário, exceto roupas íntimas e as confeccionadas sob medida", "85 UNIDADES"],
+            ["82º", "Atividades de psicologia e psicanálise", "84 UNIDADES"],
+            ["83º", "Edição de cadastros, listas e de outros produtos gráficos", "82 UNIDADES"],
+            ["84º", "Confecção, sob medida, de peças do vestuário, exceto roupas íntimas", "82 UNIDADES"],
+            ["85º", "Representantes comerciais e agentes do comércio de mercadorias em geral não especializado", "80 UNIDADES"],
+            ["86º", "Serviços de pintura de edifícios em geral", "78 UNIDADES"],
+            ["87º", "Fabricação de produtos diversos não especificados anteriormente", "78 UNIDADES"],
+            ["88º", "Atividade médica ambulatorial com recursos para realização de procedimentos cirúrgicos", "75 UNIDADES"],
+            ["89º", "Hotéis", "73 UNIDADES"],
+            ["90º", "Comércio a varejo de automóveis, camionetas e utilitários usados", "73 UNIDADES"],
+            ["91º", "Atividades associativas não especificadas anteriormente", "72 UNIDADES"],
+            ["92º", "Serviços de alimentação para eventos e recepções - bufê", "71 UNIDADES"],
+            ["93º", "Agências de viagens", "70 UNIDADES"],
+            ["94º", "Educação infantil - pré-escola", "69 UNIDADES"],
+            ["95º", "Outros alojamentos não especificados anteriormente", "67 UNIDADES"],
+            ["96º", "Atividade médica ambulatorial com recursos para realização de exames complementares", "66 UNIDADES"],
+            ["97º", "Compra e venda de imóveis próprios", "66 UNIDADES"],
+            ["98º", "Fabricação de artigos para viagem, bolsas e semelhantes de qualquer material", "65 UNIDADES"],
+            ["99º", "Comércio varejista especializado de peças e acessórios para aparelhos eletroeletrônicos para uso doméstico, exceto informática e comunicação", "63 UNIDADES"],
+            ["100º", "Comércio varejista de produtos saneantes domissanitários", "63 UNIDADES"]
+        ];
+
+        const tbody = document.getElementById('table-body');
+        data.forEach(item => {
+            const row = `<tr>
+                <td class="rank">${item[0]}</td>
+                <td>${item[1]}</td>
+                <td class="units">${item[2]}</td>
+            </tr>`;
+            tbody.innerHTML += row;
+        });
+    </script>
+</body>
+</html>
