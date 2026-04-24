@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Certificações</title>
+    <style>
+        :root {
+            --primary-blue: #1a3a5f;
+            --secondary-blue: #2c5282;
+            --light-blue: #ebf8ff;
+            --highlight-blue: #e1effe;
+            --border-color: #bee3f8;
+            --text-color: #2d3748;
+        }
+
+        * {
+            box-sizing: border-box; /* Garante que padding não aumente a largura total */
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f7fafc;
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 100%; /* Essencial para não cortar */
+        }
+
+        header {
+            border-bottom: 3px solid var(--primary-blue);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            color: var(--primary-blue);
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .summary-box {
+            background-color: var(--light-blue);
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 5px solid var(--secondary-blue);
+            margin-bottom: 25px;
+        }
+
+        .total-hours {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-blue);
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto; /* Scroll apenas em telas pequenas */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto; /* Permite que o navegador ajuste as colunas */
+        }
+
+        th {
+            background-color: var(--primary-blue);
+            color: white;
+            text-align: left;
+            padding: 10px;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 12px;
+            word-wrap: break-word; /* Força quebra de texto */
+            overflow-wrap: break-word;
+        }
+
+        .row-geral {
+            background-color: var(--highlight-blue) !important;
+            font-weight: bold;
+        }
+
+        .badge-geral {
+            background-color: var(--secondary-blue);
+            color: white;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 9px;
+            margin-right: 4px;
+        }
+
+        /* --- AJUSTES DE IMPRESSÃO --- */
+        @media print {
+            @page {
+                size: portrait;
+                margin: 10mm; /* Margem da folha */
+            }
+
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+
+            .container {
+                box-shadow: none;
+                max-width: 100% !important;
+                width: 100% !important;
+                padding: 0;
+                margin: 0;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            table {
+                width: 100% !important;
+                table-layout: fixed; /* Força o preenchimento exato da largura A4 */
+            }
+
+            th, td {
+                padding: 8px 5px !important;
+                font-size: 10pt !important; /* Tamanho de fonte fixo para papel */
+            }
+
+            /* Define larguras relativas para evitar que colunas longas empurrem a tabela */
+            th:nth-child(1) { width: 35%; } /* Certificado */
+            th:nth-child(2) { width: 25%; } /* Curso */
+            th:nth-child(3) { width: 12%; } /* Projeto */
+            th:nth-child(4) { width: 18%; } /* Matrícula */
+            th:nth-child(5) { width: 10%; } /* Carga */
+
+            .row-geral {
+                background-color: #e1effe !important;
+                -webkit-print-color-adjust: exact; /* Força o Chrome/Edge a imprimir a cor de fundo */
+                print-color-adjust: exact;
+            }
+        }
+
+        /* Responsividade para celular */
+        @media (max-width: 600px) {
+            h1 { font-size: 18px; }
+            .btn-print { display: none; }
+        }
+
+        .btn-print {
+            background-color: var(--secondary-blue);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Relatório de Certificações</h1>
+        <button class="btn-print no-print" onclick="window.print()">Imprimir PDF</button>
+    </header>
+
+    <div class="summary-box">
+        <span style="font-size: 13px;">Carga Horária Total (Somente Certificados Gerais):</span>
+        <div class="total-hours" id="totalHours">0h</div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Certificado</th>
+                    <th>Curso</th>
+                    <th>Projeto</th>
+                    <th>Matrícula</th>
+                    <th>Carga</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Inserido via JS -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const data = [
+        { "Certificado": "CERTIFICADO GERAL: ARGUMENTAÇÃO E ANÁLISE DE DISCURSO", "Curso": "ARGUMENTAÇÃO E ANÁLISE DE DISCURSO", "Projeto": "2025/2", "Matrícula Trilha": "8444347901", "Carga Horaria": 120 },
+        { "Certificado": "TEORIA DA ARGUMENTAÇÃO JURÍDICA", "Curso": "ARGUMENTAÇÃO E ANÁLISE DE DISCURSO", "Projeto": "2025/2", "Matrícula Trilha": "8444347901", "Carga Horaria": 60 },
+        { "Certificado": "ANÁLISE DO DISCURSO", "Curso": "ARGUMENTAÇÃO E ANÁLISE DE DISCURSO", "Projeto": "2025/2", "Matrícula Trilha": "8444347901", "Carga Horaria": 60 },
+        { "Certificado": "CERTIFICADO GERAL: Análise de Dados com Python", "Curso": "Análise de Dados com Python", "Projeto": "2025/2", "Matrícula Trilha": "8444347501", "Carga Horaria": 40 },
+        { "Certificado": "INTRODUÇÃO À LINGUAGEM PYTHON", "Curso": "Análise de Dados com Python", "Projeto": "2025/2", "Matrícula Trilha": "8444347501", "Carga Horaria": 15 },
+        { "Certificado": "INTRODUÇÃO À ANÁLISE DE DADOS COM PYTHON", "Curso": "Análise de Dados com Python", "Projeto": "2025/2", "Matrícula Trilha": "8444347501", "Carga Horaria": 15 },
+        { "Certificado": "ESTRUTURAS DE DADOS EM PYTHON", "Curso": "Análise de Dados com Python", "Projeto": "2025/2", "Matrícula Trilha": "8444347501", "Carga Horaria": 10 },
+        { "Certificado": "CERTIFICADO GERAL: COACHING E LIDERANÇA", "Curso": "COACHING E LIDERANÇA", "Projeto": "2026/1", "Matrícula Trilha": "8444348302", "Carga Horaria": 80 },
+        { "Certificado": "LIDERANÇA E DESENVOLVIMENTO DE EQUIPES", "Curso": "COACHING E LIDERANÇA", "Projeto": "2026/1", "Matrícula Trilha": "8444348302", "Carga Horaria": 20 },
+        { "Certificado": "GESTÃO DE METAS E INDICADORES DE PERFORMANCE", "Curso": "COACHING E LIDERANÇA", "Projeto": "2026/1", "Matrícula Trilha": "8444348302", "Carga Horaria": 20 },
+        { "Certificado": "COMUNICAÇÃO ASSERTIVA E NEGOCIAÇÃO", "Curso": "COACHING E LIDERANÇA", "Projeto": "2026/1", "Matrícula Trilha": "8444348302", "Carga Horaria": 20 },
+        { "Certificado": "AUTOCOACHING", "Curso": "COACHING E LIDERANÇA", "Projeto": "2026/1", "Matrícula Trilha": "8444348302", "Carga Horaria": 20 },
+        { "Certificado": "CERTIFICADO GERAL: COMPLIANCE E GOVERNANÇA CORPORATIVA", "Curso": "COMPLIANCE E GOVERNANÇA CORPORATIVA", "Projeto": "2026/1", "Matrícula Trilha": "8444348402", "Carga Horaria": 120 },
+        { "Certificado": "PLANEJAMENTO ESTRATÉGICO", "Curso": "COMPLIANCE E GOVERNANÇA CORPORATIVA", "Projeto": "2026/1", "Matrícula Trilha": "8444348402", "Carga Horaria": 60 },
+        { "Certificado": "DIREITO INTERNACIONAL", "Curso": "COMPLIANCE E GOVERNANÇA CORPORATIVA", "Projeto": "2026/1", "Matrícula Trilha": "8444348402", "Carga Horaria": 60 },
+        { "Certificado": "CERTIFICADO GERAL: GESTÃO DA QUALIDADE NA PRODUÇÃO DE BENS E SERVIÇOS", "Curso": "GESTÃO DA QUALIDADE NA PRODUÇÃO DE BENS E SERVIÇOS", "Projeto": "2026/1", "Matrícula Trilha": "9247862401", "Carga Horaria": 120 },
+        { "Certificado": "GESTAO DE OPERACOES E SERVICOS", "Curso": "GESTÃO DA QUALIDADE NA PRODUÇÃO DE BENS E SERVIÇOS", "Projeto": "2026/1", "Matrícula Trilha": "9247862401", "Carga Horaria": 60 },
+        { "Certificado": "GERENCIAMENTO E CONTROLE DE QUALIDADE", "Curso": "GESTÃO DA QUALIDADE NA PRODUÇÃO DE BENS E SERVIÇOS", "Projeto": "2026/1", "Matrícula Trilha": "9247862401", "Carga Horaria": 60 },
+        { "Certificado": "CERTIFICADO GERAL: GOVERNANÇA, DIREITO E ORÇAMENTO NO SETOR PÚBLICO", "Curso": "GOVERNANÇA, DIREITO E ORÇAMENTO NO SETOR PÚBLICO", "Projeto": "2026/1", "Matrícula Trilha": "9247988001", "Carga Horaria": 120 },
+        { "Certificado": "ORÇAMENTO PÚBLICO", "Curso": "GOVERNANÇA, DIREITO E ORÇAMENTO NO SETOR PÚBLICO", "Projeto": "2026/1", "Matrícula Trilha": "9247988001", "Carga Horaria": 60 },
+        { "Certificado": "ECONOMIA POLÍTICA", "Curso": "GOVERNANÇA, DIREITO E ORÇAMENTO NO SETOR PÚBLICO", "Projeto": "2026/1", "Matrícula Trilha": "9247988001", "Carga Horaria": 60 },
+        { "Certificado": "CERTIFICADO GERAL: MATEMÁTICA FINANCEIRA PARA ANÁLISE DE RISCOS", "Curso": "MATEMÁTICA FINANCEIRA PARA ANÁLISE DE RISCOS", "Projeto": "2026/1", "Matrícula Trilha": "9302916001", "Carga Horaria": 120 },
+        { "Certificado": "NOCOES DE ATUARIA", "Curso": "MATEMÁTICA FINANCEIRA PARA ANÁLISE DE RISCOS", "Projeto": "2026/1", "Matrícula Trilha": "9302916001", "Carga Horaria": 60 },
+        { "Certificado": "MATEMATICA FINANCEIRA", "Curso": "MATEMÁTICA FINANCEIRA PARA ANÁLISE DE RISCOS", "Projeto": "2026/1", "Matrícula Trilha": "9302916001", "Carga Horaria": 60 },
+        { "Certificado": "CERTIFICADO GERAL: PSICOLOGIA APLICADA AO DIREITO PENAL", "Curso": "PSICOLOGIA APLICADA AO DIREITO PENAL", "Projeto": "2026/1", "Matrícula Trilha": "9241565601", "Carga Horaria": 120 },
+        { "Certificado": "TEORIA JURÍDICA DO DIREITO PENAL", "Curso": "PSICOLOGIA APLICADA AO DIREITO PENAL", "Projeto": "2026/1", "Matrícula Trilha": "9241565601", "Carga Horaria": 60 },
+        { "Certificado": "PSICOLOGIA APLICADA AO DIREITO", "Curso": "PSICOLOGIA APLICADA AO DIREITO PENAL", "Projeto": "2026/1", "Matrícula Trilha": "9241565601", "Carga Horaria": 60 },
+        { "Certificado": "CERTIFICADO GERAL: RELAÇÕES SOCIAIS E COMPORTAMENTO HUMANO", "Curso": "RELAÇÕES SOCIAIS E COMPORTAMENTO HUMANO", "Projeto": "2026/1", "Matrícula Trilha": "9247862501", "Carga Horaria": 120 },
+        { "Certificado": "PSICOLOGIA DO DESENVOLVIMENTO", "Curso": "RELAÇÕES SOCIAIS E COMPORTAMENTO HUMANO", "Projeto": "2026/1", "Matrícula Trilha": "9247862501", "Carga Horaria": 60 },
+        { "Certificado": "PSICOLOGIA APLICADA A SAUDE", "Curso": "RELAÇÕES SOCIAIS E COMPORTAMENTO HUMANO", "Projeto": "2026/1", "Matrícula Trilha": "9247862501", "Carga Horaria": 60 },
+        { "Certificado": "CERTIFICADO GERAL: TECNOLOGIA, DIREITO DIGITAL E PROPRIEDADE INTELECTUAL", "Curso": "TECNOLOGIA, DIREITO DIGITAL E PROPRIEDADE INTELECTUAL", "Projeto": "2026/1", "Matrícula Trilha": "9247988101", "Carga Horaria": 120 },
+        { "Certificado": "TECNOLOGIAS DE INFORMAÇÃO APLICADAS AO DIREITO", "Curso": "TECNOLOGIA, DIREITO DIGITAL E PROPRIEDADE INTELECTUAL", "Projeto": "2026/1", "Matrícula Trilha": "9247988101", "Carga Horaria": 60 },
+        { "Certificado": "DIREITO ELETRÔNICO", "Curso": "TECNOLOGIA, DIREITO DIGITAL E PROPRIEDADE INTELECTUAL", "Projeto": "2026/1", "Matrícula Trilha": "9247988101", "Carga Horaria": 60 }
+    ];
+
+    function renderTable() {
+        const tableBody = document.getElementById('tableBody');
+        const totalHoursElement = document.getElementById('totalHours');
+        let totalGeneralHours = 0;
+
+        data.forEach(item => {
+            const isGeral = item.Certificado.toUpperCase().includes("CERTIFICADO GERAL");
+            
+            if (isGeral) {
+                totalGeneralHours += item["Carga Horaria"];
+            }
+
+            const row = document.createElement('tr');
+            if (isGeral) row.className = 'row-geral';
+
+            row.innerHTML = `
+                <td>${item.Certificado.replace("CERTIFICADO GERAL: ", "#")}</td>
+                <td>${item.Curso}</td>
+                <td style="text-align: center;">${item.Projeto}</td>
+                <td>${item["Matrícula Trilha"]}</td>
+                <td style="text-align: right; white-space: nowrap;">${item["Carga Horaria"]}h</td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+        totalHoursElement.innerText = `${totalGeneralHours} horas`;
+    }
+
+    window.onload = renderTable;
+</script>
+
+</body>
+</html>
