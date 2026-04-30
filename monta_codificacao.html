@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Codificação Logística</title>
+    
+    <!-- Favicon via Link Externo (Ícone de Logística Azul) -->
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2343/2343894.png">
+
+    <style>
+        :root {
+            --primary: #0056b3;
+            --secondary: #007bff;
+            --light-blue: #e7f1ff;
+            --dark-blue: #003d80;
+            --danger: #dc3545;
+            --success: #28a745;
+            --copy-btn: #6f42c1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--light-blue);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 950px;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 3px solid var(--secondary);
+            padding-bottom: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--dark-blue);
+        }
+
+        input {
+            padding: 12px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        input:focus {
+            border-color: var(--secondary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
+        }
+
+        .btn-main {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 6px;
+            width: 100%;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-main:hover { background-color: var(--dark-blue); }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-tool {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            color: white;
+        }
+
+        .btn-export { background-color: var(--success); }
+        .btn-import { background-color: #6c757d; }
+        .btn-clear { background-color: var(--danger); margin-left: auto; }
+
+        .table-section {
+            margin-top: 30px;
+            border-top: 2px solid #eee;
+            padding-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th {
+            background-color: var(--primary);
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .code-cell {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: var(--dark-blue);
+            font-size: 1.1em;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-copy {
+            background-color: var(--copy-btn);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        .btn-delete {
+            background-color: #fff;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        .btn-delete:hover { background: var(--danger); color: white; }
+
+        .timestamp { font-size: 0.8em; color: #6c757d; }
+
+        #importFile { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Gerador de Codificação</h2>
+    
+    <form id="codeForm">
+        <div class="form-grid">
+            <div class="input-group">
+                <label>Nº Viagem</label>
+                <input type="number" id="viagem" placeholder="Ex: 01" required>
+            </div>
+            <div class="input-group">
+                <label>Ano</label>
+                <input type="number" id="ano" placeholder="Ex: 2024" required>
+            </div>
+            <div class="input-group">
+                <label>Vendedor</label>
+                <input type="text" id="vendedor" placeholder="Nome" required>
+            </div>
+            <div class="input-group">
+                <label>Nº Ficha</label>
+                <input type="number" id="ficha" placeholder="Ex: 001" required>
+            </div>
+        </div>
+        <button type="submit" class="btn-main">Gerar e Salvar no Relatório</button>
+    </form>
+
+    <div class="toolbar">
+        <button class="btn-tool btn-export" onclick="exportData()">Exportar JSON</button>
+        <button class="btn-tool btn-import" onclick="document.getElementById('importFile').click()">Importar JSON</button>
+        <input type="file" id="importFile" accept=".json" onchange="importData(event)">
+        <button class="btn-tool btn-clear" onclick="clearList()">Zerar Lista</button>
+    </div>
+
+    <div class="table-section">
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Data/Hora</th>
+                    <th>Código Gerado</th>
+                    <th>Vendedor</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let listData = JSON.parse(localStorage.getItem('relatorioCodigos')) || [];
+
+    // Ao carregar, renderiza a tabela e preenche o form com o último registro se existir
+    window.onload = () => {
+        renderTable();
+        fillFormWithLastData();
+    };
+
+    document.getElementById('codeForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const vRaw = document.getElementById('viagem').value;
+        const aRaw = document.getElementById('ano').value;
+        const vendRaw = document.getElementById('vendedor').value.toUpperCase();
+        const fRaw = document.getElementById('ficha').value;
+
+        // Validações rigorosas
+        if (aRaw.length !== 4 || !aRaw.startsWith('20')) {
+            alert("O ano deve ter 4 dígitos e começar com '20'.");
+            return;
+        }
+        if (parseInt(fRaw) > 999 || parseInt(fRaw) < 0) {
+            alert("Nº da Ficha deve ser entre 0 e 999.");
+            return;
+        }
+
+        // Formatação
+        const vPad = vRaw.toString().padStart(2, '0').slice(-2);
+        const fPad = fRaw.toString().padStart(3, '0').slice(-3);
+        const codeString = `${vPad}-${aRaw} - ${vendRaw} - ${fPad}`;
+        
+        const timestamp = new Date().toLocaleString('pt-BR');
+
+        const newItem = {
+            id: Date.now(),
+            code: codeString,
+            vendedor: vendRaw,
+            viagem: vRaw,
+            ano: aRaw,
+            ficha: fRaw,
+            timestamp: timestamp
+        };
+
+        // Adiciona ao topo
+        listData.unshift(newItem);
+        saveData();
+        renderTable();
+        
+        // OBS: Não resetamos o form para que os valores permaneçam conforme solicitado.
+        alert("Código gerado com sucesso! Os valores permanecem no campo para sua conveniência.");
+    });
+
+    function fillFormWithLastData() {
+        if (listData.length > 0) {
+            const last = listData[0]; // Pega o mais recente
+            document.getElementById('viagem').value = last.viagem;
+            document.getElementById('ano').value = last.ano;
+            document.getElementById('vendedor').value = last.vendedor;
+            document.getElementById('ficha').value = last.ficha;
+        }
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+
+        listData.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="timestamp">${item.timestamp}</td>
+                <td class="code-cell">${item.code}</td>
+                <td>${item.vendedor}</td>
+                <td class="action-btns">
+                    <button class="btn-copy" onclick="copyToClipboard('${item.code}', this)">Copiar</button>
+                    <button class="btn-delete" onclick="deleteItem(${index})">Deletar</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function copyToClipboard(text, btn) {
+        navigator.clipboard.writeText(text).then(() => {
+            const originalText = btn.innerText;
+            btn.innerText = "Copiado!";
+            btn.style.backgroundColor = "#28a745";
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.style.backgroundColor = "";
+            }, 1200);
+        });
+    }
+
+    function deleteItem(index) {
+        if(confirm("Remover esta linha?")) {
+            listData.splice(index, 1);
+            saveData();
+            renderTable();
+        }
+    }
+
+    function saveData() {
+        localStorage.setItem('relatorioCodigos', JSON.stringify(listData));
+    }
+
+    function clearList() {
+        if(confirm("Deseja ZERAR toda a lista?")) {
+            listData = [];
+            saveData();
+            renderTable();
+            document.getElementById('codeForm').reset();
+        }
+    }
+
+    function exportData() {
+        if(listData.length === 0) return alert("Lista vazia.");
+        const blob = new Blob([JSON.stringify(listData, null, 2)], {type : 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `codigos_logistica.json`;
+        a.click();
+    }
+
+    function importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const imported = JSON.parse(e.target.result);
+                if(Array.isArray(imported)) {
+                    listData = [...imported, ...listData];
+                    saveData();
+                    renderTable();
+                    fillFormWithLastData();
+                    alert("Dados importados e somados à lista!");
+                }
+            } catch (err) { alert("Erro no arquivo."); }
+        };
+        reader.readAsText(file);
+        event.target.value = ''; 
+    }
+</script>
+
+</body>
+</html>
