@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal de Verificação de Paridade</title>
+    <style>
+        :root {
+            --neon-blue: #00f2ff;
+            --neon-green: #39ff14;
+            --neon-red: #ff003c;
+            --bg-dark: #0a0b10;
+            --card-bg: rgba(20, 22, 32, 0.9);
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 50% 50%, #1a1b26 0%, #0a0b10 100%);
+            color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 15px;
+            border: 1px solid var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Efeito decorativo de scanline */
+        .card::before {
+            content: " ";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: rgba(0, 242, 255, 0.1);
+            animation: scan 4s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        h2 {
+            color: var(--neon-blue);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-align: center;
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+        }
+
+        p.subtitle {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--neon-blue);
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+            border-radius: 5px;
+            color: var(--neon-green);
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.3s;
+            letter-spacing: 2px;
+            word-break: break-all;
+        }
+
+        input:focus {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: transparent;
+            color: var(--neon-blue);
+            border: 2px solid var(--neon-blue);
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            background: var(--neon-blue);
+            color: #000;
+            box-shadow: 0 0 25px var(--neon-blue);
+        }
+
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 5px;
+            display: none;
+            border-left: 5px solid;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .success {
+            background: rgba(57, 255, 20, 0.1);
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+        }
+
+        .error {
+            background: rgba(255, 0, 60, 0.1);
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+        }
+
+        .stats {
+            font-size: 0.8rem;
+            margin-top: 10px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h2>System Analyzer</h2>
+        <p class="subtitle">Validando integridade de paridade par</p>
+        
+        <div class="input-group">
+            <label for="bits">RECEIVING_DATA_STREAM:</label>
+            <!-- Aceita até 1024 caracteres para testes grandes -->
+            <input type="text" id="bits" 
+                   placeholder="Aguardando bits..." 
+                   maxlength="1024" 
+                   oninput="limparInput(this)"
+                   autocomplete="off">
+            <div id="counter" class="stats">Bits detectados: 0</div>
+        </div>
+        
+        <button onclick="verificarParidade()">Executar Varredura</button>
+
+        <div id="resultado" class="result"></div>
+    </div>
+</div>
+
+<script>
+    // Impede a digitação de qualquer coisa que não seja 0 ou 1 em tempo real
+    function limparInput(el) {
+        el.value = el.value.replace(/[^01]/g, '');
+        document.getElementById('counter').innerText = `Bits detectados: ${el.value.length}`;
+    }
+
+    function verificarParidade() {
+        const input = document.getElementById('bits').value;
+        const resultDiv = document.getElementById('resultado');
+        
+        if (input.length === 0) {
+            alert("ERRO: Buffer vazio. Insira uma sequência de bits.");
+            return;
+        }
+
+        // Contagem de bits '1'
+        const quantidadeDeUns = (input.match(/1/g) || []).length;
+        const isPar = quantidadeDeUns % 2 === 0;
+        
+        resultDiv.style.display = 'block';
+        
+        if (isPar) {
+            resultDiv.className = 'result success';
+            resultDiv.innerHTML = `
+                <strong>> STATUS: INTEGRIDADE CONFIRMADA</strong><br>
+                > QUANTIDADE_DE_UNS: ${quantidadeDeUns}<br>
+                > PARIDADE: PAR (OK)<br>
+                > MENSAGEM: O dado foi recebido sem erros detectáveis.
+            `;
+        } else {
+            resultDiv.className = 'result error';
+            resultDiv.innerHTML = `
+                <strong>> STATUS: FALHA NA VERIFICAÇÃO</strong><br>
+                > QUANTIDADE_DE_UNS: ${quantidadeDeUns}<br>
+                > PARIDADE: ÍMPAR (ERROR)<br>
+                > MENSAGEM: Corrupção de dados detectada no fluxo.
+            `;
+        }
+    }
+
+    // Permitir pressionar Enter para verificar
+    document.getElementById('bits').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            verificarParidade();
+        }
+    });
+</script>
+
+</body>
+</html>
