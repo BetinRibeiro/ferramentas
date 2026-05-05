@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Calculadora Tabela Price</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
+    <style>
+        :root {
+            --primary: #1e40af; /* Azul Royal */
+            --primary-light: #3b82f6;
+            --secondary: #64748b;
+            --success: #059669;
+            --bg-gradient: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-gradient);
+            margin: 0;
+            padding: 20px;
+            color: #1a202c;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            border-top: 8px solid var(--primary);
+        }
+
+        h1 { 
+            text-align: center; 
+            color: var(--primary); 
+            margin-top: 0;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+        
+        p.subtitle { 
+            text-align: center; 
+            color: var(--secondary); 
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+
+        /* Grid de Formuário */
+        .grid-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin-bottom: 35px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: var(--primary);
+            text-transform: uppercase;
+        }
+
+        input {
+            padding: 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Botões */
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        button {
+            padding: 16px 30px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-calc { background-color: var(--primary); color: white; width: 100%; max-width: 300px; }
+        .btn-table { background-color: var(--success); color: white; display: none; }
+        .btn-print { background-color: #334155; color: white; display: none; }
+
+        button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            filter: brightness(1.1);
+        }
+
+        button:active { transform: translateY(0); }
+
+        /* Resultado */
+        #resultado-texto {
+            margin-top: 30px;
+            padding: 20px;
+            background: #eff6ff;
+            border-radius: 12px;
+            border-left: 6px solid var(--primary);
+            display: none;
+            font-size: 1.1rem;
+            color: var(--primary);
+        }
+
+        /* Tabela */
+        .tabela-wrapper {
+            overflow-x: auto;
+            margin-top: 30px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+            background: white;
+        }
+
+        th {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #f1f5f9;
+            text-align: right;
+        }
+
+        tr:nth-child(even) { background-color: #f8fafc; }
+        tr:hover { background-color: #f1f5f9; }
+
+        .resumo-final {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        /* --- VERSÃO MOBILE (ESTILO APP) --- */
+        @media (max-width: 600px) {
+            body { padding: 0; background: #fff; }
+            
+            .container {
+                border-radius: 0;
+                box-shadow: none;
+                border-top: none;
+                padding: 20px;
+            }
+
+            h1 { font-size: 1.8rem; margin-bottom: 10px; }
+
+            .grid-form {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            input {
+                padding: 16px; /* Maior área de toque */
+                background: #f1f5f9;
+                border: 1px solid #cbd5e1;
+            }
+
+            button {
+                width: 100%;
+                border-radius: 50px; /* Estilo pílula de app */
+                padding: 18px;
+            }
+
+            .buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            #resultado-texto {
+                font-size: 1rem;
+                text-align: center;
+            }
+
+            th, td {
+                padding: 10px 5px;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* --- VERSÃO IMPRESSÃO --- */
+        @media print {
+            body { background: white; padding: 0; }
+            .container { 
+                box-shadow: none; 
+                border: none; 
+                width: 100%; 
+                max-width: 100%;
+                padding: 0;
+            }
+            .grid-form, .buttons, .subtitle, h1 { display: none !important; }
+            
+            #resultado-texto { 
+                display: block !important; 
+                background: none; 
+                border: 1px solid #eee;
+                margin-bottom: 20px;
+                color: black;
+            }
+
+            table { border: 1px solid #000; }
+            th { background-color: #eee !important; color: #000 !important; border: 1px solid #000; }
+            td { border: 1px solid #eee; color: #000; }
+            
+            .resumo-final { 
+                background: #eee !important; 
+                color: black !important; 
+                border: 1px solid #000;
+            }
+            
+            /* Título apenas na impressão */
+            body::before {
+                content: "Relatório de Financiamento - Tabela Price";
+                display: block;
+                font-size: 20pt;
+                font-weight: bold;
+                margin-bottom: 20px;
+                text-align: center;
+                color: #1e40af;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Calculadora Price</h1>
+    <p class="subtitle">Preencha 3 campos e calcularemos o restante para você.</p>
+
+    <div class="grid-form">
+        <div class="input-group">
+            <label>Valor Presente (PV)</label>
+            <input type="number" id="pv" step="0.01" placeholder="R$ 0,00">
+        </div>
+        <div class="input-group">
+            <label>Parcela (PMT)</label>
+            <input type="number" id="pmt" step="0.01" placeholder="R$ 0,00">
+        </div>
+        <div class="input-group">
+            <label>Nº de Meses (n)</label>
+            <input type="number" id="n" placeholder="0">
+        </div>
+        <div class="input-group">
+            <label>Taxa de Juros (% a.m.)</label>
+            <input type="number" id="taxa" step="0.0001" placeholder="0,00%">
+        </div>
+    </div>
+
+    <div class="buttons">
+        <button class="btn-calc" onclick="calcularFaltante()">Calcular Valor</button>
+        <button class="btn-table" id="btn-table" onclick="gerarTabela()">Gerar Tabela Completa</button>
+        <button class="btn-print" id="btn-print" onclick="window.print()">Imprimir PDF</button>
+    </div>
+
+    <div id="resultado-texto"></div>
+    <div class="tabela-wrapper" id="tabela-container"></div>
+</div>
+
+<script>
+    // JS MANTIDO INTEGRALMENTE CONFORME SOLICITADO
+    function formatarMoeda(valor) {
+        return valor.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
+    }
+
+    function calcularFaltante() {
+        let pv = parseFloat(document.getElementById('pv').value);
+        let pmt = parseFloat(document.getElementById('pmt').value);
+        let n = parseFloat(document.getElementById('n').value);
+        let i = parseFloat(document.getElementById('taxa').value) / 100;
+
+        const inputs = [
+            { id: 'pv', val: pv },
+            { id: 'pmt', val: pmt },
+            { id: 'n', val: n },
+            { id: 'taxa', val: i }
+        ];
+
+        const vazios = inputs.filter(input => isNaN(input.val));
+
+        if (vazios.length !== 1) {
+            alert("Por favor, preencha exatamente 3 campos para calcular o 4º.");
+            return;
+        }
+
+        const campoFaltante = vazios[0].id;
+
+        try {
+            if (campoFaltante === 'pmt') {
+                pmt = pv * ( (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1) );
+                document.getElementById('pmt').value = pmt.toFixed(2);
+            } 
+            else if (campoFaltante === 'pv') {
+                pv = pmt * ( (Math.pow(1 + i, n) - 1) / (i * Math.pow(1 + i, n)) );
+                document.getElementById('pv').value = pv.toFixed(2);
+            } 
+            else if (campoFaltante === 'n') {
+                n = Math.log(pmt / (pmt - pv * i)) / Math.log(1 + i);
+                document.getElementById('n').value = Math.round(n);
+            } 
+            else if (campoFaltante === 'taxa') {
+                i = calcularTaxaIterativa(pv, pmt, n);
+                document.getElementById('taxa').value = (i * 100).toFixed(4);
+            }
+
+            document.getElementById('resultado-texto').style.display = 'block';
+            document.getElementById('resultado-texto').innerHTML = `<strong>Sucesso!</strong> O valor faltante foi calculado. Agora você pode gerar a tabela detalhada abaixo.`;
+            document.getElementById('btn-table').style.display = 'flex';
+            document.getElementById('btn-print').style.display = 'flex';
+        } catch (e) {
+            alert("Erro no cálculo. Verifique se os dados são coerentes.");
+        }
+    }
+
+    function calcularTaxaIterativa(pv, pmt, n) {
+        let i = 0.01;
+        for (let j = 0; j < 100; j++) {
+            let f = pmt * (1 - Math.pow(1 + i, -n)) / i - pv;
+            let df = pmt * (n * Math.pow(1 + i, -n - 1) * i - (1 - Math.pow(1 + i, -n))) / (i * i);
+            let i_next = i - f / df;
+            if (Math.abs(i_next - i) < 0.0000001) return i_next;
+            i = i_next;
+        }
+        return i;
+    }
+
+    function gerarTabela() {
+        const pv = parseFloat(document.getElementById('pv').value);
+        const pmt = parseFloat(document.getElementById('pmt').value);
+        const n = parseInt(document.getElementById('n').value);
+        const i = parseFloat(document.getElementById('taxa').value) / 100;
+
+        let html = `<table>
+            <thead>
+                <tr>
+                    <th>Mês</th>
+                    <th>Prestação</th>
+                    <th>Juros</th>
+                    <th>Amortização</th>
+                    <th>Saldo Devedor</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="text-align:center">0</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>${formatarMoeda(pv)}</td>
+                </tr>`;
+
+        let saldoDevedor = pv;
+        let totalJuros = 0;
+
+        for (let m = 1; m <= n; m++) {
+            let jurosMês = saldoDevedor * i;
+            let amortizacaoMês = pmt - jurosMês;
+            saldoDevedor -= amortizacaoMês;
+            totalJuros += jurosMês;
+
+            if (m === n) { saldoDevedor = 0; }
+
+            html += `<tr>
+                <td style="text-align:center"><strong>${m}</strong></td>
+                <td>${formatarMoeda(pmt)}</td>
+                <td>${formatarMoeda(jurosMês)}</td>
+                <td>${formatarMoeda(amortizacaoMês)}</td>
+                <td>${formatarMoeda(Math.abs(saldoDevedor))}</td>
+            </tr>`;
+        }
+
+        html += `</tbody></table>`;
+        
+        const resumo = `<div class="resumo-final">
+            <div><strong>Total Pago:</strong> ${formatarMoeda(pmt * n)}</div>
+            <div><strong>Total de Juros:</strong> ${formatarMoeda(totalJuros)}</div>
+        </div>`;
+
+        document.getElementById('tabela-container').innerHTML = html + resumo;
+        
+        // Scroll suave até a tabela no mobile
+        if(window.innerWidth < 600) {
+            document.getElementById('tabela-container').scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+</script>
+
+</body>
+</html>
