@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist - Investigador de Polícia (Inspeção Médica)</title>
+    <style>
+        :root {
+            --primary-blue: #1a3a5f;
+            --secondary-blue: #eef4fb;
+            --accent-blue: #2980b9;
+            --text-dark: #333;
+            --border-color: #bdc3c7;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            color: var(--text-dark);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-top: 10px solid var(--primary-blue);
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--secondary-blue);
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+        }
+
+        h1 { color: var(--primary-blue); margin: 0; font-size: 24px; text-transform: uppercase; }
+        h2 { color: var(--accent-blue); margin: 5px 0; font-size: 18px; }
+
+        .info-box {
+            background-color: var(--secondary-blue);
+            border-left: 5px solid var(--primary-blue);
+            padding: 15px;
+            margin-bottom: 25px;
+            font-size: 0.9em;
+        }
+
+        .section-title {
+            background: var(--primary-blue);
+            color: white;
+            padding: 10px 15px;
+            margin-top: 30px;
+            border-radius: 4px;
+            font-size: 1.1em;
+            text-transform: uppercase;
+        }
+
+        .checklist-group {
+            margin: 15px 0;
+        }
+
+        .item {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            transition: background 0.2s;
+        }
+
+        .item:hover {
+            background-color: #f9f9f9;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            cursor: pointer;
+            accent-color: var(--primary-blue);
+        }
+
+        .item-text {
+            flex: 1;
+        }
+
+        .important-note {
+            font-weight: bold;
+            color: #c0392b;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .details-list {
+            padding-left: 20px;
+            font-size: 0.85em;
+            color: #555;
+            list-style-type: square;
+        }
+
+        .footer-actions {
+            margin-top: 30px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .btn-print { background: var(--primary-blue); color: white; }
+        .btn-clear { background: #e74c3c; color: white; }
+
+        /* Estilos para Impressão */
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; border: none; width: 100%; max-width: 100%; padding: 0; }
+            .footer-actions, .btn-clear { display: none; }
+            .item:hover { background: transparent; }
+            .section-title { background: #eee !important; color: black; border: 1px solid #000; }
+            input[type="checkbox"] { border: 1px solid #000; }
+            header { border-bottom: 2px solid #000; }
+            .info-box { border: 1px solid #ccc; background: white; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Oficial - Investigador de Polícia</h1>
+        <h2>Checklist de Inspeção Médica Oficial</h2>
+    </header>
+
+    <div class="info-box">
+        <strong>LOCAL DE COMPARECIMENTO:</strong><br>
+        Diretoria de Perícia Médica do Estado do Ceará (DIPEM)<br>
+        Rua Júlio Lima, nº 770, Bairro Cidade dos Funcionários, Fortaleza/CE, CEP: 60.822-500.
+    </div>
+
+    <!-- DOCUMENTAÇÃO BÁSICA -->
+    <div class="section-title">1. Documentação e Requisitos Básicos</div>
+    <div class="checklist-group">
+        <label class="item">
+            <input type="checkbox" id="doc_id">
+            <div class="item-text">Documento de identificação original com foto.</div>
+        </label>
+        <label class="item">
+            <input type="checkbox" id="form_pericia">
+            <div class="item-text">
+                Formulário de Perícia Admissional preenchido e assinado (Item 4.1 do comunicado).
+            </div>
+        </label>
+        <label class="item">
+            <input type="checkbox" id="pcd_doc">
+            <div class="item-text">
+                Candidatos PCD: Documentação comprobatória da condição.
+            </div>
+        </label>
+    </div>
+
+    <!-- EXAMES LABORATORIAIS -->
+    <div class="section-title">2. Exames Laboratoriais e Clínicos</div>
+    <div class="info-box" style="margin-top: 10px; font-size: 0.8em;">
+        * Validade máxima de 6 meses (retroativos à data da perícia), exceto toxicológico.
+    </div>
+    
+    <div class="checklist-group">
+        <label class="item">
+            <input type="checkbox" id="ex_01">
+            <div class="item-text">1. Hemograma completo com plaquetas.</div>
+        </label>
+        <label class="item">
+            <input type="checkbox" id="ex_02">
+            <div class="item-text">2. Coagulograma completo (Tempo de Protrombina e TTPA).</div>
+        </label>
+        <label class="item">
+            <input type="checkbox" id="ex_03">
+            <div class="item-text">3. Bioquímica: Glicose, Ureia, Creatinina, Ácido Úrico, AST e ALT.</div>
+        </label>
+        <label class="item">
+            <input type="checkbox" id="ex_04">
+            <div class="item-text">4. Sumário de urina (EAS).</div>
+        </label>
+        <label class="item">
+            <input type="checkbox" id="ex_05">
+            <div class="item-text">5. Raio-X de tórax em PA com laudo.</div>
+        </label>
+        <label class="item">
+            <input type="checkbox" id="ex_06">
+            <div class="item-text">6. Eletrocardiograma (ECG) com laudo.</div>
+        </label>
+        <label class="item">
+            <input type="checkbox" id="ex_07">
+            <div class="item-text">7. Eletroencefalograma (EEG) com laudo.</div>
+        </label>
+        <label class="item">
+            <input type="checkbox" id="ex_08">
+            <div class="item-text">8. Audiometria.</div>
+        </label>
+        <label class="item">
+            <input type="checkbox" id="ex_09">
+            <div class="item-text">
+                9. Exame Oftalmológico completo:
+                <ul class="details-list">
+                    <li>Acuidade visual, Tonometria, Senso cromático, Fundo de olho e Biomicroscopia.</li>
+                </ul>
+            </div>
+        </label>
+        <label class="item">
+            <input type="checkbox" id="ex_10">
+            <div class="item-text">10. Laudo de sanidade mental assinado por psiquiatra.</div>
+        </label>
+    </div>
+
+    <!-- EXAME TOXICOLÓGICO -->
+    <div class="section-title">3. Exame Toxicológico</div>
+    <div class="checklist-group">
+        <label class="item">
+            <input type="checkbox" id="ex_toxic">
+            <div class="item-text">
+                12. Exame Toxicológico (Larga janela de detecção - mínimo 90 dias).
+                <span class="important-note">Observações do Edital:</span>
+                <ul class="details-list">
+                    <li>Material: Amostra biológica de queratina (cabelos ou pelos).</li>
+                    <li>Substâncias: Cocaína, Maconha, Metanfetaminas, Anfetaminas, Ecstasy (MDMA/MDA), Opiáceos e PCP.</li>
+                    <li>O laudo deve vir como "RECOMENDADO" (resultado negativo).</li>
+                </ul>
+            </div>
+        </label>
+    </div>
+
+    <div class="info-box">
+        <strong>Nota 1.1.11:</strong> Fique atento caso os peritos solicitem exames ou pareceres complementares após a avaliação inicial.
+    </div>
+
+    <div class="footer-actions">
+        <button class="btn-print" onclick="window.print()">Imprimir Checklist</button>
+        <button class="btn-clear" onclick="clearChecks()">Limpar Tudo</button>
+    </div>
+</div>
+
+<script>
+    // Seleciona todos os checkboxes
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+
+    // Função para salvar no LocalStorage
+    function saveStatus() {
+        checkboxes.forEach(checkbox => {
+            localStorage.setItem(checkbox.id, checkbox.checked);
+        });
+    }
+
+    // Função para carregar do LocalStorage
+    function loadStatus() {
+        checkboxes.forEach(checkbox => {
+            const savedStatus = localStorage.getItem(checkbox.id);
+            if (savedStatus === "true") {
+                checkbox.checked = true;
+            }
+        });
+    }
+
+    // Função para limpar o checklist
+    function clearChecks() {
+        if (confirm("Deseja limpar todos os itens marcados?")) {
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+                localStorage.removeItem(checkbox.id);
+            });
+        }
+    }
+
+    // Adiciona evento de mudança em cada checkbox
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', saveStatus);
+    });
+
+    // Inicializa a página carregando o que foi salvo
+    window.onload = loadStatus;
+</script>
+
+</body>
+</html>
