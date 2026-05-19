@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist Convocação - Investigador PC-CE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #003366;
+            --secondary: #0056b3;
+            --accent: #00d4ff;
+            --bg: #f4f7f9;
+            --text: #333;
+            --white: #ffffff;
+            --gray: #e1e8ed;
+        }
+
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--white);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-top: 8px solid var(--primary);
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--gray);
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+        }
+
+        h1 { color: var(--primary); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .deadline { 
+            background: #ff4d4d; 
+            color: white; 
+            padding: 5px 15px; 
+            border-radius: 20px; 
+            display: inline-block;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .info-box {
+            background: aliceblue;
+            border-left: 5px solid var(--secondary);
+            padding: 15px;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+
+        .section-title {
+            color: var(--secondary);
+            border-bottom: 1px solid var(--gray);
+            padding-bottom: 5px;
+            margin-top: 30px;
+            display: flex;
+            align-items: center;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.3s;
+        }
+
+        .checklist-item:hover { background: #f9fbff; }
+
+        .checkbox-wrapper {
+            margin-right: 15px;
+            margin-top: 4px;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .item-text { flex: 1; }
+        .item-text label { cursor: pointer; display: block; }
+        .sub-item { margin-left: 35px; font-size: 0.9em; color: #555; }
+
+        .btn-link {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 0.85em;
+            margin-top: 5px;
+            transition: 0.3s;
+        }
+
+        .btn-link:hover { background: var(--accent); color: var(--primary); }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .btn-print { background: var(--secondary); color: white; }
+        .btn-reset { background: #666; color: white; }
+
+        /* Estilo para Impressão */
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; border: none; width: 100%; max-width: 100%; }
+            .controls, .btn-link, .deadline { display: none !important; }
+            .checklist-item { page-break-inside: avoid; }
+            h1 { color: black; }
+            .info-box { border: 1px solid #ccc; background: white; }
+            a { text-decoration: none; color: black; font-size: 0.8em; }
+            .item-text::after { content: " [ ]"; float: right; font-weight: bold; }
+            input[type="checkbox"] { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Checklist de Convocação PC-CE</h1>
+        <p>Oficial Investigador de Polícia Civil</p>
+        <div class="deadline">PRAZO LIMITE: 20/05</div>
+    </header>
+
+    <div class="info-box">
+        <strong>Atenção:</strong> Preencher formulário e encaminhar documentos via link até 20/05.<br>
+        <strong>Local de Entrega Presencial:</strong> Auditório da Polícia Civil - Rua Professor Guilhon, S/N, CISP, Bairro Aeroporto, Fortaleza/CE. CEP: 60.415-390.<br>
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSe4zr003iU3DQGKVRQ7Vc6qLahVPAvUGYL3lEVWhCA691KmdQ/viewform?usp=publish-editor" target="_blank" class="btn-link">Acessar Formulário Online (Google Forms)</a>
+    </div>
+
+    <h2 class="section-title">1. Documentação Básica</h2>
+    
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item1"></div>
+        <div class="item-text">
+            <label for="item1"><strong>1. 02 Fotos 3x4 com fundo branco:</strong></label>
+            <div class="sub-item">1.1. Homens: Terno preto, camisa branca e gravata.</div>
+            <div class="sub-item">1.2. Mulheres: Blazer preto, camisa/blusa branca.</div>
+        </div>
+    </div>
+
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item2"></div>
+        <div class="item-text"><label for="item2">2. Fotocópia autenticada da CIN (Identidade)</label></div>
+    </div>
+
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item3"></div>
+        <div class="item-text">
+            <label for="item3">3. Fotocópia autenticada do CPF e Situação Cadastral</label>
+            <a href="https://servicos.receita.fazenda.gov.br/Servicos/CPF/ConsultaSituacao/ConsultaPublica.asp" target="_blank" class="btn-link">Consultar Situação CPF</a>
+        </div>
+    </div>
+
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item4"></div>
+        <div class="item-text"><label for="item4">4. Fotocópia autenticada da CNH</label></div>
+    </div>
+
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item5"></div>
+        <div class="item-text">
+            <label for="item5">5. Fotocópia autenticada do Diploma de Nível Superior (MEC)</label>
+            <div class="sub-item">Obs: Deve ser apresentado até a posse (29/05/2026). Se não tiver, certidão de colação de grau.</div>
+        </div>
+    </div>
+
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item6"></div>
+        <div class="item-text"><label for="item6">6. Fotocópia autenticada do Certificado de Reservista (Homens)</label></div>
+    </div>
+
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item7"></div>
+        <div class="item-text"><label for="item7">7. Fotocópia autenticada do Título de Eleitor</label></div>
+    </div>
+
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item8"></div>
+        <div class="item-text"><label for="item8">8. Fotocópia autenticada de Identificação Militar (Se militar)</label></div>
+    </div>
+
+    <h2 class="section-title">2. Certidões e Justiça</h2>
+
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item9"></div>
+        <div class="item-text"><label for="item9">9. Certidão Justiça Eleitoral: "Nada Consta"</label></div>
+    </div>
+
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item10"></div>
+        <div class="item-text"><label for="item10">10. Certidão Justiça Eleitoral: "Estar Quite"</label></div>
+    </div>
+
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item11"></div>
+        <div class="item-text"><label for="item11">11. Certidão Ação Penal (Fórum Estadual - onde residiu nos últimos 2 anos)</label></div>
+    </div>
+
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item12"></div>
+        <div class="item-text"><label for="item12">12. Certidão Ação Penal (Tribunal de Justiça Estadual)</label></div>
+    </div>
+
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item13"></div>
+        <div class="item-text"><label for="item13">13. Certidão Negativa Justiça Federal</label></div>
+    </div>
+
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item14"></div>
+        <div class="item-text"><label for="item14">14. Certidão Negativa Tribunal Regional Federal</label></div>
+    </div>
+
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item15"></div>
+        <div class="item-text"><label for="item15">15. Certidão Antecedentes Criminais - Polícia Federal</label></div>
+    </div>
+
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item16"></div>
+        <div class="item-text"><label for="item16">16. Certidão Antecedentes Criminais - Polícia Civil</label></div>
+    </div>
+
+    <h2 class="section-title">3. Declarações e Formulários (Links de Modelos)</h2>
+
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item20"></div>
+        <div class="item-text">
+            <label for="item20">20. Formulário de Dados Pessoais</label>
+            <a href="https://drive.google.com/file/d/161d2vHDVCKbGRv3c5H7OzDvyDh9WKgQE/view?usp=drive_link" target="_blank" class="btn-link">Baixar Modelo</a>
+        </div>
+    </div>
+
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item21"></div>
+        <div class="item-text">
+            <label for="item21">21. Formulário de Autodeclaração de Bens e Valores</label>
+            <a href="https://drive.google.com/file/d/1Md3X6IujWtDuh50h5rMZpiLnejShmsKr/view?usp=drive_link" target="_blank" class="btn-link">Baixar Modelo</a>
+        </div>
+    </div>
+
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item19"></div>
+        <div class="item-text">
+            <label for="item19">19. Declaração de Boa Conduta (Assinada por Delegado ou Juiz)</label>
+            <a href="https://drive.google.com/file/d/18BCR58TVdlMdQ7uFE7_572jyjJOZJWmz/view?usp=drive_link" target="_blank" class="btn-link">Baixar Modelo</a>
+        </div>
+    </div>
+
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item17"></div>
+        <div class="item-text">
+            <label for="item17">17. Certidão de não acumulação de cargos (SEPLAG)</label>
+            <a href="https://webapps.seplag.ce.gov.br/cac/pages/formulario/aceitarTermos.seam" target="_blank" class="btn-link">Gerar no Site SEPLAG</a>
+        </div>
+    </div>
+
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item22"></div>
+        <div class="item-text">
+            <label for="item22">22. Termo de Ciência Regimes de Previdência</label>
+            <a href="https://drive.google.com/file/d/1YRJnTmgMZ8_mjsImu6A8zgtjkOycuOi2/view?usp=drive_link" target="_blank" class="btn-link">Baixar Modelo</a>
+        </div>
+    </div>
+
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item23"></div>
+        <div class="item-text">
+            <label for="item23">23. Declaração Acumulação de Cargos (P/ quem NÃO possui cargo)</label>
+            <a href="https://drive.google.com/file/d/1Gc09RJkT9lFl89SY7NMIinGWTNTmkxP2/view?usp=drive_link" target="_blank" class="btn-link">Baixar Modelo</a>
+        </div>
+    </div>
+
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item18"></div>
+        <div class="item-text"><label for="item18">18. Comprovante de Residência no nome do candidato ou declaração autenticada</label></div>
+    </div>
+
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="itempericia"></div>
+        <div class="item-text">
+            <label for="itempericia">Formulário de Perícia Admissional</label>
+            <a href="https://drive.google.com/file/d/1n8hN7TrZblNy7hxKzMjumIZlL-gb-Xqr/view?usp=drive_link" target="_blank" class="btn-link">Baixar Modelo</a>
+        </div>
+    </div>
+
+    <h2 class="section-title">4. Servidores Públicos (Se aplicável)</h2>
+    <div class="checklist-item">
+        <div class="checkbox-wrapper"><input type="checkbox" id="item24"></div>
+        <div class="item-text">
+            <label for="item24">24. Documentação para quem exerce cargo público:</label>
+            <div class="sub-item">24.1. Declaração do órgão: não responde a PAD nem pena de demissão.</div>
+            <div class="sub-item">24.2. Declaração do órgão: cargo ocupado e carga horária.</div>
+            <div class="sub-item">24.3. Termo de Compromisso de Exoneração (Entregar na POSSE). 
+                <a href="https://drive.google.com/file/d/1hrWrs9FHlfB-u77Dvd6Lqb0qop4DnYUw/view?usp=drive_link" target="_blank" style="color:var(--secondary)">[Link Modelo]</a>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">5. Outros Modelos Úteis</h2>
+    <div style="padding: 10px; display: flex; flex-wrap: wrap; gap: 10px;">
+        <a href="https://drive.google.com/file/d/11qiBkRTcU2n_-X2MvUxb0_rEKGOjeNaB/view?usp=sharing" target="_blank" class="btn-link">Termo de Desistência</a>
+        <a href="https://drive.google.com/file/d/1Ixsq1cZK4v05oK57k7DoArLkXx9jrp2I/view?usp=drive_link" target="_blank" class="btn-link">Termo Compromisso Diploma</a>
+    </div>
+
+    <div style="margin-top: 50px; font-size: 0.8em; border-top: 1px solid #eee; padding-top: 20px;">
+        <p><strong>Notas Finais:</strong><br>
+        - Posse prevista para 29/05/2026.<br>
+        - Não será aceita prorrogação de posse.<br>
+        - E-mail para dúvidas/desistência: cmf.cogep@pc.ce.gov.br</p>
+    </div>
+</div>
+
+<div class="controls">
+    <button class="btn-reset" onclick="resetChecklist()">Limpar Checklist</button>
+    <button class="btn-print" onclick="window.print()">Imprimir PDF</button>
+</div>
+
+<script>
+    // Função para salvar no LocalStorage
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            localStorage.setItem(checkbox.id, checkbox.checked);
+        });
+    });
+
+    // Carregar dados ao abrir
+    window.addEventListener('load', () => {
+        checkboxes.forEach(checkbox => {
+            const savedStatus = localStorage.getItem(checkbox.id);
+            if (savedStatus === 'true') {
+                checkbox.checked = true;
+            }
+        });
+    });
+
+    function resetChecklist() {
+        if(confirm("Deseja limpar todo o seu progresso?")) {
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+                localStorage.removeItem(checkbox.id);
+            });
+        }
+    }
+</script>
+
+</body>
+</html>
