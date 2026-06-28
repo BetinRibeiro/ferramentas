@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Playlist Oficial - Ritmo & Balanço</title>
+    <style>
+        :root {
+            --bg-principal: #0a1128;
+            --bg-card: #1c2541;
+            --azul-destaque: #00b4d8;
+            --azul-neon: #90e0ef;
+            --texto-claro: #f4f6f9;
+            --texto-mutado: #8d99ae;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-principal);
+            color: var(--texto-claro);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--azul-destaque);
+            padding-bottom: 15px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: var(--azul-neon);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        header p {
+            margin: 5px 0 0 0;
+            color: var(--texto-mutado);
+            font-size: 14px;
+        }
+
+        .container-temas {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .bloco-tema {
+            background-color: var(--bg-card);
+            border-left: 4px solid var(--azul-destaque);
+            border-radius: 6px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .titulo-tema {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--azul-neon);
+            margin-top: 0;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .lista-musicas {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .item-musica {
+            display: flex;
+            align-items: center;
+            padding: 10px 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.2s ease;
+        }
+
+        .item-musica:last-child {
+            border-bottom: none;
+        }
+
+        .item-musica:hover {
+            background-color: rgba(0, 180, 216, 0.1);
+            border-radius: 4px;
+        }
+
+        .numero {
+            font-size: 12px;
+            color: var(--azul-destaque);
+            font-weight: bold;
+            width: 25px;
+        }
+
+        .info-musica {
+            flex-grow: 1;
+        }
+
+        .nome-musica {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .artista {
+            font-size: 13px;
+            color: var(--texto-mutado);
+        }
+
+        .tag-atual {
+            background-color: #0077b6;
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Playlist Perfil Personalizado</h1>
+        <p>13 Faixas • Foco em Ritmo, Sintetizadores & Balanço</p>
+    </header>
+
+    <div class="container-temas">
+
+        <!-- Bloco Tema 1 -->
+        <div class="bloco-tema">
+            <div class="titulo-tema">🎹 Clássicos New Wave & Sintetizadores</div>
+            <ul class="lista-musicas">
+                <li class="item-musica">
+                    <div class="numero">01</div>
+                    <div class="info-musica">
+                        <div class="nome-musica">Casanova</div>
+                        <div class="artista">Ritchie</div>
+                    </div>
+                </li>
+                <li class="item-musica">
+                    <div class="numero">02</div>
+                    <div class="info-musica">
+                        <div class="nome-musica">Pelo Interfone</div>
+                        <div class="artista">Ritchie</div>
+                    </div>
+                </li>
+                <li class="item-musica">
+                    <div class="numero">03</div>
+                    <div class="info-musica">
+                        <div class="nome-musica">Louras Geladas</div>
+                        <div class="artista">RPM</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Bloco Tema 2 -->
+        <div class="bloco-tema">
+            <div class="titulo-tema">🎸 Pop Rock Inteligente & Cadenciado</div>
+            <ul class="lista-musicas">
+                <li class="item-musica">
+                    <div class="numero">04</div>
+                    <div class="info-musica">
+                        <div class="nome-musica">Depois</div>
+                        <div class="artista">Pato Fu</div>
+                    </div>
+                </li>
+                <li class="item-musica">
+                    <div class="numero">05</div>
+                    <div class="info-musica">
+                        <div class="nome-musica">Noite do Prazer</div>
+                        <div class="artista">Brylho</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Bloco Tema 3 -->
+        <div class="bloco-tema">
+            <div class="titulo-tema">🎺 O Peso do Ska, Metais & Balanço</div>
+            <ul class="lista-musicas">
+                <li class="item-musica">
+                    <div class="numero">06</div>
+                    <div class="info-musica">
+                        <div class="nome-musica">Saideira</div>
+                        <div class="artista">Skank</div>
+                    </div>
+                </li>
+                <li class="item-musica">
+                    <div class="numero">07</div>
+                    <div class="info-musica">
+                        <div class="nome-musica">É Proibido Fumar</div>
+                        <div class="artista">Skank</div>
+                    </div>
+                </li>
+                <li class="item-musica">
+                    <div class="numero">08</div>
+                    <div class="info-musica">
+                        <div class="nome-musica">Garota Nacional</div>
+                        <div class="artista">Skank</div>
+                    </div>
+                </li>
+                <li class="item-musica">
+                    <div class="numero">09</div>
+                    <div class="info-musica">
+                        <div class="nome-musica">Óculos</div>
+                        <div class="artista">Os Paralamas do Sucesso</div>
+                    </div>
+                </li>
+                <li class="item-musica">
+                    <div class="numero">10</div>
+                    <div class="info-musica">
+                        <div class="nome-musica">Ska</div>
+                        <div class="artista">Os Paralamas do Sucesso</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Bloco Tema 4 -->
+        <div class="bloco-tema">
+            <div class="titulo-tema">⚡ Energia Rock & Ritmo Acelerado</div>
+            <ul class="lista-musicas">
+                <li class="item-musica">
+                    <div class="numero">11</div>
+                    <div class="info-musica">
+                        <div class="nome-musica">Rebelde Sem Causa</div>
+                        <div class="artista">Ultraje a Rigor</div>
+                    </div>
+                </li>
+                <li class="item-musica">
+                    <div class="numero">12</div>
+                    <div class="info-musica">
+                        <div class="nome-musica">Inútil</div>
+                        <div class="artista">Ultraje a Rigor</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Bloco Tema 5 -->
+        <div class="bloco-tema">
+            <div class="titulo-tema">🔥 Transição Atualizada (A Nova Geração)</div>
+            <ul class="lista-musicas">
+                <li class="item-musica">
+                    <div class="numero">13</div>
+                    <div class="info-musica">
+                        <div class="nome-musica">Me Lambe</div>
+                        <div class="artista">Jão</div>
+                    </div>
+                    <span class="tag-atual">Atual</span>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+</body>
+</html>
